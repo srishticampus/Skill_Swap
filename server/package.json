@@ -1,0 +1,30 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "npm run build && node dist/app.cjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongoose": "^8.13.0",
+    "morgan": "^1.10.0",
+    "node-hmr": "^1.4.0",
+    "pino": "^9.6.0",
+    "pino-http": "^10.4.0",
+    "rotating-file-stream": "^3.2.6"
+  },
+  "devDependencies": {
+    "vite": "^5.4.15",
+    "vite-plugin-node": "^4.0.0"
+  }
+}

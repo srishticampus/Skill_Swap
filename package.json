@@ -1,0 +1,27 @@
+{
+  "name": "skill-swap",
+  "version": "0.0.1",
+  "description": "Aims to create a platform that facilitates the exchange of skills and services without the exchange of money, fostering a community of mutual support and bartering.",
+  "scripts": {
+    "client": "cd client && npm run dev",
+    "server": "cd server && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srishticampus/Skill_Swap.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://https://github.com/srishticampus/Skill_Swap/issues"
+  },
+  "homepage": "https://github.com/srishticampus/Skill_Swap.git#readme",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
