@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://https://github.com/srishticampus/Skill_Swap/issues"
   },
-  "homepage": "https://github.com/srishticampus/Skill_Swap.git#readme",
+  "homepage": "https://github.com/srishticampus/Skill_Swap#readme",
   "workspaces": [
     "client",
     "server"
