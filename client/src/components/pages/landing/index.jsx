@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Book, Users, MessageCircle, Globe, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 import { useLocation, Link } from 'react-router';
 
-import skillswap from "./skillswap.svg";
+import skillswap from "@/assets/skillswap.svg";
 import heroimg from "./heroimg.jpeg"
 
 export default function Landing() {
