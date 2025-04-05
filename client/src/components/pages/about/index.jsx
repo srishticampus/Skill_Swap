@@ -1,5 +1,7 @@
-import { Button } from "../../ui/button";
+
 import heroimg from "./hero.png"
+import rocket from "./rocket.svg"
+import sunrise from "./sunrise.svg"
 const About = () => {
   const features = [
     "No Money Needed:Exchange skills and services without financial constraints",
@@ -8,12 +10,6 @@ const About = () => {
     "Diverse Skill Categories:From coding to art, swap skills across multiple fields",
     "Trust & Transparency:Ratings, reviews, and exchange tracking ensure fair trades",
     "Community-Driven Growth:Build connections and expand your expertise through collaboration"
-  ];
-
-  const services = [
-    { title: "Send", text: "Send and receive money globally in seconds" },
-    { title: "Spend", text: "A virtual Mastercard that suits your lifestyle" },
-    { title: "Bank", text: "Own multiple global accounts in your name" }
   ];
 
   return (
@@ -41,17 +37,17 @@ const About = () => {
 
       {/* Mission & Vision */}
       <div className="grid md:grid-cols-2 gap-8 mb-24 mx-auto container">
-        <div className="bg-primary/20 p-8 rounded-3xl">
-          <div className="bg-white w-32 h-32 mx-auto mb-8 rounded-2xl" />
-          <h3 className="text-purple-700 text-2xl text-center font-medium mb-4">Mission</h3>
+        <div className="p-8 rounded-3xl border">
+          <img src={rocket} alt="rocket" className="bg-white w-32 h-32 mx-auto mb-8 rounded-2xl" />
+          <h3 className="text-primary text-2xl text-center font-medium mb-4">Mission</h3>
           <p className="text-gray-600 text-center">
             To empower individuals and communities by enabling skill exchange without financial barriers.
           </p>
         </div>
 
-        <div className="bg-primary/20 p-8 rounded-3xl">
-          <div className="bg-white w-32 h-32 mx-auto mb-8 rounded-2xl" />
-          <h3 className="text-purple-700 text-2xl text-center font-medium mb-4">Vision</h3>
+        <div className="p-8 rounded-3xl border">
+          <img src={sunrise} alt="sunrise" className="bg-white w-32 h-32 mx-auto mb-8 rounded-2xl" />
+          <h3 className="text-primary text-2xl text-center font-medium mb-4">Vision</h3>
           <p className="text-gray-600 text-center">
             To provide an AI-driven platform that facilitates seamless, fair, and transparent skill-sharing experiences.
           </p>

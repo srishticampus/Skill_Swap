@@ -19,11 +19,11 @@ export default function Layout() {
             <Link to="/" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/" ? "text-primary" : ""}`}>
               Home
             </Link>
-            <Link to="/community" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/community" ? "text-primary" : ""}`}>
-              Community
+            <Link to="/about" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/about" ? "text-primary" : ""}`}>
+              About
             </Link>
-            <Link to="/courses" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/courses" ? "text-primary" : ""}`}>
-              Courses
+            <Link to="/contact" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/contact" ? "text-primary" : ""}`}>
+              Contact
             </Link>
           </div>
 
