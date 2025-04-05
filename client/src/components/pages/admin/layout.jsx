@@ -8,6 +8,7 @@ import {
   Search,
   LogOut,
   Dog,
+  Building2,
 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -31,54 +32,24 @@ const items = [
     icon: LayoutDashboard
   },
   {
-    title: "Adopter Management",
-    url: "/admin/adopters",
-    icon: User
+    title: "Organizations",
+    url: "/admin/organizations",
+    icon: Building2
   },
   {
-    title: "Foster Management",
-    url: "/admin/fosters",
+    title: "Skill Swappers",
+    url: "/admin/skill-swappers",
     icon: Users
   },
   {
-    title: "Rescue Management",
-    url: "/admin/rescues",
+    title: "Manage Categories",
+    url: "/admin/categories",
     icon: Search
   },
   {
-    title: "Pet Owner",
-    url: "/admin/pet-owner",
+    title: "Manage Complaints",
+    url: "/admin/complaints",
     icon: User
-  },
-  {
-    title: "Pet Management",
-    url: "/admin/pet-management",
-    icon: Dog
-  },
-  {
-    title: "Lost & Found Pets",
-    url: "/admin/lost-found-pets",
-    icon: Search
-  },
-  {
-    title: "Manage Applications",
-    url: "/admin/manage-applications",
-    icon: FileText
-  },
-  {
-    title: "Adopted Pets",
-    url: "/admin/adopted-pets",
-    icon: PawPrint
-  },
-  {
-    title: "Fostered Pets",
-    url: "/admin/fostered-pets",
-    icon: PawPrint
-  },
-  {
-    title: "Manage Documents",
-    url: "/admin/manage-documents",
-    icon: FileText
   },
 ];
 
