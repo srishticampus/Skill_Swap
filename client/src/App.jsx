@@ -7,6 +7,7 @@ import About from "./components/pages/about";
 import Layout from "./components/pages/layout";
 import Contact from "./components/pages/contact";
 import Dashboard from "./components/pages/admin/dashboard";
+import Signup from "./components/pages/signup";
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/signup" element={<Signup />} />
       </Route>
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
