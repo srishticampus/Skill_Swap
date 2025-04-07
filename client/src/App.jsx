@@ -11,6 +11,7 @@ import Signup from "./components/pages/signup";
 import Login from "./components/pages/login";
 import ForgotPassword from "./components/pages/forgot-password";
 import ResetPassword from "./components/pages/reset-password";
+import UpdatePersonalInfo from "./components/pages/update-personal-info";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/update-personal-info" element={<UpdatePersonalInfo />} />
       </Route>
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
