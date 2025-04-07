@@ -8,6 +8,9 @@ import Layout from "./components/pages/layout";
 import Contact from "./components/pages/contact";
 import Dashboard from "./components/pages/admin/dashboard";
 import Signup from "./components/pages/signup";
+import Login from "./components/pages/login";
+import ForgotPassword from "./components/pages/forgot-password";
+import ResetPassword from "./components/pages/reset-password";
 
 
 function App() {
@@ -18,6 +21,9 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />

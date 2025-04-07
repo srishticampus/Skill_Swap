@@ -49,39 +49,44 @@ const Footer = () => {
   );
 };
 
-export default function Layout() {
+function Navbar() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
-        <div className="container flex items-center justify-between px-4 py-3 mx-auto">
+    <nav className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+      <div className="container flex items-center justify-between px-4 py-3 mx-auto">
         <img src={skillswap} alt="skillswap" className="my-5 rounded-full" />
 
-          <div className="hidden md:flex items-center gap-6">
-            <Link to="/" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/" ? "text-primary" : ""}`}>
-              Home
-            </Link>
-            <Link to="/about" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/about" ? "text-primary" : ""}`}>
-              About
-            </Link>
-            <Link to="/contact" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/contact" ? "text-primary" : ""}`}>
-              Contact
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="outline" className="rounded-full">
-              Sign In
-            </Button>
-            <Button className="rounded-full">
-              Get Started
-            </Button>
-          </div>
+        <div className="hidden md:flex items-center gap-6">
+          <Link to="/" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/" ? "text-primary" : ""}`}>
+            Home
+          </Link>
+          <Link to="/about" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/about" ? "text-primary" : ""}`}>
+            About
+          </Link>
+          <Link to="/contact" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/contact" ? "text-primary" : ""}`}>
+            Contact
+          </Link>
         </div>
-      </nav>
 
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline" className="rounded-full">
+            <Link to="/login">Sign In</Link>
+          </Button>
+          <Button asChild className="rounded-full">
+            <Link to="/signup">Get Started</Link>
+          </Button>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+export default function Layout() {
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar/>
       <Outlet/>
       <Footer />
     </div>
