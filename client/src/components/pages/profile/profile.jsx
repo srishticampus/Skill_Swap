@@ -46,6 +46,7 @@ import {
 import pfp from "@/assets/pfp.jpeg"
 import { Button } from "../../ui/button"
 import EditProfile from "./edit-profile";
+import EditTechnicalInfo from "./edit-technical";
 // Dummy data - replace with your actual data fetching
 const profileData = {
   profilePicture: pfp, // Replace with actual image URL
@@ -174,7 +175,7 @@ const ProfilePage = () => {
                         Make changes to your profile here.
                       </DialogDescription>
                     </DialogHeader>
-                    {/* Add your edit form here */}
+                      <EditTechnicalInfo className=""/>
                     <DialogFooter>
                       <Button type="submit">Save changes</Button>
                     </DialogFooter>
