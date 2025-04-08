@@ -7,13 +7,13 @@ import About from "./components/pages/about";
 import Layout from "./components/pages/layout";
 import Contact from "./components/pages/contact";
 import Dashboard from "./components/pages/admin/dashboard";
-import Signup from "./components/pages/signup";
-import Login from "./components/pages/login";
+import Signup from "./components/pages/auth/signup";
+import Login from "./components/pages/auth/login";
 import ForgotPassword from "./components/pages/forgot-password";
 import ResetPassword from "./components/pages/reset-password";
 import UpdatePersonalInfo from "./components/pages/update-personal-info";
 import AuthLanding from "./components/pages/landing/authLanding";
-import ProfilePage from "./components/pages/profile";
+import ProfilePage from "./components/pages/profile/profile";
 
 
 function App() {

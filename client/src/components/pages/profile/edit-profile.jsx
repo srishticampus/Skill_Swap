@@ -1,10 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import profilepic from "@/assets/profile-pic.png";
 import { Input } from "@/components/ui/input";
 
-export default function Signup() {
+export default function EditProfile() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,6 +20,28 @@ export default function Signup() {
 
   const [errors, setErrors] = useState({});
   const [profilePicPreview, setProfilePicPreview] = useState(profilepic);
+
+  useEffect(() => {
+    // Simulate fetching user data. Replace with your actual data fetching logic.
+    const fetchUserData = async () => {
+      //Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const userData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+        phone: '123-456-7890',
+        country: 'USA',
+        city: 'New York',
+        gender: 'male',
+        profilePic: null, // Or the URL of the profile picture if you have one.
+      };
+      setFormData(userData);
+      setProfilePicPreview(userData.profilePic || profilepic);
+    };
+
+    fetchUserData();
+  }, []);
 
 
   const handleChange = (e) => {
@@ -75,9 +97,7 @@ export default function Signup() {
     if (!data.city) {
         errors.city = 'City is required';
     }
-    if (!data.newPassword) {
-      errors.newPassword = 'Password is required';
-    } else if (data.newPassword.length < 6) {
+    if (data.newPassword && data.newPassword.length < 6) {
         errors.newPassword = "Password must be at least 6 characters long";
     }
     if (data.newPassword !== data.confirmPassword) {
@@ -91,13 +111,12 @@ export default function Signup() {
   };
 
   return (
-    <main className="container mx-3 flex flex-col items-center gap-4 my-16">
-        <h1 className="text-center text-primary text-3xl">Sign Up!</h1>
+    <div className=" flex flex-col items-center gap-4">
         <label className="flex flex-col items-center justify-center">
-        <img src={profilePicPreview} alt="upload profile pic" className="w-48 h-56 object-contain rounded-full" />
+        <img src={profilePicPreview} alt="upload profile pic" className="w-32 h-32 object-contain rounded-full" />
         <input type="file" accept="image/*" onChange={handleProfilePicChange} className='hidden' />
         </label>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-[80%] max-w-[600px]">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <label htmlFor="firstName" className="flex flex-col">
                 <span>First Name</span>
                 <Input type="text" name="firstName" id="firstName" value={formData.firstName} onChange={handleChange} />
@@ -128,16 +147,6 @@ export default function Signup() {
                 <Input type="text" name="city" id="city" value={formData.city} onChange={handleChange} />
                 {errors.city && <span className="text-red-500">{errors.city}</span>}
             </label>
-            <label htmlFor="newPassword" className="flex flex-col">
-                <span>New Password</span>
-                <Input type="password" name="newPassword" id="newPassword" value={formData.newPassword} onChange={handleChange} />
-                {errors.newPassword && <span className="text-red-500">{errors.newPassword}</span>}
-            </label>
-            <label htmlFor="confirmPassword" className="flex flex-col">
-                <span>Confirm Password</span>
-                <Input type="password" name="confirmPassword" id="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
-                {errors.confirmPassword && <span className="text-red-500">{errors.confirmPassword}</span>}
-            </label>
             <div className="flex flex-col sm:col-span-2">
                 <span>Gender</span>
                 <div className="flex gap-4">
@@ -156,9 +165,8 @@ export default function Signup() {
                 </div>
                 {errors.gender && <span className="text-red-500">{errors.gender}</span>}
             </div>
-            <Button type="submit" className="sm:col-span-2">Sign Up</Button>
+            {/* <Button type="submit" className="sm:col-span-2">Update Profile</Button> */}
         </form>
-        <p>Already have an account? <a href="/login" className="underline">Login</a></p>
-    </main>
+    </div>
   );
 }

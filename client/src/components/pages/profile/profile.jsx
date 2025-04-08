@@ -1,3 +1,4 @@
+
 import {
   Avatar,
   AvatarFallback,
@@ -31,10 +32,20 @@ import {
   MessageSquare,
   Edit
 } from "lucide-react"
-import {Link} from "react-router"
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 import pfp from "@/assets/pfp.jpeg"
-import { Button } from "../ui/button"
+import { Button } from "../../ui/button"
+import EditProfile from "./edit-profile";
 // Dummy data - replace with your actual data fetching
 const profileData = {
   profilePicture: pfp, // Replace with actual image URL
@@ -56,6 +67,16 @@ const profileData = {
 };
 
 const ProfilePage = () => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const openEditModal = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+  };
+
   return (
     <div className="container mx-auto p-4">
       {/* Profile and Details Section */}
@@ -69,9 +90,23 @@ const ProfilePage = () => {
             <div className="flex flex-col justify-start w-full">
               <div className="flex items-center justify-start gap-3">
                 <h1 className="text-2xl font-bold text-primary">{profileData.name}</h1>
-                    <Link to="/edit">
-                      <Edit className="h-6 w-6 text-primary cursor-pointer"/>
-                    </Link>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Edit className="h-6 w-6 text-primary cursor-pointer" />
+                  </DialogTrigger>
+                  <DialogContent className="">
+                    <DialogHeader>
+                      <DialogTitle>Edit Profile</DialogTitle>
+                      <DialogDescription>
+                        Make changes to your profile here.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <EditProfile/>
+                    <DialogFooter>
+                      <Button type="submit">Save changes</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
               {/* Profile Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
@@ -128,9 +163,23 @@ const ProfilePage = () => {
         <CardHeader>
           <div className="flex items-center justify-start gap-3">
             <CardTitle className="text-primary text-xl">Technical Information</CardTitle>
-            <Link to="/edit">
-              <Edit className="h-6 w-6 text-primary cursor-pointer"/>
-            </Link>
+            <Dialog>
+                  <DialogTrigger asChild>
+                    <Edit className="h-6 w-6 text-primary cursor-pointer" />
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Edit Profile</DialogTitle>
+                      <DialogDescription>
+                        Make changes to your profile here.
+                      </DialogDescription>
+                    </DialogHeader>
+                    {/* Add your edit form here */}
+                    <DialogFooter>
+                      <Button type="submit">Save changes</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 p-4">
