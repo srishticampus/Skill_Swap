@@ -12,6 +12,7 @@ import Login from "./components/pages/login";
 import ForgotPassword from "./components/pages/forgot-password";
 import ResetPassword from "./components/pages/reset-password";
 import UpdatePersonalInfo from "./components/pages/update-personal-info";
+import AuthLanding from "./components/pages/landing/authLanding";
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/update-personal-info" element={<UpdatePersonalInfo />} />
+        <Route path="/authlanding" element={<AuthLanding />} />
       </Route>
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
