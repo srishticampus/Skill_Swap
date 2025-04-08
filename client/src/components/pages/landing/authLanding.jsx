@@ -1,12 +1,11 @@
 
 import { Button } from "@/components/ui/button";
-import { Handshake, Users, User, ArrowRight, ChartNoAxesCombined, MapPin, Star, BriefcaseBusiness } from "lucide-react";
+import {  MapPin, Star, BriefcaseBusiness } from "lucide-react"
 import {  Link } from 'react-router';
 
 
 import heroimg from "./heroimg.jpeg"
-import pfp from "./pfp.jpeg"
-import { Separator } from "@/components/ui/separator";
+import pfp from "@/assets/pfp.jpeg"
 
 
 export default function AuthLanding(){

@@ -13,6 +13,7 @@ import ForgotPassword from "./components/pages/forgot-password";
 import ResetPassword from "./components/pages/reset-password";
 import UpdatePersonalInfo from "./components/pages/update-personal-info";
 import AuthLanding from "./components/pages/landing/authLanding";
+import ProfilePage from "./components/pages/profile";
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/update-personal-info" element={<UpdatePersonalInfo />} />
         <Route path="/authlanding" element={<AuthLanding />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
