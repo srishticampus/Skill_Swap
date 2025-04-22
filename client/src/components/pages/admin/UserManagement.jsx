@@ -9,9 +9,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { MoreHorizontal } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { useDisclosure } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newMentorStatus, setNewMentorStatus] = useState(false);
 
   useEffect(() => {
     // Fetch users from API
@@ -33,6 +59,34 @@ const UserManagement = () => {
     return date.toLocaleDateString();
   };
 
+  const handleDeleteUser = async (userId) => {
+    try {
+      await axiosInstance.delete(`/api/admin/users/${userId}`);
+      setUsers(users.filter(user => user._id !== userId));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
+  const handleMentorChange = async () => {
+    if (!selectedUser) return;
+    try {
+      await axiosInstance.put(`/api/admin/users/${selectedUser}/mentor`, { mentor: newMentorStatus });
+      setUsers(users.map(user =>
+        user._id === selectedUser ? { ...user, mentor: newMentorStatus } : user
+      ));
+      onClose();
+    } catch (error) {
+      console.error('Error updating mentor status:', error);
+    }
+  };
+
+  const handleCheckboxChange = (userId, mentorStatus) => {
+    setSelectedUser(userId);
+    setNewMentorStatus(mentorStatus);
+    onOpen();
+  };
+
   return (
     <main className="flex-1 px-6 pb-6">
       <div className="bg-white rounded-lg h-full p-6">
@@ -49,6 +103,8 @@ const UserManagement = () => {
               <TableHead>Profile Picture</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Last Login</TableHead>
+              <TableHead>Mentor</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -63,6 +119,44 @@ const UserManagement = () => {
                 <TableCell>{user.profilePicture}</TableCell>
                 <TableCell>{formatDate(user.date)}</TableCell>
                 <TableCell>{formatDate(user.lastLogin)}</TableCell>
+                <TableCell>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Checkbox
+                        checked={user.mentor || false}
+                        onCheckedChange={(checked) => handleCheckboxChange(user._id, checked)}
+                      />
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action will update the mentor status of the selected user.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleMentorChange}>Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => handleDeleteUser(user._id)}>
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

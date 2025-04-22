@@ -152,3 +152,25 @@ router.delete("/users/:id", auth, adminCheck, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
+
+// @route   PUT api/admin/users/:id/mentor
+// @desc    Update user mentor status by ID (Admin only)
+// @access  Private (Requires authentication and admin role)
+router.put("/users/:id/mentor", auth, adminCheck, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    user.mentor = req.body.mentor;
+
+    await user.save();
+
+    res.json({ msg: "User mentor status updated successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});

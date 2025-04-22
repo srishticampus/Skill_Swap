@@ -38,6 +38,10 @@ const UserSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  mentor: {
+    type: Boolean,
+    default: false,
+  },
   yearsOfExperience: {
     type: Number,
     default: 0,
