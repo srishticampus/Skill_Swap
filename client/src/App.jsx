@@ -14,9 +14,9 @@ import UpdatePersonalInfo from "./components/pages/update-personal-info";
 import AuthLanding from "./components/pages/landing/authLanding";
 import ProfilePage from "./components/pages/profile/profile";
 import UserManagement from "./components/pages/admin/UserManagement";
+import Marketplace from "./components/pages/Marketplace";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-
 
 function App() {
   return (
@@ -33,6 +33,7 @@ function App() {
           <Route path="/update-personal-info" element={<UpdatePersonalInfo />} />
           <Route path="/authlanding" element={<AuthLanding />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/marketplace" element={<Marketplace />} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />

@@ -17,8 +17,7 @@ const Footer = () => {
 
             </div>
             <p className="text-sm opacity-75">
-              A compassionate platform dedicated to rescuing, rehabilitating,
-              and rehoming pets.
+              A platform for exchanging skills, real-time collaborations and progress tracking.
             </p>
           </div>
           <nav className="flex-1 flex justify-end gap-8">

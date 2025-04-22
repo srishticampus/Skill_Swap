@@ -6,6 +6,9 @@ import { createStream } from "rotating-file-stream";
 import db from "./db_driver";
 import { router as authRoutes } from "./controllers/auth/index.js";
 import { router as adminRoutes } from "./controllers/admin/index.js";
+import { router as marketplaceRoutes } from "./controllers/marketplace/index.js";
+import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById } from './controllers/swap_request.js';
+import { verifyToken } from "./controllers/auth/index.js";
 
 export const app = express();
 
@@ -32,6 +35,16 @@ app.use("/api/auth", authRoutes);
 
 // Use admin routes
 app.use("/api/admin", adminRoutes);
+
+// Use marketplace routes
+app.use("/api/marketplace", marketplaceRoutes);
+
+// Swap Request routes
+app.post('/api/swap-requests', createSwapRequest);
+app.get('/api/swap-requests', getAllSwapRequests);
+app.get('/api/swap-requests/:id', getSwapRequestById);
+app.put('/api/swap-requests/:id', verifyToken, updateSwapRequestById);
+app.delete('/api/swap-requests/:id', verifyToken, deleteSwapRequestById);
 
 // Add profile update routes
 app.post("/api/auth/update-profile", authRoutes);
