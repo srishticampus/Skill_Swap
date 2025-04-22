@@ -1,4 +1,3 @@
-
 import { Route, Routes } from "react-router";
 
 import Landing from "./components/pages/landing";
@@ -14,27 +13,33 @@ import ResetPassword from "./components/pages/reset-password";
 import UpdatePersonalInfo from "./components/pages/update-personal-info";
 import AuthLanding from "./components/pages/landing/authLanding";
 import ProfilePage from "./components/pages/profile/profile";
+import UserManagement from "./components/pages/admin/UserManagement";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 function App() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Landing />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/update-personal-info" element={<UpdatePersonalInfo />} />
-        <Route path="/authlanding" element={<AuthLanding />} />
-        <Route path="/profile" element={<ProfilePage />} />
-      </Route>
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<Dashboard />} />
-      </Route>
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Landing />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/update-personal-info" element={<UpdatePersonalInfo />} />
+          <Route path="/authlanding" element={<AuthLanding />} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        </Route>
+        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+          <Route index element={<Dashboard />} />
+          <Route path="/admin/user-management" element={<UserManagement />} />
+        </Route>
+      </Routes>
+    </AuthProvider>
   );
 }
 

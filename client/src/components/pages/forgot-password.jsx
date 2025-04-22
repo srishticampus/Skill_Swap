@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import axiosInstance from '@/api/axios';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -23,25 +23,22 @@ export default function ForgotPassword() {
     }
     // In a real application, you would send a request to your backend here
     // to initiate the password reset process. For example:
-    // try {
-    //   const response = await fetch('/api/forgot-password', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ email }),
-    //   });
+    try {
+      const response = await axiosInstance.post('/api/forgot-password', { email }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    //   if (response.ok) {
-    //     setEmailSent(true);
-    //   } else {
-    //     const errorData = await response.json();
-    //     setError(errorData.message || 'Failed to send reset instructions.');
-    //   }
-    // } catch (error) {
-    //   setError('Failed to connect to the server.');
-    // }
-    setEmailSent(true); // For demonstration purposes, assume success
+      if (response.status === 200) {
+        setEmailSent(true);
+      } else {
+        setError(response.data.message || 'Failed to send reset instructions.');
+      }
+    } catch (error) {
+      setError('Failed to connect to the server.');
+    }
+    //setEmailSent(true); // For demonstration purposes, assume success
   };
 
   if (emailSent) {

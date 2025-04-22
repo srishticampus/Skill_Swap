@@ -1,8 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import {  Facebook, Twitter, Linkedin, Instagram,Dog } from "lucide-react";
 import { useLocation, Link, Outlet } from 'react-router';
-
+import { useAuth } from "@/context/AuthContext";
 import skillswap from "@/assets/skillswap.svg";
 import skillswapwhite from "@/assets/skillswap-white.svg";
 
@@ -51,6 +50,7 @@ const Footer = () => {
 
 function Navbar() {
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   return (
     <nav className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
@@ -67,15 +67,33 @@ function Navbar() {
           <Link to="/contact" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/contact" ? "text-primary" : ""}`}>
             Contact
           </Link>
+          {user?.isAdmin && (
+            <Link to="/admin" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/admin" ? "text-primary" : ""}`}>
+              Admin Dashboard
+            </Link>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="outline" className="rounded-full">
-            <Link to="/login">Sign In</Link>
-          </Button>
-          <Button asChild className="rounded-full">
-            <Link to="/signup">Get Started</Link>
-          </Button>
+          {user ? (
+            <>
+              <Button asChild variant="outline" className="rounded-full">
+                <Link to="/profile">Profile</Link>
+              </Button>
+              <Button variant="outline" className="rounded-full" onClick={logout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="outline" className="rounded-full">
+                <Link to="/login">Sign In</Link>
+              </Button>
+              <Button asChild className="rounded-full">
+                <Link to="/signup">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </nav>

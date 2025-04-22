@@ -1,4 +1,3 @@
-
 import {
   Avatar,
   AvatarFallback,
@@ -32,7 +31,7 @@ import {
   MessageSquare,
   Edit
 } from "lucide-react"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -47,28 +46,54 @@ import pfp from "@/assets/pfp.jpeg"
 import { Button } from "../../ui/button"
 import EditProfile from "./edit-profile";
 import EditTechnicalInfo from "./edit-technical";
+import { useAuth } from "@/context/AuthContext";
+import axiosInstance from '@/api/axios';
 // Dummy data - replace with your actual data fetching
-const profileData = {
-  profilePicture: pfp, // Replace with actual image URL
-  name: "John Doe",
-  email: "john.doe@example.com",
-  phone: "+1 555-123-4567",
-  gender: "Male",
-  country: "USA",
-  city: "New York",
-  resume: "resume.pdf",
-  qualifications: ["Bachelor's Degree", "Master's Degree"],
-  yearsOfExperience: 5,
-  experienceLevel: "Senior",
-  skills: ["React", "Node.js", "JavaScript"],
-  certifications: ["Certified React Developer", "AWS Certified"],
-  responseTime: "Within 24 hours",
-  availability: "Full-time",
-  serviceDescription: "Experienced software engineer specializing in web development."
-};
+// const profileData = {
+//   profilePicture: pfp, // Replace with actual image URL
+//   name: "John Doe",
+//   email: "john.doe@example.com",
+//   phone: "+1 555-123-4567",
+//   gender: "Male",
+//   country: "USA",
+//   city: "New York",
+//   resume: "resume.pdf",
+//   qualifications: ["Bachelor's Degree", "Master's Degree"],
+//   yearsOfExperience: 5,
+//   experienceLevel: "Senior",
+//   skills: ["React", "Node.js", "JavaScript"],
+//   certifications: ["Certified React Developer", "AWS Certified"],
+//   responseTime: "Within 24 hours",
+//   availability: "Full-time",
+//   serviceDescription: "Experienced software engineer specializing in web development."
+// };
 
 const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const { token } = useAuth();
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axiosInstance.get('/api/auth/profile', {
+          headers: {
+            'x-auth-token': token,
+          },
+        });
+
+        if (response.status !== 200) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        setProfileData(response.data);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
+
+    fetchProfileData();
+  }, [token]);
 
   const openEditModal = () => {
     setIsEditModalOpen(true);
@@ -78,6 +103,10 @@ const ProfilePage = () => {
     setIsEditModalOpen(false);
   };
 
+  if (!profileData) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="container mx-auto p-4">
       {/* Profile and Details Section */}
@@ -85,7 +114,7 @@ const ProfilePage = () => {
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row items-center gap-8 mb-4 px-8">
             <Avatar className="h-40 w-40 md:h-64 md:w-64">
-              <AvatarImage src={profileData.profilePicture} alt={profileData.name} />
+              <AvatarImage src={profileData.profilePicture || pfp} alt={profileData.name} />
               <AvatarFallback>{profileData.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-start w-full">
@@ -200,7 +229,7 @@ const ProfilePage = () => {
                 <p className="text-sm text-muted-foreground">Qualifications</p>
               </div>
               <ul className="list-disc list-inside">
-                {profileData.qualifications.map((q, index) => (
+                {profileData.qualifications?.map((q, index) => (
                   <li key={index}>{q}</li>
                 ))}
               </ul>
@@ -225,7 +254,7 @@ const ProfilePage = () => {
                 <p className="text-sm text-muted-foreground">Skills</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {profileData.skills.map((skill, index) => (
+                {profileData.skills?.map((skill, index) => (
                   <Badge key={index}>
                     {skill}
                   </Badge>
@@ -238,7 +267,7 @@ const ProfilePage = () => {
                 <p className="text-sm text-muted-foreground">Certifications</p>
               </div>
               <ul className="list-disc list-inside">
-                {profileData.certifications.map((cert, index) => (
+                {profileData.certifications?.map((cert, index) => (
                   <li key={index}>{cert}</li>
                 ))}
               </ul>

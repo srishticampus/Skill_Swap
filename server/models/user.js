@@ -14,14 +14,25 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  role: {
-    type: String,
-    enum: ["adopter", "foster", "rescue", "admin", "pet_owner"],
-    default: "adopter",
+  skills: {
+    type: [String],
+    default: [],
   },
-  isVerified: {
-    type: Boolean,
-    default: false,
+  interests: {
+    type: [String],
+    default: [],
+  },
+  bio: {
+    type: String,
+    default: "",
+  },
+  location: {
+    type: String,
+    default: "",
+  },
+  profilePicture: {
+    type: String,
+    default: "",
   },
   date: {
     type: Date,
