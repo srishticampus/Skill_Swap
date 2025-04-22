@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useDisclosure } from "@/components/ui/dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +34,7 @@ import {
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [newMentorStatus, setNewMentorStatus] = useState(false);
 
@@ -75,7 +74,7 @@ const UserManagement = () => {
       setUsers(users.map(user =>
         user._id === selectedUser ? { ...user, mentor: newMentorStatus } : user
       ));
-      onClose();
+      setIsOpen(false);
     } catch (error) {
       console.error('Error updating mentor status:', error);
     }
@@ -84,7 +83,11 @@ const UserManagement = () => {
   const handleCheckboxChange = (userId, mentorStatus) => {
     setSelectedUser(userId);
     setNewMentorStatus(mentorStatus);
-    onOpen();
+    setIsOpen(true);
+  };
+
+  const onClose = () => {
+    setIsOpen(false);
   };
 
   return (
@@ -120,7 +123,7 @@ const UserManagement = () => {
                 <TableCell>{formatDate(user.date)}</TableCell>
                 <TableCell>{formatDate(user.lastLogin)}</TableCell>
                 <TableCell>
-                  <AlertDialog>
+                  <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
                     <AlertDialogTrigger asChild>
                       <Checkbox
                         checked={user.mentor || false}
