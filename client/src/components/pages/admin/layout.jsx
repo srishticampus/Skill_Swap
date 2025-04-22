@@ -20,10 +20,11 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
-
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
 import skillswap from "@/assets/skillswap.svg";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router";
 
 const items = [
   {
@@ -97,50 +98,58 @@ function AppSidebar() {
 }
 
 export default function Admin() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <SidebarProvider>
-    <div className="flex h-screen w-full bg-[#F6F7F9]">
-      <AppSidebar />
+      <div className="flex h-screen w-full bg-[#F6F7F9]">
+        <AppSidebar />
 
-      {/* Main Content Area */}
-      <div className=" flex flex-col w-full">
-        {/* Header */}
-        <header className="flex justify-between items-center p-4 m-6 bg-white rounded-lg">
-          <div className="flex items-center gap-4">
-            <SidebarTrigger size="32" />
-            <h1 className="text-xl text-secondary-foreground">Dashboard</h1>
-          </div>
-          <Dialog>
-                <DialogTrigger asChild>
-                  <button className="flex items-center text-gray-700 hover:text-gray-900">
-                    <LogOut className="w-5 h-5 mr-2" />
-                    Logout
-                  </button>
-                </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Logout</DialogTitle>
-                <hr/>
+        {/* Main Content Area */}
+        <div className=" flex flex-col w-full">
+          {/* Header */}
+          <header className="flex justify-between items-center p-4 m-6 bg-white rounded-lg">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger size="32" />
+              <h1 className="text-xl text-secondary-foreground">Dashboard</h1>
+            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="flex items-center text-gray-700 hover:text-gray-900">
+                  <LogOut className="w-5 h-5 mr-2" />
+                  Logout
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Logout</DialogTitle>
+                  <hr />
 
-                <DialogDescription>
-                  Are you sure you want to log out ?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="flex sm:justify-center">
-                <Button type="submit" variant="outline" className="w-28" onClick={()=>{}}>Yes</Button>
-                <DialogClose asChild>
-                  <Button className="w-28">No</Button>
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                  <DialogDescription>
+                    Are you sure you want to log out ?
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="flex sm:justify-center">
+                  <Button type="submit" variant="outline" className="w-28" onClick={handleLogout}>Yes</Button>
+                  <DialogClose asChild>
+                    <Button className="w-28">No</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
-        </header>
+          </header>
 
-        {/* Content */}
-        <Outlet/>
+          {/* Content */}
+          <Outlet />
+        </div>
       </div>
-    </div>
 
     </SidebarProvider>
   );

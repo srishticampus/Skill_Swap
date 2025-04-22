@@ -65,8 +65,10 @@ export default function Signup() {
 
         if (response.status === 200) {
           const userData = response.data;
-          login(userData); // Update AuthContext with user data
-          navigate('/profile'); // Redirect to profile page after successful signup
+          login(userData,userData.token); // Update AuthContext with user data
+          setTimeout(() => {
+            navigate('/profile'); // Redirect to profile page after successful signup
+          }, 1000);
         } else {
           setErrors({ api: response.data.message }); // Display error message from the API
         }
@@ -80,13 +82,13 @@ export default function Signup() {
     const errors = {};
 
     if (!data.firstName) {
-      errors.firstName = 'First name is required';
+      errors.firstName = 'First Name is required';
     }
     if (!data.lastName) {
-      errors.lastName = 'Last name is required';
+      errors.lastName = 'Last Name is required';
     }
     if (!data.email) {
-      errors.email = 'Email is required';
+      errors.email = 'Please include a valid email';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       errors.email = 'Invalid email format';
     }
@@ -100,7 +102,7 @@ export default function Signup() {
       errors.city = 'City is required';
     }
     if (!data.newPassword) {
-      errors.newPassword = 'Password is required';
+      errors.newPassword = 'Please enter a password with 6 or more characters';
     } else if (data.newPassword.length < 6) {
       errors.newPassword = "Password must be at least 6 characters long";
     }

@@ -5,7 +5,11 @@ import jwt from "jsonwebtoken";
 import { check, validationResult } from "express-validator";
 import User from "../../models/user.js";
 import nodemailer from 'nodemailer';
+import multer from 'multer';
 
+// Multer configuration
+const storage = multer.memoryStorage(); // Store the file in memory
+const upload = multer({ storage: storage });
 
 // Middleware function to verify JWT token
 export const auth = (req, res, next) => {
@@ -34,6 +38,7 @@ export const auth = (req, res, next) => {
 // @access  Public
 router.post(
   "/signup",
+  upload.single('profilePic'), // Use multer middleware to handle file upload
   [
     check("firstName", "First Name is required").not().isEmpty(),
     check("lastName", "Last Name is required").not().isEmpty(),

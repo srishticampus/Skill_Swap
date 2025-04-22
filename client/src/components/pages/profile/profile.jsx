@@ -71,16 +71,11 @@ import axiosInstance from '@/api/axios';
 const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
-  const { token } = useAuth();
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axiosInstance.get('/api/auth/profile', {
-          headers: {
-            'x-auth-token': token,
-          },
-        });
+        const response = await axiosInstance.get('/api/auth/profile');
 
         if (response.status !== 200) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -93,7 +88,7 @@ const ProfilePage = () => {
     };
 
     fetchProfileData();
-  }, [token]);
+  }, []);
 
   const openEditModal = () => {
     setIsEditModalOpen(true);
