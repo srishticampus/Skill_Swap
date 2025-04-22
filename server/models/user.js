@@ -14,19 +14,55 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  phone: {
+    type: String,
+    default: "",
+  },
+  gender: {
+    type: String,
+    default: "",
+  },
+  country: {
+    type: String,
+    default: "",
+  },
+  city: {
+    type: String,
+    default: "",
+  },
+  resume: {
+    type: String,
+    default: "",
+  },
+  qualifications: {
+    type: [String],
+    default: [],
+  },
+  yearsOfExperience: {
+    type: Number,
+    default: 0,
+  },
+  experienceLevel: {
+    type: String,
+    default: "",
+  },
   skills: {
     type: [String],
     default: [],
   },
-  interests: {
+  certifications: {
     type: [String],
     default: [],
   },
-  bio: {
+  responseTime: {
     type: String,
     default: "",
   },
-  location: {
+  availability: {
+    type: String,
+    default: "",
+  },
+  serviceDescription: {
     type: String,
     default: "",
   },

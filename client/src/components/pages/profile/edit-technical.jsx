@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from '@/lib/utils';
+import axiosInstance from '@/api/axios';
 
 export default function EditTechnicalInfo({ className }) {
   const [formData, setFormData] = useState({
@@ -21,7 +21,24 @@ export default function EditTechnicalInfo({ className }) {
     yearsOfExperience: '',
     serviceDescription: '',
     certifications: [],
+    responseTime: '',
+    availability: '',
   });
+
+  useEffect(() => {
+    // Simulate fetching user data. Replace with your actual data fetching logic.
+    const fetchUserData = async () => {
+      try {
+        const response = await axiosInstance.get('/api/auth/profile');
+        const userData = response.data;
+        setFormData(userData);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleCertificationChange = (index, e) => {
     if(!e.target){
@@ -57,10 +74,15 @@ export default function EditTechnicalInfo({ className }) {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form data submitted:', formData);
-    // Add your submission logic here (e.g., API call)
+    try {
+      const response = await axiosInstance.post('/api/auth/update-technical', formData);
+      console.log('Technical information updated successfully:', response.data);
+      // Optionally, update the profile data in the parent component or context
+    } catch (error) {
+      console.error('Error updating technical information:', error);
+    }
   };
 
   return (
@@ -94,6 +116,16 @@ export default function EditTechnicalInfo({ className }) {
             <label htmlFor="yearsOfExperience" className="flex flex-col">
               <span>Years of Experience</span>
               <Input type="number" name="yearsOfExperience" id="yearsOfExperience" value={formData.yearsOfExperience} onChange={handleChange} />
+            </label>
+
+            <label htmlFor="responseTime" className="flex flex-col">
+              <span>Response Time</span>
+              <Input type="text" name="responseTime" id="responseTime" value={formData.responseTime} onChange={handleChange} />
+            </label>
+
+            <label htmlFor="availability" className="flex flex-col">
+              <span>Availability</span>
+              <Input type="text" name="availability" id="availability" value={formData.availability} onChange={handleChange} />
             </label>
 
 

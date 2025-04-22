@@ -33,4 +33,8 @@ app.use("/api/auth", authRoutes);
 // Use admin routes
 app.use("/api/admin", adminRoutes);
 
+// Add profile update routes
+app.post("/api/auth/update-profile", authRoutes);
+app.post("/api/auth/update-technical", authRoutes);
+
 if (import.meta.env.PROD) app.listen(3000);

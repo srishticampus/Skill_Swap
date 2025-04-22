@@ -287,3 +287,105 @@ router.get("/profile", auth, async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+// @route   POST api/auth/update-profile
+// @desc    Update user profile
+// @access  Private
+router.post(
+  "/update-profile",
+  auth,
+  [
+    check("firstName", "First Name is required").not().isEmpty(),
+    check("lastName", "Last Name is required").not().isEmpty(),
+    check("email", "Please include a valid email").isEmail(),
+    check("phone", "Phone number is required").not().isEmpty(),
+    check("country", "Country is required").not().isEmpty(),
+    check("city", "City is required").not().isEmpty(),
+    check("gender", "Gender is required").not().isEmpty(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { firstName, lastName, email, phone, country, city, gender, profilePicture } = req.body;
+
+    try {
+      const user = await User.findById(req.user.id);
+
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+      }
+
+      // Update user fields
+      user.name = `${firstName} ${lastName}`;
+      user.email = email;
+      user.phone = phone;
+      user.country = country;
+      user.city = city;
+      user.gender = gender;
+      user.profilePicture = profilePicture;
+
+      await user.save();
+
+      res.json({ msg: "Profile updated successfully" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+    }
+  }
+);
+
+// @route   POST api/auth/update-technical
+// @desc    Update user technical information
+// @access  Private
+router.post(
+  "/update-technical",
+  auth,
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id);
+
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+      }
+
+      // Update user fields
+      if (req.body.resume) {
+        user.resume = req.body.resume;
+      }
+      if (req.body.qualifications) {
+        user.qualifications = req.body.qualifications;
+      }
+      if (req.body.skills) {
+        user.skills = req.body.skills;
+      }
+      if (req.body.experienceLevel) {
+        user.experienceLevel = req.body.experienceLevel;
+      }
+      if (req.body.yearsOfExperience) {
+        user.yearsOfExperience = req.body.yearsOfExperience;
+      }
+      if (req.body.serviceDescription) {
+        user.serviceDescription = req.body.serviceDescription;
+      }
+      if (req.body.certifications) {
+        user.certifications = req.body.certifications;
+      }
+      if (req.body.responseTime) {
+        user.responseTime = req.body.responseTime;
+      }
+      if (req.body.availability) {
+        user.availability = req.body.availability;
+      }
+
+      await user.save();
+
+      res.json({ msg: "Technical information updated successfully" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+    }
+  }
+);

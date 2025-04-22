@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import profilepic from "@/assets/profile-pic.png";
 import { Input } from "@/components/ui/input";
+import axiosInstance from '@/api/axios';
 
 export default function EditProfile() {
   const [formData, setFormData] = useState({
@@ -24,20 +24,14 @@ export default function EditProfile() {
   useEffect(() => {
     // Simulate fetching user data. Replace with your actual data fetching logic.
     const fetchUserData = async () => {
-      //Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const userData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        phone: '123-456-7890',
-        country: 'USA',
-        city: 'New York',
-        gender: 'male',
-        profilePic: null, // Or the URL of the profile picture if you have one.
-      };
-      setFormData(userData);
-      setProfilePicPreview(userData.profilePic || profilepic);
+      try {
+        const response = await axiosInstance.get('/api/auth/profile');
+        const userData = response.data;
+        setFormData(userData);
+        setProfilePicPreview(userData.profilePicture || profilepic);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
     };
 
     fetchUserData();
@@ -62,15 +56,20 @@ export default function EditProfile() {
   };
 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
       // Form is valid, submit data
-      console.log('Form data submitted:', formData);
-      // Add your submission logic here (e.g., API call)
+      try {
+        const response = await axiosInstance.post('/api/auth/update-profile', formData);
+        console.log('Profile updated successfully:', response.data);
+        // Optionally, update the profile data in the parent component or context
+      } catch (error) {
+        console.error('Error updating profile:', error);
+      }
     }
   };
 
