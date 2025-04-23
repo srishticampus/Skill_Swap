@@ -32,6 +32,8 @@ export const auth = (req, res, next) => {
   }
 };
 
+export const verifyToken = auth;
+
 
 // @route   POST api/auth/signup
 // @desc    Register user
@@ -239,11 +241,11 @@ router.post(
 
       // Send email with reset token
       const transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
+        host: 'smtp.gmail.com',
         port: 587,
         auth: {
-            user: 'jayde.boehm@ethereal.email',
-            pass: 'z4ZmNnpeVzKxG9aQ6S'
+            user: import.meta.env.VITE_EMAIL,
+            pass: import.meta.env.VITE_PASSWORD
         }
       });
 
@@ -253,7 +255,7 @@ router.post(
         subject: 'Password Reset',
         html: `<p>You are receiving this because you (or someone else) have requested the reset of the password for your account.</p>
                <p>Please click on the following link, or paste this into your browser to complete the process:</p>
-               <p><a href="http://localhost:5173/reset-password/${resetToken}">http://localhost:5173/reset-password/${resetToken}</a></p>
+               <p><a href="${import.meta.env.VITE_CLIENT_URL}/reset-password/${resetToken}">${import.meta.env.VITE_CLIENT_URL}/reset-password/${resetToken}</a></p>
                <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>`
       };
 

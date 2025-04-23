@@ -50,4 +50,4 @@ app.delete('/api/swap-requests/:id', verifyToken, deleteSwapRequestById);
 app.post("/api/auth/update-profile", authRoutes);
 app.post("/api/auth/update-technical", authRoutes);
 
-if (import.meta.env.PROD) app.listen(3000);
+if (import.meta.env.PROD) app.listen(import.meta.env.VITE_PORT || 4054);
