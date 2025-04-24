@@ -26,10 +26,11 @@
     "nodemailer": "^6.10.1",
     "pino": "^9.6.0",
     "pino-http": "^10.4.0",
-    "rotating-file-stream": "^3.2.6"
-  },
-  "devDependencies": {
+    "rotating-file-stream": "^3.2.6",
     "vite": "^5.4.15",
     "vite-plugin-node": "^4.0.0"
+  },
+  "devDependencies": {
+   
   }
 }
