@@ -1,0 +1,128 @@
+name: Deploy SkillSwap to VPS
+
+on:
+  push:
+    branches: [deployment]
+
+env:
+  VPS_IP: ${{ secrets.VPS_IP }}
+  VPS_USER: ${{ secrets.VPS_USER }}
+  VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+  DEPLOY_DIR: /home/ubuntu/new_hybrid_projects/skill_swap
+  PM2_APP_NAME: skill_swap
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Create environment files
+      - name: Create client environment file
+        working-directory: ./client
+        run: |
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env.production
+          echo "VITE_BASE_URL=${{ secrets.VITE_BASE_URL }}" >> .env.production
+
+      - name: Create server environment file
+        working-directory: ./server
+        run: |
+          echo "VITE_JWT_SECRET=${{ secrets.VITE_JWT_SECRET }}" > .env.production
+          echo "VITE_EMAIL=${{ secrets.VITE_EMAIL }}" >> .env.production
+          echo "VITE_EMAIL_PASSWORD=${{ secrets.VITE_EMAIL_PASSWORD }}" >> .env.production
+          echo "VITE_CLIENT_URL=${{ secrets.VITE_CLIENT_URL }}" >> .env.production
+          echo "VITE_MONGO_URI=${{ secrets.VITE_MONGO_URI }}" >> .env.production
+          echo "VITE_PORT=${{ secrets.VITE_PORT }}" >> .env.production
+
+      # Build frontend
+      - name: Build React frontend
+        working-directory: ./client
+        run: |
+          npm ci
+          npm run build -- --outDir=../dist
+
+      # Prepare backend
+      - name: Prepare backend
+        working-directory: ./server
+        run: |
+          npm ci --omit=dev
+
+      # Create deployment package
+      - name: Create deployment structure
+        run: |
+          mkdir -p deploy
+
+          # Copy frontend build files
+          cp -r dist/* deploy/
+
+          # Create server directory and copy files
+          mkdir -p deploy/server
+          cp -r server/* deploy/server/
+          rm -rf deploy/server/node_modules
+
+          # Move environment files to correct locations
+          mv client/.env.production deploy/
+          mv server/.env.production deploy/server/
+
+      # Compress for transfer
+      - name: Compress deployment package
+        run: tar -czvf skill_swap.tar.gz -C deploy .
+
+      # Deploy to VPS
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.VPS_SSH_KEY }}
+          known_hosts: "just-a-placeholder-so-we-dont-get-errors"
+
+      - name: Transfer files to VPS
+        run: |
+          scp -o StrictHostKeyChecking=no skill_swap.tar.gz ${{ env.VPS_USER }}@${{ env.VPS_IP }}:/tmp/
+
+      - name: SSH and deploy on VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ env.VPS_USER }}@${{ env.VPS_IP }} << EOF
+          # Create directory if not exists
+          mkdir -p ${{ env.DEPLOY_DIR }}
+
+          # Clear existing files (preserve uploads if they exist)
+          if [ -d "${{ env.DEPLOY_DIR }}/server/uploads" ]; then
+            mv ${{ env.DEPLOY_DIR }}/server/uploads /tmp/skill_swap_uploads
+          fi
+          rm -rf ${{ env.DEPLOY_DIR }}/*
+
+          # Extract files
+          tar -xzvf /tmp/skill_swap.tar.gz -C ${{ env.DEPLOY_DIR }}
+
+          # Restore uploads if they existed
+          if [ -d "/tmp/skill_swap_uploads" ]; then
+            mkdir -p ${{ env.DEPLOY_DIR }}/server/uploads
+            mv /tmp/skill_swap_uploads/* ${{ env.DEPLOY_DIR }}/server/uploads/
+            rm -rf /tmp/skill_swap_uploads
+          else
+            mkdir -p ${{ env.DEPLOY_DIR }}/server/uploads
+          fi
+
+          # Set proper permissions
+          chmod -R 755 ${{ env.DEPLOY_DIR }}/server/uploads
+
+          # Install backend dependencies
+          cd ${{ env.DEPLOY_DIR }}/server
+          npm install --omit=dev
+
+          # Build server
+          npm run build
+
+          # Restart application with PM2
+          pm2 delete ${{ env.PM2_APP_NAME }} || true
+          pm2 start "npm run start" --name "${{ env.PM2_APP_NAME }}"
+          pm2 save
+
+          # Verify deployment
+          echo "Deployment structure:"
+          ls -la ${{ env.DEPLOY_DIR }}
+          echo "Server directory:"
+          ls -la ${{ env.DEPLOY_DIR }}/server
+          EOF
