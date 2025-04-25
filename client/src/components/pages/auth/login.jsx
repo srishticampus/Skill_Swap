@@ -40,7 +40,11 @@ export default function Login() {
           const token = response.data.token;
           const userData = response.data.user; // Extract user data from response
           login(userData, token); // Update AuthContext with user data and token
-          navigate('/profile'); // Redirect to profile page after successful login
+          if (userData && userData.isAdmin) {
+            navigate('/admin'); // Redirect to admin page if user is admin
+          } else {
+            navigate('/profile'); // Redirect to profile page after successful login
+          }
         } else {
           setErrors({ api: response.data.message }); // Display error message from the API
         }

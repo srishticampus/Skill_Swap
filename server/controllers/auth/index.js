@@ -75,7 +75,8 @@ router.post(
         phone,
         country,
         city,
-        gender
+        gender,
+        lastLogin: Date.now() // added lastLogin here
       });
 
       const salt = await bcrypt.genSalt(10);
@@ -138,6 +139,7 @@ router.post(
               email: "admin@admin.com",
               password: "admin",
               isAdmin: true,
+              lastLogin: Date.now()
             });
 
             const salt = await bcrypt.genSalt(10);
@@ -182,6 +184,9 @@ router.post(
         user.isAdmin = true;
         await user.save();
       }
+
+      user.lastLogin = Date.now(); // update lastLogin
+      await user.save(); // save the updated user
 
       const payload = {
         user: {

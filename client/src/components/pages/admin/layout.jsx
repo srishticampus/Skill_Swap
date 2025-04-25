@@ -22,9 +22,12 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import skillswap from "@/assets/skillswap.svg";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
+import { useState, useEffect } from 'react';
+import axiosInstance from '@/api/axios';
 
 const items = [
   {
@@ -57,11 +60,32 @@ const items = [
     url: "/admin/user-management",
     icon: Users // You can choose a more appropriate icon
   },
+  {
+    title: "Mentor Requests",
+    url: "/admin/mentor-requests",
+    icon: Users // You can choose a more appropriate icon
+  },
 ];
 
 
 function AppSidebar() {
   const { pathname } = useLocation();
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+  useEffect(() => {
+    const fetchMentorRequests = async () => {
+      try {
+        const response = await axiosInstance.get('/api/admin/mentor-requests');
+        const pendingRequests = response.data.filter(request => request.status === 'pending');
+        setPendingRequestsCount(pendingRequests.length);
+      } catch (error) {
+        console.error("Error fetching mentor requests:", error);
+      }
+    };
+
+    fetchMentorRequests();
+  }, []);
+
   return (
     <Sidebar className="border-none">
       <SidebarContent>
@@ -85,6 +109,9 @@ function AppSidebar() {
                     >
                       <item.icon className="w-5 h-5 mr-3" />
                       <span>{item.title}</span>
+                      {item.title === "Mentor Requests" && pendingRequestsCount > 0 && (
+                        <Badge className="ml-2">{pendingRequestsCount}</Badge>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

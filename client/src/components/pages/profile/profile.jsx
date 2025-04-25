@@ -42,35 +42,23 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+
 import pfp from "@/assets/pfp.jpeg"
 import { Button } from "../../ui/button"
 import EditProfile from "./edit-profile";
 import EditTechnicalInfo from "./edit-technical";
 import { useAuth } from "@/context/AuthContext";
 import axiosInstance from '@/api/axios';
-// Dummy data - replace with your actual data fetching
-// const profileData = {
-//   profilePicture: pfp, // Replace with actual image URL
-//   name: "John Doe",
-//   email: "john.doe@example.com",
-//   phone: "+1 555-123-4567",
-//   gender: "Male",
-//   country: "USA",
-//   city: "New York",
-//   resume: "resume.pdf",
-//   qualifications: ["Bachelor's Degree", "Master's Degree"],
-//   yearsOfExperience: 5,
-//   experienceLevel: "Senior",
-//   skills: ["React", "Node.js", "JavaScript"],
-//   certifications: ["Certified React Developer", "AWS Certified"],
-//   responseTime: "Within 24 hours",
-//   availability: "Full-time",
-//   serviceDescription: "Experienced software engineer specializing in web development."
-// };
+import { toast } from "sonner"
+
 
 const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [isMentorRequestModalOpen, setIsMentorRequestModalOpen] = useState(false);
+  const [mentorRequestText, setMentorRequestText] = useState("");
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -96,6 +84,33 @@ const ProfilePage = () => {
 
   const closeEditModal = () => {
     setIsEditModalOpen(false);
+  };
+
+  const handleMentorRequestOpen = () => {
+    setIsMentorRequestModalOpen(true);
+  };
+
+  const handleMentorRequestClose = () => {
+    setIsMentorRequestModalOpen(false);
+    setMentorRequestText("");
+  };
+
+  const handleMentorRequestSubmit = async () => {
+    try {
+      await axiosInstance.post('/api/admin/mentor-requests', {
+        requestText: mentorRequestText,
+      });
+      console.log("Mentor Request Submitted:", mentorRequestText);
+      toast.success(
+        "Request submitted!",
+        {description: "Your request to be a mentor has been submitted."},
+      )
+      handleMentorRequestClose();
+      // Optionally show a success message to the user
+    } catch (error) {
+      console.error("Error submitting mentor request:", error);
+      // Optionally show an error message to the user
+    }
   };
 
   if (!profileData) {
@@ -129,6 +144,34 @@ const ProfilePage = () => {
                     <EditProfile/>
                     <DialogFooter>
                       <Button type="submit">Save changes</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">Request to be a Mentor</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Request to be a Mentor</DialogTitle>
+                      <DialogDescription>
+                        Explain your qualifications and experience for becoming a mentor.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="mentor-request">Qualifications</Label>
+                        <Textarea
+                          id="mentor-request"
+                          placeholder="Enter your qualifications and experience here."
+                          value={mentorRequestText}
+                          onChange={(e) => setMentorRequestText(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button onClick={handleMentorRequestSubmit}>Submit Request</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>

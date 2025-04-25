@@ -17,6 +17,8 @@ import UserManagement from "./components/pages/admin/UserManagement";
 import Marketplace from "./components/pages/Marketplace";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import MentorRequests from "./components/pages/admin/MentorRequests";
+import CategoryManagement from "./components/pages/admin/CategoryManagement";
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="/admin/user-management" element={<UserManagement />} />
+          <Route path="/admin/mentor-requests" element={<MentorRequests />} />
+          <Route path="/admin/categories" element={<CategoryManagement />} />
         </Route>
       </Routes>
     </AuthProvider>

@@ -6,7 +6,7 @@ const swapRequestSchema = new mongoose.Schema({
     required: true
   },
   serviceCategory: {
-    type: [String], // Array of strings
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
     default: []
   },
   serviceRequired: {
