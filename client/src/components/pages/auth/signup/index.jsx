@@ -117,7 +117,7 @@ export default function Signup() {
   };
 
   return (
-    <main className="container mx-3 flex flex-col items-center gap-4 my-16">
+    <main className="container mx-3 md:mx-auto flex flex-col items-center gap-4 my-16">
       <h1 className="text-center text-primary text-3xl">Sign Up!</h1>
       <label className="flex flex-col items-center justify-center">
         <img src={profilePicPreview} alt="upload profile pic" className="w-48 h-56 object-contain rounded-full" />
@@ -185,7 +185,7 @@ export default function Signup() {
         {errors.api && <span className="text-red-500">{errors.api}</span>} {/* Display API error */}
         <Button type="submit" className="sm:col-span-2">Sign Up</Button>
       </form>
-      <p>Already have an account? <a href="/login" className="underline">Login</a></p>
+      <p>Already have an account? <Link href="/login" className="underline">Login</Link></p>
     </main>
   );
 }

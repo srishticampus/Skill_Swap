@@ -26,24 +26,6 @@ const swapRequestSchema = new mongoose.Schema({
   deadline: {
     type: Date
   },
-  contactName: {
-    type: String,
-    required: true
-  },
-  contactEmail: {
-    type: String,
-    required: true,
-    validate: {
-      validator: function(v) {
-        return /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/.test(v);
-      },
-      message: "Please enter a valid email"
-    }
-  },
-  contactPhoneNumber: {
-    type: String,
-    required: true
-  },
   requestStatus: {
     type: String,
     enum: ['Open', 'In Progress', 'Completed', 'Cancelled'],

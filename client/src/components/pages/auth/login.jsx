@@ -66,7 +66,7 @@ export default function Login() {
   };
 
   return (
-    <main className="container mx-3 flex flex-col items-center gap-4 my-20">
+    <main className="container mx-3 md:mx-auto flex flex-col items-center gap-4 my-20">
       <h1 className="text-center text-primary text-3xl">Login</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8 w-[80%] max-w-[400px]">
         <label htmlFor="email" className="flex flex-col">
@@ -91,7 +91,7 @@ export default function Login() {
         <Button type="submit">Login</Button>
       </form>
       <div className="flex flex-col items-center gap-2">
-        <p>Don't have an account? <a href="/signup" className="underline">Sign Up</a></p>
+        <p>Don't have an account? <Link href="/signup" className="underline">Sign Up</Link></p>
       </div>
     </main>
   );
