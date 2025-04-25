@@ -1,10 +1,21 @@
 import { Button } from "@/components/ui/button";
-import {  Facebook, Twitter, Linkedin, Instagram,Dog } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useLocation, Link, Outlet } from 'react-router';
 import { useAuth } from "@/context/AuthContext";
 import skillswap from "@/assets/skillswap.svg";
 import skillswapwhite from "@/assets/skillswap-white.svg";
-
+import Notifications from "@/components/Notifications";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
+import { useState, useEffect } from "react";
+import axiosInstance from "@/api/axios";
 
 const Footer = () => {
   return (
@@ -50,6 +61,27 @@ const Footer = () => {
 function Navbar() {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await axiosInstance.get('/api/notifications');
+        const unread = response.data.filter(notification => !notification.read).length;
+        setUnreadNotifications(unread);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    if (user) {
+      fetchNotifications();
+    }
+  }, [user]);
+
+  const handleNotificationRead = () => {
+    setUnreadNotifications(prevCount => Math.max(0, prevCount - 1));
+  };
 
   return (
     <nav className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
@@ -76,6 +108,21 @@ function Navbar() {
         <div className="flex items-center gap-2">
           {user ? (
             <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-full">
+                    <Bell/>
+                    {unreadNotifications > 0 && (
+                      <Badge className="ml-2">{unreadNotifications}</Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>My Notifications</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <Notifications onNotificationRead={handleNotificationRead} />
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button asChild variant="outline" className="rounded-full">
                 <Link to="/profile">Profile</Link>
               </Button>
@@ -100,6 +147,7 @@ function Navbar() {
 }
 
 export default function Layout() {
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">

@@ -9,6 +9,7 @@ import { router as adminRoutes } from "./controllers/admin/index.js";
 import { router as marketplaceRoutes } from "./controllers/marketplace/index.js";
 import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById } from './controllers/swap_request.js';
 import { verifyToken } from "./controllers/auth/index.js";
+import notificationRoutes from "./controllers/notifications.js";
 
 export const app = express();
 
@@ -38,6 +39,9 @@ app.use("/api/admin", adminRoutes);
 
 // Use marketplace routes
 app.use("/api/marketplace", marketplaceRoutes);
+
+// Use notification routes
+app.use("/api/notifications", notificationRoutes);//I have also removed prefix on notificationRoutes
 
 // Swap Request routes
 app.post('/api/swap-requests', createSwapRequest);

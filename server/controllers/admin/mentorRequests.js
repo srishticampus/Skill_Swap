@@ -4,6 +4,7 @@ import MentorRequest from "../../models/mentor_request.js";
 import User from "../../models/user.js";
 import { auth } from "../auth/index.js";
 import { adminCheck } from "./middleware.js";
+import {createNotification} from "../notifications.js";
 
 const router = express.Router();
 
@@ -47,7 +48,7 @@ router.post(
 // @access  Private (Requires authentication and admin role)
 router.get("/mentor-requests", auth, adminCheck, async (req, res) => {
   try {
-    const mentorRequests = await MentorRequest.find().populate('user', 'name email');
+    const mentorRequests = await MentorRequest.find({ status: "pending" }).populate('user', 'name email');
     res.json(mentorRequests);
   } catch (err) {
     console.error(err.message);
@@ -71,11 +72,14 @@ router.put("/mentor-requests/:id/approve", auth, adminCheck, async (req, res) =>
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
-    user.role = "mentor";
+    user.mentor = true;
     await user.save();
 
     mentorRequest.status = "approved";
     await mentorRequest.save();
+
+    // Create notification
+    await createNotification(mentorRequest.user._id, 'mentor_request', `Your mentor request has been approved`, 'approved');
 
     res.json({ msg: "Mentor request approved successfully" });
   } catch (err) {
@@ -97,6 +101,9 @@ router.put("/mentor-requests/:id/reject", auth, adminCheck, async (req, res) => 
 
     mentorRequest.status = "rejected";
     await mentorRequest.save();
+
+    // Create notification
+    await createNotification(mentorRequest.user._id, 'mentor_request', `Your mentor request has been rejected`, 'rejected');
 
     res.json({ msg: "Mentor request rejected successfully" });
   } catch (err) {
