@@ -60,6 +60,7 @@ const ProfilePage = () => {
   const [isMentorRequestModalOpen, setIsMentorRequestModalOpen] = useState(false);
   const [mentorRequestText, setMentorRequestText] = useState("");
 
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -99,11 +100,12 @@ const ProfilePage = () => {
     try {
       await axiosInstance.post('/api/admin/mentor-requests', {
         requestText: mentorRequestText,
+        userId: profileData._id,
       });
       console.log("Mentor Request Submitted:", mentorRequestText);
       toast.success(
         "Request submitted!",
-        {description: "Your request to be a mentor has been submitted."},
+        { description: "Your request to be a mentor has been submitted." },
       )
       handleMentorRequestClose();
       // Optionally show a success message to the user
@@ -124,13 +126,13 @@ const ProfilePage = () => {
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row items-center gap-8 mb-4 px-8">
             <Avatar className="h-40 w-40 md:h-64 md:w-64">
-              <AvatarImage src={profileData.profilePicture || pfp} alt={profileData.name} />
+              <AvatarImage src={profileData.profilePictureUrl ? `${import.meta.env.VITE_API_URL}/${profileData.profilePictureUrl}` : pfp} alt={profileData.name} />
               <AvatarFallback>{profileData?.name?.charAt(0) || 'N'}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-start w-full">
               <div className="flex items-center justify-start gap-3">
                 <h1 className="text-2xl font-bold text-primary">{profileData.name}</h1>
-                <Dialog>
+                <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
                   <DialogTrigger asChild>
                     <Edit className="h-6 w-6 text-primary cursor-pointer" />
                   </DialogTrigger>
@@ -141,40 +143,44 @@ const ProfilePage = () => {
                         Make changes to your profile here.
                       </DialogDescription>
                     </DialogHeader>
-                    <EditProfile/>
+                    <EditProfile setIsEditModalOpen={setIsEditModalOpen} />
                     <DialogFooter>
                       <Button type="submit">Save changes</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
 
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">Request to be a Mentor</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Request to be a Mentor</DialogTitle>
-                      <DialogDescription>
-                        Explain your qualifications and experience for becoming a mentor.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="mentor-request">Qualifications</Label>
-                        <Textarea
-                          id="mentor-request"
-                          placeholder="Enter your qualifications and experience here."
-                          value={mentorRequestText}
-                          onChange={(e) => setMentorRequestText(e.target.value)}
-                        />
+                {profileData.mentor ?
+                  <Badge variant="outline" className='text-sm'>Mentor</Badge>
+                  :
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">Request to be a Mentor</Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Request to be a Mentor</DialogTitle>
+                        <DialogDescription>
+                          Explain your qualifications and experience for becoming a mentor.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="mentor-request">Qualifications</Label>
+                          <Textarea
+                            id="mentor-request"
+                            placeholder="Enter your qualifications and experience here."
+                            value={mentorRequestText}
+                            onChange={(e) => setMentorRequestText(e.target.value)}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <DialogFooter>
-                      <Button onClick={handleMentorRequestSubmit}>Submit Request</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                      <DialogFooter>
+                        <Button onClick={handleMentorRequestSubmit}>Submit Request</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                }
               </div>
               {/* Profile Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
@@ -201,7 +207,7 @@ const ProfilePage = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <VenusAndMars  className="h-4 w-4 text-muted-foreground" />
+                    <VenusAndMars className="h-4 w-4 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Gender</p>
                   </div>
                   <p>{profileData.gender}</p>
@@ -232,22 +238,22 @@ const ProfilePage = () => {
           <div className="flex items-center justify-start gap-3">
             <CardTitle className="text-primary text-xl">Technical Information</CardTitle>
             <Dialog>
-                  <DialogTrigger asChild>
-                    <Edit className="h-6 w-6 text-primary cursor-pointer" />
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Edit Profile</DialogTitle>
-                      <DialogDescription>
-                        Make changes to your profile here.
-                      </DialogDescription>
-                    </DialogHeader>
-                      <EditTechnicalInfo className=""/>
-                    <DialogFooter>
-                      <Button type="submit">Save changes</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+              <DialogTrigger asChild>
+                <Edit className="h-6 w-6 text-primary cursor-pointer" />
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Edit Profile</DialogTitle>
+                  <DialogDescription>
+                    Make changes to your profile here.
+                  </DialogDescription>
+                </DialogHeader>
+                <EditTechnicalInfo className="" />
+                <DialogFooter>
+                  <Button type="submit">Save changes</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 p-4">

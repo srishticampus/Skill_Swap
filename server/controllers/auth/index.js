@@ -6,6 +6,8 @@ import { check, validationResult } from "express-validator";
 import User from "../../models/user.js";
 import nodemailer from 'nodemailer';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 // Multer configuration
 const storage = multer.memoryStorage(); // Store the file in memory
@@ -78,6 +80,21 @@ router.post(
         gender,
         lastLogin: Date.now() // added lastLogin here
       });
+
+      // Handle profile picture upload
+      if (req.file) {
+        const profilePicFilename = `${Date.now()}-${req.file.originalname}`;
+        const profilePicPath = path.join('uploads', profilePicFilename);
+
+        // Ensure the 'uploads' directory exists
+        if (!fs.existsSync('uploads')) {
+          fs.mkdirSync('uploads');
+        }
+
+        // Write the file to the uploads directory
+        fs.writeFileSync(profilePicPath, req.file.buffer);
+        user.profilePicture = profilePicPath; // Store the path in the user model
+      }
 
       const salt = await bcrypt.genSalt(10);
 
@@ -211,7 +228,7 @@ router.post(
   }
 );
 
-// @route   POST api/forgot-password
+// @route   POST api/auth/forgot-password
 // @desc    Send password reset email
 // @access  Public
 router.post(
@@ -288,7 +305,8 @@ router.post(
 router.get("/profile", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
-    res.json(user);
+    const profilePictureUrl = user.profilePicture ? `${user.profilePicture}` : null;
+    res.json({...user.toObject(), profilePictureUrl});
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -301,9 +319,9 @@ router.get("/profile", auth, async (req, res) => {
 router.post(
   "/update-profile",
   auth,
+  upload.single('profilePic'), // Use multer middleware to handle file upload
   [
-    check("firstName", "First Name is required").not().isEmpty(),
-    check("lastName", "Last Name is required").not().isEmpty(),
+    check("name", "Name is required").not().isEmpty(),
     check("email", "Please include a valid email").isEmail(),
     check("phone", "Phone number is required").not().isEmpty(),
     check("country", "Country is required").not().isEmpty(),
@@ -316,7 +334,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { firstName, lastName, email, phone, country, city, gender, profilePicture } = req.body;
+    const { name, email, phone, country, city, gender } = req.body;
 
     try {
       const user = await User.findById(req.user.id);
@@ -326,13 +344,27 @@ router.post(
       }
 
       // Update user fields
-      user.name = `${firstName} ${lastName}`;
+      user.name = name;
       user.email = email;
       user.phone = phone;
       user.country = country;
       user.city = city;
       user.gender = gender;
-      user.profilePicture = profilePicture;
+
+      // Handle profile picture upload
+      if (req.file) {
+        const profilePicFilename = `${Date.now()}-${req.file.originalname}`;
+        const profilePicPath = path.join('uploads', profilePicFilename);
+
+        // Ensure the 'uploads' directory exists
+        if (!fs.existsSync('uploads')) {
+          fs.mkdirSync('uploads');
+        }
+
+        // Write the file to the uploads directory
+        fs.writeFileSync(profilePicPath, req.file.buffer);
+        user.profilePicture = profilePicPath; // Store the path in the user model
+      }
 
       await user.save();
 

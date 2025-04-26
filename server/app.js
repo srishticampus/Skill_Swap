@@ -11,6 +11,7 @@ import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRe
 import { verifyToken } from "./controllers/auth/index.js";
 import notificationRoutes from "./controllers/notifications.js";
 import { submitContactForm, getAllContactForms, getContactFormById, deleteContactForm } from './controllers/contact.js';
+import path from "path";
 
 export const app = express();
 
@@ -27,6 +28,9 @@ const accessLogStream = createStream("access.log", {
 
 // setup the logger
 app.use(morgan("combined", { stream: accessLogStream }));
+
+// Serve static files from the 'uploads' directory
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get("/", (req, res, next) => {
   res.send("Expresssss");

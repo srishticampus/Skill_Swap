@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import profilepic from "@/assets/profile-pic.png";
 import { Input } from "@/components/ui/input";
 import axiosInstance from '@/api/axios';
+import { toast } from 'sonner';
 
-export default function EditProfile() {
+export default function EditProfile({setIsEditModalOpen}) {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     phone: '',
     country: '',
@@ -64,9 +64,21 @@ export default function EditProfile() {
     if (Object.keys(validationErrors).length === 0) {
       // Form is valid, submit data
       try {
-        const response = await axiosInstance.post('/api/auth/update-profile', formData);
-        console.log('Profile updated successfully:', response.data);
-        // Optionally, update the profile data in the parent component or context
+        const formDataToSend = new FormData();
+        for (const key in formData) {
+          formDataToSend.append(key, formData[key]);
+        }
+        const response = await axiosInstance.post('/api/auth/update-profile', formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        setIsEditModalOpen(false);
+        toast.success(
+          "Profile updated successfully!",
+          {description: "Your profile has been updated."},
+        )
+
       } catch (error) {
         console.error('Error updating profile:', error);
       }
@@ -76,11 +88,8 @@ export default function EditProfile() {
   const validateForm = (data) => {
     const errors = {};
 
-    if (!data.firstName) {
-      errors.firstName = 'First name is required';
-    }
-    if (!data.lastName) {
-      errors.lastName = 'Last name is required';
+    if (!data.name) {
+      errors.name = 'Name is required';
     }
     if (!data.email) {
       errors.email = 'Email is required';
@@ -116,15 +125,10 @@ export default function EditProfile() {
         <input type="file" accept="image/*" onChange={handleProfilePicChange} className='hidden' />
         </label>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-            <label htmlFor="firstName" className="flex flex-col">
-                <span>First Name</span>
-                <Input type="text" name="firstName" id="firstName" value={formData.firstName} onChange={handleChange} />
-                {errors.firstName && <span className="text-red-500">{errors.firstName}</span>}
-            </label>
-            <label htmlFor="lastName" className="flex flex-col">
-                <span>Last Name</span>
-                <Input type="text" name="lastName" id="lastName" value={formData.lastName} onChange={handleChange} />
-                {errors.lastName && <span className="text-red-500">{errors.lastName}</span>}
+            <label htmlFor="name" className="flex flex-col">
+                <span>Name</span>
+                <Input type="text" name="name" id="name" value={formData.name} onChange={handleChange} />
+                {errors.name && <span className="text-red-500">{errors.name}</span>}
             </label>
             <label htmlFor="email" className="flex flex-col">
                 <span>Email</span>
@@ -164,7 +168,7 @@ export default function EditProfile() {
                 </div>
                 {errors.gender && <span className="text-red-500">{errors.gender}</span>}
             </div>
-            {/* <Button type="submit" className="sm:col-span-2">Update Profile</Button> */}
+            <Button type="submit" className="sm:col-span-2">Update Profile</Button>
         </form>
     </div>
   );
