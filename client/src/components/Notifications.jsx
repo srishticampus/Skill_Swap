@@ -14,6 +14,7 @@ const Notifications = ({ onNotificationRead }) => {
     const fetchNotifications = async () => {
       try {
         const response = await axiosInstance.get('/api/notifications');
+        console.log(response.data);
         setNotifications(response.data);
       } catch (error) {
         console.error('Error fetching notifications:', error);
@@ -46,7 +47,7 @@ const Notifications = ({ onNotificationRead }) => {
         <DropdownMenuItem>No notifications yet.</DropdownMenuItem>
       ) : (
         <>
-          {notifications.map(notification => (
+          {notifications?.map(notification => (
             <React.Fragment key={notification._id}>
               <DropdownMenuItem>
                 <div className="flex justify-between items-center">
