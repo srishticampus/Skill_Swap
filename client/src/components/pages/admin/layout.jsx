@@ -65,6 +65,11 @@ const items = [
     url: "/admin/mentor-requests",
     icon: Users // You can choose a more appropriate icon
   },
+  {
+    title: "Contact Submissions",
+    url: "/admin/contact-submissions",
+    icon: FileText // You can choose a more appropriate icon
+  },
 ];
 
 

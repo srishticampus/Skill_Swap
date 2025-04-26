@@ -19,6 +19,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MentorRequests from "./components/pages/admin/MentorRequests";
 import CategoryManagement from "./components/pages/admin/CategoryManagement";
+import ContactSubmissions from "./components/pages/admin/ContactSubmissions";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
           <Route path="/admin/user-management" element={<UserManagement />} />
           <Route path="/admin/mentor-requests" element={<MentorRequests />} />
           <Route path="/admin/categories" element={<CategoryManagement />} />
+          <Route path="/admin/contact-submissions" element={<ContactSubmissions />} />
         </Route>
       </Routes>
     </AuthProvider>

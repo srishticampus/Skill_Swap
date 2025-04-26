@@ -10,6 +10,7 @@ import { router as marketplaceRoutes } from "./controllers/marketplace/index.js"
 import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById } from './controllers/swap_request.js';
 import { verifyToken } from "./controllers/auth/index.js";
 import notificationRoutes from "./controllers/notifications.js";
+import { submitContactForm, getAllContactForms, getContactFormById, deleteContactForm } from './controllers/contact.js';
 
 export const app = express();
 
@@ -53,5 +54,14 @@ app.delete('/api/swap-requests/:id', verifyToken, deleteSwapRequestById);
 // Add profile update routes
 app.post("/api/auth/update-profile", authRoutes);
 app.post("/api/auth/update-technical", authRoutes);
+
+// Contact form routes
+app.post(
+  '/api/contact',
+  submitContactForm
+);
+app.get('/api/contact', verifyToken, getAllContactForms);
+app.get('/api/contact/:id', verifyToken, getContactFormById);
+app.delete('/api/contact/:id', verifyToken, deleteContactForm);
 
 if (import.meta.env.PROD) app.listen(import.meta.env.VITE_PORT || 4054);
