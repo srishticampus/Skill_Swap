@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import axiosInstance from '@/api/axios';
 import { toast } from 'sonner';
 
-export default function EditProfile({setIsEditModalOpen}) {
+export default function EditProfile({setIsEditModalOpen, onProfileUpdate}) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,7 +22,6 @@ export default function EditProfile({setIsEditModalOpen}) {
   const [profilePicPreview, setProfilePicPreview] = useState(profilepic);
 
   useEffect(() => {
-    // Simulate fetching user data. Replace with your actual data fetching logic.
     const fetchUserData = async () => {
       try {
         const response = await axiosInstance.get('/api/auth/profile');
@@ -68,6 +67,7 @@ export default function EditProfile({setIsEditModalOpen}) {
         for (const key in formData) {
           formDataToSend.append(key, formData[key]);
         }
+
         const response = await axiosInstance.post('/api/auth/update-profile', formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -78,6 +78,9 @@ export default function EditProfile({setIsEditModalOpen}) {
           "Profile updated successfully!",
           {description: "Your profile has been updated."},
         )
+        if (onProfileUpdate) {
+          onProfileUpdate(); // Call the callback function
+        }
 
       } catch (error) {
         console.error('Error updating profile:', error);
@@ -168,6 +171,7 @@ export default function EditProfile({setIsEditModalOpen}) {
                 </div>
                 {errors.gender && <span className="text-red-500">{errors.gender}</span>}
             </div>
+
             <Button type="submit" className="sm:col-span-2">Update Profile</Button>
         </form>
     </div>

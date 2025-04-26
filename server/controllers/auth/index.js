@@ -382,19 +382,6 @@ router.post(
 
             fs.writeFileSync(resumePath, file.buffer);
             user.resume = resumePath;
-          } else if (file.fieldname.startsWith('certifications')) {
-            const certificationFilename = `${Date.now()}-${file.originalname}`;
-            const certificationPath = path.join('uploads', certificationFilename);
-
-            if (!fs.existsSync('uploads')) {
-              fs.mkdirSync('uploads');
-            }
-
-            fs.writeFileSync(certificationPath, file.buffer);
-            if (!user.certifications) {
-              user.certifications = [];
-            }
-            user.certifications.push(certificationPath);
           }
         });
       }
@@ -421,9 +408,96 @@ router.post(
         user.availability = req.body.availability;
       }
 
+
       await user.save();
 
       res.json({ msg: "Technical information updated successfully" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+    }
+  }
+);
+
+// @route   POST api/auth/add-certification
+// @desc    Add a new certification to the user
+// @access  Private
+router.post(
+  "/add-certification",
+  auth,
+  upload.single('certificationFile'),
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id);
+
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+      }
+
+      let certificationPath = null;
+
+      if (req.file) {
+        // Handle file upload
+        const certificationFilename = `${Date.now()}-${req.file.originalname}`;
+        certificationPath = path.join('uploads', certificationFilename);
+
+        if (!fs.existsSync('uploads')) {
+          fs.mkdirSync('uploads');
+        }
+
+        fs.writeFileSync(certificationPath, req.file.buffer);
+      } else if (req.body.certificationURL) {
+        // Handle URL
+        certificationPath = req.body.certificationURL;
+      } else if (req.body.certificationText) {
+        // Handle plain text
+        certificationPath = req.body.certificationText;
+      } else {
+        return res.status(400).json({ msg: "No certification data provided" });
+      }
+
+      if (!user.certifications) {
+        user.certifications = [];
+      }
+
+      user.certifications.push(certificationPath);
+      await user.save();
+
+      res.json({ msg: "Certification added successfully" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+    }
+  }
+);
+
+// @route   DELETE api/auth/delete-certification
+// @desc    Delete a user certification
+// @access  Private
+router.delete(
+  "/delete-certification",
+  auth,
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id);
+
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+      }
+
+      const { certification } = req.body;
+
+      if (!user.certifications) {
+        return res.status(400).json({ msg: "No certifications found for this user" });
+      }
+
+      user.certifications = user.certifications.filter(
+        (cert) => cert !== certification
+      );
+
+      await user.save();
+
+      res.json({ msg: "Certification deleted successfully" });
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server error");

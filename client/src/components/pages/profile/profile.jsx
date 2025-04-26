@@ -29,9 +29,10 @@ import {
   Clock,
   List,
   MessageSquare,
-  Edit
+  Edit,
+  Trash2
 } from "lucide-react"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -52,32 +53,45 @@ import EditTechnicalInfo from "./edit-technical";
 import { useAuth } from "@/context/AuthContext";
 import axiosInstance from '@/api/axios';
 import { toast } from "sonner"
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 
 const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isTechModalOpen, setIsTechModalOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [isMentorRequestModalOpen, setIsMentorRequestModalOpen] = useState(false);
   const [mentorRequestText, setMentorRequestText] = useState("");
+  const [isAddCertificationModalOpen, setIsAddCertificationModalOpen] = useState(false);
+  const [certificationType, setCertificationType] = useState("text");
+  const [certificationValue, setCertificationValue] = useState("");
+  const [certificationFile, setCertificationFile] = useState(null);
 
+
+  const fetchProfileData = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get('/api/auth/profile');
+
+      if (response.status !== 200) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      setProfileData(response.data);
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        const response = await axiosInstance.get('/api/auth/profile');
-
-        if (response.status !== 200) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        setProfileData(response.data);
-      } catch (error) {
-        console.error('Error fetching profile data:', error);
-      }
-    };
-
     fetchProfileData();
-  }, []);
+  }, [fetchProfileData]);
 
   const openEditModal = () => {
     setIsEditModalOpen(true);
@@ -115,6 +129,63 @@ const ProfilePage = () => {
     }
   };
 
+  const handleDeleteCertification = async (cert) => {
+    try {
+      await axiosInstance.delete('/api/auth/delete-certification', {
+        data: { certification: cert },
+      });
+
+      // Update profile data after successful deletion
+      const updatedCertifications = profileData.certifications.filter(c => c !== cert);
+      setProfileData({ ...profileData, certifications: updatedCertifications });
+
+      toast.success("Certification deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting certification:", error);
+      toast.error("Failed to delete certification.");
+    }
+  };
+
+  const handleAddCertificationOpen = () => {
+    setIsAddCertificationModalOpen(true);
+  };
+
+  const handleAddCertificationClose = () => {
+    setIsAddCertificationModalOpen(false);
+    setCertificationType("text");
+    setCertificationValue("");
+    setCertificationFile(null);
+  };
+
+  const handleAddCertificationSubmit = async () => {
+    try {
+      const formData = new FormData();
+      if (certificationType === "file") {
+        formData.append("certificationFile", certificationFile);
+      } else if (certificationType === "url") {
+        formData.append("certificationURL", certificationValue);
+      } else {
+        formData.append("certificationText", certificationValue);
+      }
+
+      await axiosInstance.post('/api/auth/add-certification', formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // Refresh profile data
+      fetchProfileData();
+
+      toast.success("Certification added successfully!");
+      handleAddCertificationClose();
+    } catch (error) {
+      console.error("Error adding certification:", error);
+      toast.error("Failed to add certification.");
+    }
+  };
+
+
   if (!profileData) {
     return <div>Loading...</div>;
   }
@@ -143,7 +214,7 @@ const ProfilePage = () => {
                         Make changes to your profile here.
                       </DialogDescription>
                     </DialogHeader>
-                    <EditProfile setIsEditModalOpen={setIsEditModalOpen} />
+                    <EditProfile setIsEditModalOpen={setIsEditModalOpen} onProfileUpdate={fetchProfileData} />
                     <DialogFooter>
                       <Button type="submit">Save changes</Button>
                     </DialogFooter>
@@ -237,7 +308,7 @@ const ProfilePage = () => {
         <CardHeader>
           <div className="flex items-center justify-start gap-3">
             <CardTitle className="text-primary text-xl">Technical Information</CardTitle>
-            <Dialog>
+            <Dialog open={isTechModalOpen} onOpenChange={setIsTechModalOpen}>
               <DialogTrigger asChild>
                 <Edit className="h-6 w-6 text-primary cursor-pointer" />
               </DialogTrigger>
@@ -248,9 +319,74 @@ const ProfilePage = () => {
                     Make changes to your profile here.
                   </DialogDescription>
                 </DialogHeader>
-                <EditTechnicalInfo className="" />
-                <DialogFooter>
+                <EditTechnicalInfo className="" setIsTechModalOpen={setIsTechModalOpen} onProfileUpdate={fetchProfileData} />
+                {/* <DialogFooter>
                   <Button type="submit">Save changes</Button>
+                </DialogFooter> */}
+              </DialogContent>
+            </Dialog>
+            <Dialog open={isAddCertificationModalOpen} onOpenChange={setIsAddCertificationModalOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" onClick={handleAddCertificationOpen}>Add Certification</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add Certification</DialogTitle>
+                  <DialogDescription>
+                    Choose the type and enter the details of the certification.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="certification-type">Type</Label>
+                    <Select value={certificationType} onValueChange={setCertificationType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="url">URL</SelectItem>
+                        <SelectItem value="file">File</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {certificationType === "text" && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="certification-text">Text</Label>
+                      <Input
+                        type="text"
+                        id="certification-text"
+                        value={certificationValue}
+                        onChange={(e) => setCertificationValue(e.target.value)}
+                      />
+                    </div>
+                  )}
+                  {certificationType === "url" && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="certification-url">URL</Label>
+                      <Input
+                        type="url"
+                        id="certification-url"
+                        value={certificationValue}
+                        onChange={(e) => setCertificationValue(e.target.value)}
+                      />
+                    </div>
+                  )}
+                  {certificationType === "file" && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="certification-file">File</Label>
+                      <Input
+                        type="file"
+                        id="certification-file"
+                        onChange={(e) => setCertificationFile(e.target.files[0])}
+                      />
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button type="button" onClick={handleAddCertificationSubmit}>
+                    Add Certification
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -312,22 +448,23 @@ const ProfilePage = () => {
               </div>
               <ul className="list-disc list-inside">
                 {profileData.certifications?.map((cert, index) => (
-                  cert.startsWith("uploads/") ? (
-                    <li key={index}>
+                  <li key={index} className="flex items-center justify-between">
+                    {cert.startsWith("uploads/") ? (
                       <a
                         href={`${import.meta.env.VITE_API_URL}/${cert}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-primary"
                       >
-                        {
-                          cert.split("/")[1].split("-")[1]
-                        }
+                        {cert.split("/")[1].split("-")[1]}
                       </a>
-                    </li>
-                  ) : (
-                    <li key={index}>{cert}</li>
-                  )
+                    ) : (
+                      <span>{cert}</span>
+                    )}
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteCertification(cert)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </li>
                 ))}
               </ul>
             </div>
