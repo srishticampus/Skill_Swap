@@ -42,7 +42,7 @@ const Notifications = ({ onNotificationRead }) => {
 
   return (
     <>
-      {notifications.length === 0 ? (
+      {!notifications || notifications.length === 0 ? (
         <DropdownMenuItem>No notifications yet.</DropdownMenuItem>
       ) : (
         <>
