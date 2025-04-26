@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import herobg from "./bg.png";
-import axiosInstance from '../../api/axios';
+import axiosInstance from '../../../api/axios';
 
 const Contact = () => {
   const [formData, setFormData] = useState({

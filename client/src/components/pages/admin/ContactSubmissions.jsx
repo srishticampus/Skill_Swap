@@ -52,6 +52,9 @@ const ContactSubmissions = () => {
   }
 
   return (
+    <main className="flex-1 px-6 pb-6">
+    <div className="bg-white rounded-lg h-full p-6">
+      <h2 className="text-2xl font-semibold mb-4">Category Management</h2>
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-semibold mb-6">Contact Form Submissions</h1>
       <Table>
@@ -87,6 +90,8 @@ const ContactSubmissions = () => {
         </TableFooter>
       </Table>
     </div>
+    </div>
+    </main>
   );
 };
 
