@@ -186,7 +186,7 @@ export default function Signup() {
         {errors.api && <span className="text-red-500">{errors.api}</span>} {/* Display API error */}
         <Button type="submit" className="sm:col-span-2">Sign Up</Button>
       </form>
-      <p>Already have an account? <Link href="/login" className="underline">Login</Link></p>
+      <p>Already have an account? <Link to="/login" className="underline">Login</Link></p>
     </main>
   );
 }

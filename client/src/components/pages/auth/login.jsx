@@ -95,7 +95,7 @@ export default function Login() {
         <Button type="submit">Login</Button>
       </form>
       <div className="flex flex-col items-center gap-2">
-        <p>Don't have an account? <Link href="/signup" className="underline">Sign Up</Link></p>
+        <p>Don't have an account? <Link to="/signup" className="underline">Sign Up</Link></p>
       </div>
     </main>
   );
