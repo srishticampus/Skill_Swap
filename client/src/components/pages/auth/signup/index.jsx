@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from 'react-router';
 import AuthContext from '@/context/AuthContext';
 import axiosInstance from '@/api/axios';
+import { Link } from 'react-router';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
