@@ -27,6 +27,8 @@ const Notifications = ({ onNotificationRead }) => {
     try {
       await axiosInstance.put(`/api/notifications/${notificationId}/read`);
       // Update the notification in the state
+      if(!notifications) return;
+      if(!notifications.length) return;
       setNotifications(notifications.map(notification =>
         notification._id === notificationId ? { ...notification, read: true } : notification
       ));

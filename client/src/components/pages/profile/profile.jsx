@@ -125,7 +125,7 @@ const ProfilePage = () => {
           <div className="flex flex-col md:flex-row items-center gap-8 mb-4 px-8">
             <Avatar className="h-40 w-40 md:h-64 md:w-64">
               <AvatarImage src={profileData.profilePicture || pfp} alt={profileData.name} />
-              <AvatarFallback>{profileData.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{profileData?.name?.charAt(0) || 'N'}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-start w-full">
               <div className="flex items-center justify-start gap-3">
