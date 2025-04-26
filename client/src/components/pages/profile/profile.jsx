@@ -263,7 +263,7 @@ const ProfilePage = () => {
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">Resume</p>
               </div>
-              <a href={`/${profileData.resume}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-500">
+              <a href={`${import.meta.env.VITE_API_URL}/${profileData.resume}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-500">
                 {profileData.resume}
               </a>
             </div>
@@ -312,7 +312,22 @@ const ProfilePage = () => {
               </div>
               <ul className="list-disc list-inside">
                 {profileData.certifications?.map((cert, index) => (
-                  <li key={index}>{cert}</li>
+                  cert.startsWith("uploads/") ? (
+                    <li key={index}>
+                      <a
+                        href={`${import.meta.env.VITE_API_URL}/${cert}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary"
+                      >
+                        {
+                          cert.split("/")[1].split("-")[1]
+                        }
+                      </a>
+                    </li>
+                  ) : (
+                    <li key={index}>{cert}</li>
+                  )
                 ))}
               </ul>
             </div>

@@ -77,7 +77,23 @@ export default function EditTechnicalInfo({ className }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post('/api/auth/update-technical', formData);
+      const formDataToSend = new FormData();
+      for (const key in formData) {
+        if (key === 'certifications') {
+          formData.certifications.forEach((certification, index) => {
+            for (const certKey in certification) {
+              formDataToSend.append(`certifications[${index}][${certKey}]`, certification[certKey]);
+            }
+          });
+        } else {
+          formDataToSend.append(key, formData[key]);
+        }
+      }
+      const response = await axiosInstance.post('/api/auth/update-technical', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       console.log('Technical information updated successfully:', response.data);
       // Optionally, update the profile data in the parent component or context
     } catch (error) {
@@ -180,7 +196,7 @@ export default function EditTechnicalInfo({ className }) {
               <Button type="button" onClick={addCertification} variant="outline" className="w-min mx-auto">Add Certification</Button>
             </div>
 
-          {/* <Button type="submit" className="col-span-2">Update</Button> */}
+          <Button type="submit" className="col-span-2">Update</Button>
         </form>
       </div>
   );

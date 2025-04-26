@@ -15,18 +15,14 @@ const upload = multer({ storage: storage });
 
 // Middleware function to verify JWT token
 export const auth = (req, res, next) => {
-  // Get token from header
   const token = req.header("x-auth-token");
 
-  // Check if not token
   if (!token) {
     return res.status(401).json({ msg: "No token, authorization denied" });
   }
 
-  // Verify token
   try {
     const decoded = jwt.verify(token, import.meta.env.VITE_JWT_SECRET);
-
     req.user = decoded.user;
     next();
   } catch (err) {
@@ -36,13 +32,12 @@ export const auth = (req, res, next) => {
 
 export const verifyToken = auth;
 
-
 // @route   POST api/auth/signup
 // @desc    Register user
 // @access  Public
 router.post(
   "/signup",
-  upload.single('profilePic'), // Use multer middleware to handle file upload
+  upload.single('profilePic'),
   [
     check("firstName", "First Name is required").not().isEmpty(),
     check("lastName", "Last Name is required").not().isEmpty(),
@@ -78,28 +73,23 @@ router.post(
         country,
         city,
         gender,
-        lastLogin: Date.now() // added lastLogin here
+        lastLogin: Date.now()
       });
 
-      // Handle profile picture upload
       if (req.file) {
         const profilePicFilename = `${Date.now()}-${req.file.originalname}`;
         const profilePicPath = path.join('uploads', profilePicFilename);
 
-        // Ensure the 'uploads' directory exists
         if (!fs.existsSync('uploads')) {
           fs.mkdirSync('uploads');
         }
 
-        // Write the file to the uploads directory
         fs.writeFileSync(profilePicPath, req.file.buffer);
-        user.profilePicture = profilePicPath; // Store the path in the user model
+        user.profilePicture = profilePicPath;
       }
 
       const salt = await bcrypt.genSalt(10);
-
       user.password = await bcrypt.hash(newPassword, salt);
-
       await user.save();
 
       const payload = {
@@ -146,11 +136,9 @@ router.post(
       let user = await User.findOne({ email });
 
       if (!user) {
-        // Check for admin user
         if (email === "admin@admin.com") {
           const isMatch = password === "admin";
           if (isMatch) {
-            // Create a new admin user
             user = new User({
               name: "Admin User",
               email: "admin@admin.com",
@@ -162,7 +150,6 @@ router.post(
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash("admin", salt);
             user.isAdmin = true;
-
             await user.save();
 
             const payload = {
@@ -178,7 +165,7 @@ router.post(
               { expiresIn: 360000 },
               (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, isAdmin: true } }); // Modified response
+                res.json({ token, user: { id: user.id, isAdmin: true } });
               }
             );
             return;
@@ -196,14 +183,14 @@ router.post(
           .status(400)
           .json({ errors: [{ msg: "Invalid Credentials" }] });
       }
-      if(user.email === "admin@admin.com") {
-        // set isAdmin to true
+
+      if (user.email === "admin@admin.com") {
         user.isAdmin = true;
         await user.save();
       }
 
-      user.lastLogin = Date.now(); // update lastLogin
-      await user.save(); // save the updated user
+      user.lastLogin = Date.now();
+      await user.save();
 
       const payload = {
         user: {
@@ -218,7 +205,7 @@ router.post(
         { expiresIn: 360000 },
         (err, token) => {
           if (err) throw err;
-          res.json({ token, user: { id: user.id, isAdmin: user.isAdmin || false } }); // Modified response
+          res.json({ token, user: { id: user.id, isAdmin: user.isAdmin || false } });
         }
       );
     } catch (err) {
@@ -250,24 +237,21 @@ router.post(
       if (!user) {
         return res
           .status(200)
-          .json({ msg: "If an account exists with that email, we've sent password reset instructions to your inbox." }); // Don't reveal that the user doesn't exist
+          .json({ msg: "If an account exists with that email, we've sent password reset instructions to your inbox." });
       }
 
-      // Generate password reset token
       const resetToken = jwt.sign({ userId: user._id }, import.meta.env.VITE_JWT_SECRET, { expiresIn: '1h' });
 
-      // Save reset token to user model
       user.resetPasswordToken = resetToken;
-      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+      user.resetPasswordExpires = Date.now() + 3600000;
       await user.save();
 
-      // Send email with reset token
       const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
         auth: {
-            user: import.meta.env.VITE_EMAIL,
-            pass: import.meta.env.VITE_PASSWORD
+          user: import.meta.env.VITE_EMAIL,
+          pass: import.meta.env.VITE_PASSWORD
         }
       });
 
@@ -319,7 +303,7 @@ router.get("/profile", auth, async (req, res) => {
 router.post(
   "/update-profile",
   auth,
-  upload.single('profilePic'), // Use multer middleware to handle file upload
+  upload.single('profilePic'),
   [
     check("name", "Name is required").not().isEmpty(),
     check("email", "Please include a valid email").isEmail(),
@@ -343,7 +327,6 @@ router.post(
         return res.status(404).json({ msg: "User not found" });
       }
 
-      // Update user fields
       user.name = name;
       user.email = email;
       user.phone = phone;
@@ -351,23 +334,19 @@ router.post(
       user.city = city;
       user.gender = gender;
 
-      // Handle profile picture upload
       if (req.file) {
         const profilePicFilename = `${Date.now()}-${req.file.originalname}`;
         const profilePicPath = path.join('uploads', profilePicFilename);
 
-        // Ensure the 'uploads' directory exists
         if (!fs.existsSync('uploads')) {
           fs.mkdirSync('uploads');
         }
 
-        // Write the file to the uploads directory
         fs.writeFileSync(profilePicPath, req.file.buffer);
-        user.profilePicture = profilePicPath; // Store the path in the user model
+        user.profilePicture = profilePicPath;
       }
 
       await user.save();
-
       res.json({ msg: "Profile updated successfully" });
     } catch (err) {
       console.error(err.message);
@@ -382,6 +361,7 @@ router.post(
 router.post(
   "/update-technical",
   auth,
+  upload.any(),
   async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
@@ -390,10 +370,35 @@ router.post(
         return res.status(404).json({ msg: "User not found" });
       }
 
-      // Update user fields
-      if (req.body.resume) {
-        user.resume = req.body.resume;
+      if (req.files) {
+        req.files.forEach(file => {
+          if (file.fieldname === 'resume') {
+            const resumeFilename = `${Date.now()}-${file.originalname}`;
+            const resumePath = path.join('uploads', resumeFilename);
+
+            if (!fs.existsSync('uploads')) {
+              fs.mkdirSync('uploads');
+            }
+
+            fs.writeFileSync(resumePath, file.buffer);
+            user.resume = resumePath;
+          } else if (file.fieldname.startsWith('certifications')) {
+            const certificationFilename = `${Date.now()}-${file.originalname}`;
+            const certificationPath = path.join('uploads', certificationFilename);
+
+            if (!fs.existsSync('uploads')) {
+              fs.mkdirSync('uploads');
+            }
+
+            fs.writeFileSync(certificationPath, file.buffer);
+            if (!user.certifications) {
+              user.certifications = [];
+            }
+            user.certifications.push(certificationPath);
+          }
+        });
       }
+
       if (req.body.qualifications) {
         user.qualifications = req.body.qualifications;
       }
@@ -408,9 +413,6 @@ router.post(
       }
       if (req.body.serviceDescription) {
         user.serviceDescription = req.body.serviceDescription;
-      }
-      if (req.body.certifications) {
-        user.certifications = req.body.certifications;
       }
       if (req.body.responseTime) {
         user.responseTime = req.body.responseTime;
