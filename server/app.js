@@ -33,7 +33,7 @@ app.use(morgan("combined", { stream: accessLogStream }));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get("/", (req, res, next) => {
-  res.send("Expresssss");
+  res.send("Express API server. You may be looking for the client at <a href='"+import.meta.env.VITE_CLIENT_URL+"'>"+import.meta.env.VITE_CLIENT_URL+"</a>");
 });
 
 // Use authentication routes
@@ -55,9 +55,9 @@ app.get('/api/swap-requests/:id', getSwapRequestById);
 app.put('/api/swap-requests/:id', verifyToken, updateSwapRequestById);
 app.delete('/api/swap-requests/:id', verifyToken, deleteSwapRequestById);
 
-// Add profile update routes
-app.post("/api/auth/update-profile", authRoutes);
-app.post("/api/auth/update-technical", authRoutes);
+// Add profile update routes (already added above)
+// app.post("/api/auth/update-profile", authRoutes);
+// app.post("/api/auth/update-technical", authRoutes);
 
 // Contact form routes
 app.post(

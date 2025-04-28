@@ -24,7 +24,7 @@ export default function ForgotPassword() {
     // In a real application, you would send a request to your backend here
     // to initiate the password reset process. For example:
     try {
-      const response = await axiosInstance.post('/api/forgot-password', { email }, {
+      const response = await axiosInstance.post('/api/auth/forgot-password', { email }, {
         headers: {
           'Content-Type': 'application/json',
         },

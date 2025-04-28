@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EyeIcon, EyeOff } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useParams, useNavigate } from 'react-router';
+import axiosInstance from '@/api/axios';
 
 export default function ResetPassword() {
   const [formData, setFormData] = useState({
@@ -14,21 +14,36 @@ export default function ResetPassword() {
   const [errors, setErrors] = useState({});
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const { token } = useParams();
+  const navigate = useNavigate();
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      // Form is valid, submit data
-      console.log('Reset password data submitted:', formData);
-      // Add your submission logic here (e.g., API call)
+      try {
+        const response = await axiosInstance.post('/api/auth/reset-password', {
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          token: token,
+        });
+
+        if (response.status === 200) {
+          setResetSuccess(true);
+        } else {
+          setErrors({ general: response.data.msg || 'Failed to reset password.' });
+        }
+      } catch (error) {
+        setErrors({ general: 'Failed to connect to the server.' });
+      }
     }
   };
 
@@ -51,11 +66,22 @@ export default function ResetPassword() {
     return errors;
   };
 
+  if (resetSuccess) {
+    return (
+      <main className="container mx-3 flex flex-col items-center gap-4 my-20">
+        <h1 className="text-center text-primary text-3xl">Password Reset Successful!</h1>
+        <p>Your password has been successfully reset. You can now login with your new password.</p>
+        <Button onClick={() => navigate('/login')}>Login</Button>
+      </main>
+    );
+  }
+
   return (
     <main className="container mx-3 flex flex-col items-center gap-4 my-20">
       <h1 className="text-center text-primary text-3xl">Reset Password!</h1>
       <p>Enter your new password to reset.</p>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8 w-[80%] max-w-[400px]">
+        {errors.general && <span className="text-red-500">{errors.general}</span>}
         <label htmlFor="password" className="flex flex-col relative">
           <span>New Password</span>
           <Input type={passwordVisible ? "text" : "password"} name="password" id="password" value={formData.password} onChange={handleChange} />

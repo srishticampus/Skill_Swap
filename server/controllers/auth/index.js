@@ -283,6 +283,47 @@ router.post(
   }
 );
 
+// @route   POST api/auth/reset-password
+// @desc    Reset password with token
+// @access  Public
+router.post(
+  "/reset-password",
+  [
+    check("password", "Please enter a password with 6 or more characters").isLength({ min: 6 }),
+    check("confirmPassword", "Passwords do not match").custom((value, { req }) => value === req.body.password),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { password, confirmPassword, token } = req.body;
+
+    try {
+      const user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: Date.now() },
+      });
+
+      if (!user) {
+        return res.status(400).json({ msg: "Password reset token is invalid or has expired" });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+
+      res.json({ msg: "Password reset successfully" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server error");
+    }
+  }
+);
+
 // @route   GET api/auth/profile
 // @desc    Get user profile
 // @access  Private
