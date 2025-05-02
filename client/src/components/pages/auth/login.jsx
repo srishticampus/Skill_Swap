@@ -43,13 +43,17 @@ export default function Login() {
           if (userData && userData.isAdmin) {
             navigate('/admin'); // Redirect to admin page if user is admin
           } else {
-            navigate('/profile'); // Redirect to profile page after successful login
+            navigate('/'); // Redirect to home page after successful login
           }
         } else {
           setErrors({ api: response.data.message }); // Display error message from the API
         }
       } catch (error) {
-        setErrors({ api: 'An error occurred during login.' }); // Display generic error message
+        if (error.response && error.response.data && error.response.data.errors) {
+          setErrors({ api: error.response.data.errors[0].msg }); // Display specific error message from the API
+        } else {
+          setErrors({ api: 'An error occurred during login.' }); // Display generic error message
+        }
       }
     }
   };

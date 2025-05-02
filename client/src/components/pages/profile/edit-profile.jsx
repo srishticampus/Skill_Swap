@@ -101,12 +101,18 @@ export default function EditProfile({setIsEditModalOpen, onProfileUpdate}) {
     }
     if (!data.phone) {
         errors.phone = 'Phone number is required';
+    } else if (/^0/.test(data.phone)) {
+        errors.phone = 'Phone number cannot start with zero';
     }
     if (!data.country) {
         errors.country = 'Country is required';
+    } else if (/\d/.test(data.country)) {
+        errors.country = 'Country name cannot contain digits';
     }
     if (!data.city) {
         errors.city = 'City is required';
+    } else if (/\d/.test(data.city)) {
+        errors.city = 'City name cannot contain digits';
     }
     if (data.newPassword && data.newPassword.length < 6) {
         errors.newPassword = "Password must be at least 6 characters long";
@@ -127,7 +133,7 @@ export default function EditProfile({setIsEditModalOpen, onProfileUpdate}) {
         <img src={profilePicPreview} alt="upload profile pic" className="w-32 h-32 object-contain rounded-full" />
         <input type="file" accept="image/*" onChange={handleProfilePicChange} className='hidden' />
         </label>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full">
             <label htmlFor="name" className="flex flex-col">
                 <span>Name</span>
                 <Input type="text" name="name" id="name" value={formData.name} onChange={handleChange} />
@@ -145,7 +151,14 @@ export default function EditProfile({setIsEditModalOpen, onProfileUpdate}) {
             </label>
             <label htmlFor="country" className="flex flex-col">
                 <span>Country</span>
-                <Input type="text" name="country" id="country" value={formData.country} onChange={handleChange} />
+                <select name="country" id="country" value={formData.country} onChange={handleChange} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    <option value="">Select Country</option>
+                    <option value="USA">USA</option>
+                    <option value="Canada">Canada</option>
+                    <option value="UK">UK</option>
+                    <option value="Australia">Australia</option>
+                    {/* Add more countries as needed */}
+                </select>
                 {errors.country && <span className="text-red-500">{errors.country}</span>}
             </label>
             <label htmlFor="city" className="flex flex-col">

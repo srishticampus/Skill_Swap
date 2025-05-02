@@ -46,7 +46,6 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 
-import pfp from "@/assets/pfp.jpeg"
 import { Button } from "../../ui/button"
 import EditProfile from "./edit-profile";
 import EditTechnicalInfo from "./edit-technical";
@@ -197,8 +196,14 @@ const ProfilePage = () => {
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row items-center gap-8 mb-4 px-8">
             <Avatar className="h-40 w-40 md:h-64 md:w-64">
-              <AvatarImage src={profileData.profilePictureUrl ? `${import.meta.env.VITE_API_URL}/${profileData.profilePictureUrl}` : pfp} alt={profileData.name} />
-              <AvatarFallback>{profileData?.name?.charAt(0) || 'N'}</AvatarFallback>
+              <AvatarImage src={profileData.profilePictureUrl ? `${import.meta.env.VITE_API_URL}/${profileData.profilePictureUrl}` : undefined} alt={profileData.name} />
+              <AvatarFallback>
+                {profileData.profilePictureUrl ? (
+                  profileData?.name?.charAt(0) || 'N'
+                ) : (
+                  <User className="h-1/2 w-1/2" />
+                )}
+              </AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-start w-full">
               <div className="flex items-center justify-start gap-3">
@@ -215,9 +220,7 @@ const ProfilePage = () => {
                       </DialogDescription>
                     </DialogHeader>
                     <EditProfile setIsEditModalOpen={setIsEditModalOpen} onProfileUpdate={fetchProfileData} />
-                    <DialogFooter>
-                      <Button type="submit">Save changes</Button>
-                    </DialogFooter>
+                   
                   </DialogContent>
                 </Dialog>
 

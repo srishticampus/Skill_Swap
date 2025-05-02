@@ -43,9 +43,9 @@ router.post(
     check("lastName", "Last Name is required").not().isEmpty(),
     check("email", "Please include a valid email").isEmail(),
     check("newPassword", "Please enter a password with 6 or more characters").isLength({ min: 6 }),
-    check("phone", "Phone number is required").not().isEmpty(),
-    check("country", "Country is required").not().isEmpty(),
-    check("city", "City is required").not().isEmpty(),
+    check("phone", "Phone number is required").not().isEmpty().matches(/^[1-9]\d*$/).withMessage("Phone number cannot start with zero"),
+    check("country", "Country is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("Country name cannot contain digits"),
+    check("city", "City is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("City name cannot contain digits"),
     check("gender", "Gender is required").not().isEmpty(),
   ],
   async (req, res) => {
@@ -173,7 +173,7 @@ router.post(
         }
         return res
           .status(400)
-          .json({ errors: [{ msg: "Invalid Credentials" }] });
+          .json({ errors: [{ msg: "User not found" }] });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
@@ -181,7 +181,7 @@ router.post(
       if (!isMatch) {
         return res
           .status(400)
-          .json({ errors: [{ msg: "Invalid Credentials" }] });
+          .json({ errors: [{ msg: "Incorrect password" }] });
       }
 
       if (user.email === "admin@admin.com") {
@@ -348,9 +348,9 @@ router.post(
   [
     check("name", "Name is required").not().isEmpty(),
     check("email", "Please include a valid email").isEmail(),
-    check("phone", "Phone number is required").not().isEmpty(),
-    check("country", "Country is required").not().isEmpty(),
-    check("city", "City is required").not().isEmpty(),
+    check("phone", "Phone number is required").not().isEmpty().matches(/^[1-9]\d*$/).withMessage("Phone number cannot start with zero"),
+    check("country", "Country is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("Country name cannot contain digits"),
+    check("city", "City is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("City name cannot contain digits"),
     check("gender", "Gender is required").not().isEmpty(),
   ],
   async (req, res) => {

@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { Button } from "@/components/ui/button";
 import profilepic from "@/assets/profile-pic.png";
 import { Input } from "@/components/ui/input";
+import { EyeIcon, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import AuthContext from '@/context/AuthContext';
 import axiosInstance from '@/api/axios';
@@ -23,6 +24,8 @@ export default function Signup() {
 
   const [errors, setErrors] = useState({});
   const [profilePicPreview, setProfilePicPreview] = useState(profilepic);
+  const [newPasswordVisible, setNewPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -95,12 +98,18 @@ export default function Signup() {
     }
     if (!data.phone) {
       errors.phone = 'Phone number is required';
+    } else if (/^0/.test(data.phone)) {
+      errors.phone = 'Phone number cannot start with zero';
     }
     if (!data.country) {
       errors.country = 'Country is required';
+    } else if (/\d/.test(data.country)) {
+      errors.country = 'Country name cannot contain digits';
     }
     if (!data.city) {
       errors.city = 'City is required';
+    } else if (/\d/.test(data.city)) {
+      errors.city = 'City name cannot contain digits';
     }
     if (!data.newPassword) {
       errors.newPassword = 'Please enter a password with 6 or more characters';
@@ -147,7 +156,14 @@ export default function Signup() {
         </label>
         <label htmlFor="country" className="flex flex-col">
           <span>Country</span>
-          <Input type="text" name="country" id="country" value={formData.country} onChange={handleChange} />
+          <select name="country" id="country" value={formData.country} onChange={handleChange} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+            <option value="">Select Country</option>
+            <option value="USA">USA</option>
+            <option value="Canada">Canada</option>
+            <option value="UK">UK</option>
+            <option value="Australia">Australia</option>
+            {/* Add more countries as needed */}
+          </select>
           {errors.country && <span className="text-red-500">{errors.country}</span>}
         </label>
         <label htmlFor="city" className="flex flex-col">
@@ -155,14 +171,28 @@ export default function Signup() {
           <Input type="text" name="city" id="city" value={formData.city} onChange={handleChange} />
           {errors.city && <span className="text-red-500">{errors.city}</span>}
         </label>
-        <label htmlFor="newPassword" className="flex flex-col">
+        <label htmlFor="newPassword" className="flex flex-col relative">
           <span>New Password</span>
-          <Input type="password" name="newPassword" id="newPassword" value={formData.newPassword} onChange={handleChange} />
+          <Input type={newPasswordVisible ? "text" : "password"} name="newPassword" id="newPassword" value={formData.newPassword} onChange={handleChange} />
+          <button
+            type="button"
+            onClick={() => setNewPasswordVisible(!newPasswordVisible)}
+            className="absolute right-3 top-[2.7rem] -translate-y-1/2"
+          >
+            {newPasswordVisible ? <EyeIcon className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          </button>
           {errors.newPassword && <span className="text-red-500">{errors.newPassword}</span>}
         </label>
-        <label htmlFor="confirmPassword" className="flex flex-col">
+        <label htmlFor="confirmPassword" className="flex flex-col relative">
           <span>Confirm Password</span>
-          <Input type="password" name="confirmPassword" id="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
+          <Input type={confirmPasswordVisible ? "text" : "password"} name="confirmPassword" id="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
+          <button
+            type="button"
+            onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+            className="absolute right-3 top-[2.7rem] -translate-y-1/2"
+          >
+            {confirmPasswordVisible ? <EyeIcon className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          </button>
           {errors.confirmPassword && <span className="text-red-500">{errors.confirmPassword}</span>}
         </label>
         <div className="flex flex-col sm:col-span-2">
