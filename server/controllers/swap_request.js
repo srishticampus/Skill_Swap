@@ -1,6 +1,7 @@
 import SwapRequest from '../models/swap_request.js';
+import Category from '../models/category.js'; // Import Category model
 import jwt from 'jsonwebtoken';
-
+ 
 // Create a new swap request
 export const createSwapRequest = async (req, res) => {
   try {
@@ -9,14 +10,36 @@ export const createSwapRequest = async (req, res) => {
     if (!token) {
       return res.status(401).json({ message: 'No token provided' });
     }
-
-    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+ 
+    jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => { // Use import.meta.env
       if (err) {
         return res.status(403).json({ message: 'Failed to authenticate token' });
       }
+ 
+      const userId = decoded.user.id; // Correctly access user ID from decoded token
 
-      const userId = decoded.id;
-      const newSwapRequest = new SwapRequest({ ...req.body, createdBy: userId });
+      let categoryObjectIds = [];
+      // Handle serviceCategory strings to ObjectIds conversion
+      if (req.body.serviceCategory && Array.isArray(req.body.serviceCategory)) {
+        try {
+          const categoryIds = req.body.serviceCategory; // Assuming frontend sends array of category _ids
+          // Find categories by their _id instead of value
+          const categories = await Category.find({ _id: { $in: categoryIds } });
+          categoryObjectIds = categories.map(category => category._id);
+        } catch (categoryError) {
+          console.error('Error converting serviceCategory strings to ObjectIds:', categoryError);
+          // If there's an error, categoryObjectIds remains an empty array
+        }
+      }
+
+      // Construct the data object explicitly to ensure correct types
+      const swapRequestData = {
+        ...req.body, // Copy other fields from req.body
+        serviceCategory: categoryObjectIds, // Use the converted ObjectIds array
+        createdBy: userId // Use the correctly extracted user ID
+      };
+
+      const newSwapRequest = new SwapRequest(swapRequestData);
       const savedSwapRequest = await newSwapRequest.save();
       res.status(201).json(savedSwapRequest);
     });
@@ -28,7 +51,8 @@ export const createSwapRequest = async (req, res) => {
 // Get all swap requests
 export const getAllSwapRequests = async (req, res) => {
   try {
-    const swapRequests = await SwapRequest.find().populate('createdBy');
+    // Populate both 'createdBy' and 'serviceCategory' fields
+    const swapRequests = await SwapRequest.find().populate('createdBy').populate('serviceCategory');
     res.status(200).json(swapRequests);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -56,8 +80,8 @@ export const updateSwapRequestById = async (req, res) => {
     if (!token) {
       return res.status(401).json({ message: 'No token provided' });
     }
-
-    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+ 
+    jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => { // Use import.meta.env
       if (err) {
         return res.status(403).json({ message: 'Failed to authenticate token' });
       }
@@ -94,8 +118,8 @@ export const deleteSwapRequestById = async (req, res) => {
     if (!token) {
       return res.status(401).json({ message: 'No token provided' });
     }
-
-    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+ 
+    jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => { // Use import.meta.env
       if (err) {
         return res.status(403).json({ message: 'Failed to authenticate token' });
       }

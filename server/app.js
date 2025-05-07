@@ -11,6 +11,7 @@ import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRe
 import { verifyToken } from "./controllers/auth/index.js";
 import notificationRoutes from "./controllers/notifications.js";
 import { submitContactForm, getAllContactForms, getContactFormById, deleteContactForm } from './controllers/contact.js';
+import categoryRoutes from './controllers/category.js'; // Import category routes
 import path from "path";
 
 export const app = express();
@@ -47,6 +48,9 @@ app.use("/api/marketplace", marketplaceRoutes);
 
 // Use notification routes
 app.use("/api/notifications", notificationRoutes);//I have also removed prefix on notificationRoutes
+ 
+// Use category routes
+app.use("/api/categories", categoryRoutes); // Route category routes
 
 // Swap Request routes
 app.post('/api/swap-requests', createSwapRequest);

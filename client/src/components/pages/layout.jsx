@@ -98,6 +98,16 @@ function Navbar() {
           <Link to="/contact" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/contact" ? "text-primary" : ""}`}>
             Contact
           </Link>
+          {user && (
+            <>
+              <Link to="/swap-request-form" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/swap-request-form" ? "text-primary" : ""}`}>
+                Request Swap
+              </Link>
+              <Link to="/swap-requests" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/swap-requests" ? "text-primary" : ""}`}>
+                My Swap Requests
+              </Link>
+            </>
+          )}
           {user?.isAdmin && (
             <Link to="/admin" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/admin" ? "text-primary" : ""}`}>
               Admin Dashboard

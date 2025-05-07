@@ -162,7 +162,7 @@ router.post(
             jwt.sign(
               payload,
               import.meta.env.VITE_JWT_SECRET,
-              { expiresIn: 360000 },
+              { expiresIn: 604800 }, // Set expiration to 7 days (in seconds)
               (err, token) => {
                 if (err) throw err;
                 res.json({ token, user: { id: user.id, isAdmin: true } });
@@ -202,7 +202,7 @@ router.post(
       jwt.sign(
         payload,
         import.meta.env.VITE_JWT_SECRET,
-        { expiresIn: 360000 },
+        { expiresIn: 604800 }, // Set expiration to 7 days (in seconds)
         (err, token) => {
           if (err) throw err;
           res.json({ token, user: { id: user.id, isAdmin: user.isAdmin || false } });
