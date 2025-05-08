@@ -82,6 +82,11 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  organization: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Organization',
+    default: null,
+  },
   date: {
     type: Date,
     default: Date.now,
