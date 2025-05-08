@@ -8,6 +8,10 @@ import Contact from "./components/pages/contact";
 import Dashboard from "./components/pages/admin/dashboard";
 import Signup from "./components/pages/auth/signup";
 import Login from "./components/pages/auth/login";
+import OrgLogin from "./components/pages/auth/OrgLogin";
+import OrgSignup from "./components/pages/auth/OrgSignup";
+import OrgForgotPassword from "./components/pages/OrgForgotPassword";
+import OrgResetPassword from "./components/pages/OrgResetPassword";
 import ForgotPassword from "./components/pages/forgot-password";
 import ResetPassword from "./components/pages/reset-password";
 import UpdatePersonalInfo from "./components/pages/update-personal-info";
@@ -35,8 +39,12 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/organization/signup" element={<OrgSignup />} />
+          <Route path="/organization/login" element={<OrgLogin />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/organization/forgot-password" element={<OrgForgotPassword />} />
+          <Route path="/organization/reset-password/:token" element={<OrgResetPassword />} />
           <Route path="/update-personal-info" element={<UpdatePersonalInfo />} />
           <Route path="/authlanding" element={<AuthLanding />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

@@ -5,6 +5,7 @@ import logger from "pino-http";
 import { createStream } from "rotating-file-stream";
 import db from "./db_driver";
 import { router as authRoutes } from "./controllers/auth/index.js";
+import { router as organizationAuthRoutes } from "./controllers/auth/organization.js"; // Import organization auth routes
 import { router as adminRoutes } from "./controllers/admin/index.js";
 import { router as marketplaceRoutes } from "./controllers/marketplace/index.js";
 import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById } from './controllers/swap_request.js';
@@ -39,6 +40,9 @@ app.get("/", (req, res, next) => {
 
 // Use authentication routes
 app.use("/api/auth", authRoutes);
+
+// Use organization authentication routes
+app.use("/api/organizations", organizationAuthRoutes);
 
 // Use admin routes
 app.use("/api/admin", adminRoutes);

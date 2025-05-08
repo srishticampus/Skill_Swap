@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router';
 import AuthContext from '@/context/AuthContext';
 import axiosInstance from '@/api/axios';
 
-export default function Login() {
+export default function OrgLogin() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -30,7 +30,7 @@ export default function Login() {
     if (Object.keys(validationErrors).length === 0) {
       // Form is valid, submit data
       try {
-        const response = await axiosInstance.post('/api/auth/login', formData, {
+        const response = await axiosInstance.post('/api/organizations/login', formData, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -38,13 +38,11 @@ export default function Login() {
 
         if (response.status === 200) {
           const token = response.data.token;
-          const userData = response.data.user; // Extract user data from response
-          login(userData, token); // Update AuthContext with user data and token
-          if (userData && userData.isAdmin) {
-            navigate('/admin'); // Redirect to admin page if user is admin
-          } else {
-            navigate('/'); // Redirect to home page after successful login
-          }
+          const orgData = response.data.organization; // Assuming the response contains organization data
+          // Need to update AuthContext to handle organization login
+          // For now, assuming login function can handle both user and org data
+          login(orgData, token, true); // Pass true to indicate organization login
+          navigate('/'); // Redirect to home page or organization dashboard after successful login
         } else {
           setErrors({ api: response.data.message }); // Display error message from the API
         }
@@ -52,7 +50,7 @@ export default function Login() {
         if (error.response && error.response.data && error.response.data.errors) {
           setErrors({ api: error.response.data.errors[0].msg }); // Display specific error message from the API
         } else {
-          setErrors({ api: 'An error occurred during login.' }); // Display generic error message
+          setErrors({ api: 'An error occurred during organization login.' }); // Display generic error message
         }
       }
     }
@@ -75,7 +73,7 @@ export default function Login() {
 
   return (
     <main className="container mx-3 md:mx-auto flex flex-col items-center gap-4 my-20">
-      <h1 className="text-center text-primary text-3xl">Login</h1>
+      <h1 className="text-center text-primary text-3xl">Organization Login</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8 w-[80%] max-w-[400px]">
         <label htmlFor="email" className="flex flex-col">
           <span>Email</span>
@@ -92,15 +90,14 @@ export default function Login() {
           >
             {passwordVisible ? <EyeIcon className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </button>
-          <Link to="/forgot-password" className="ms-auto mt-2 underline">Forgot Password?</Link>
+          <Link to="/organization/forgot-password" className="ms-auto mt-2 underline">Forgot Password?</Link>
           {errors.password && <span className="text-red-500">{errors.password}</span>}
         </label>
         {errors.api && <span className="text-red-500">{errors.api}</span>} {/* Display API error */}
         <Button type="submit">Login</Button>
       </form>
       <div className="flex flex-col items-center gap-2">
-        <p>Don't have an account? <Link to="/signup" className="underline">Sign Up</Link></p>
-        <p>Or, <Link to="/organization/login" className="underline">login as an organization</Link></p>
+        <p>Don't have an organization account? <Link to="/organization/signup" className="underline">Sign Up</Link></p>
       </div>
     </main>
   );

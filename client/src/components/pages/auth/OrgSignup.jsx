@@ -1,6 +1,5 @@
 import { useState, useContext } from 'react';
 import { Button } from "@/components/ui/button";
-import profilepic from "@/assets/profile-pic.png";
 import { Input } from "@/components/ui/input";
 import { EyeIcon, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router';
@@ -8,23 +7,22 @@ import AuthContext from '@/context/AuthContext';
 import axiosInstance from '@/api/axios';
 import { Link } from 'react-router';
 
-export default function Signup() {
+export default function OrgSignup() {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '', // Changed from organizationName to name
     email: '',
     phone: '',
     country: '',
     city: '',
-    newPassword: '',
+    password: '', // Changed from newPassword to password
     confirmPassword: '',
-    gender: '',
-    profilePic: null,
+    registrationNumber: '', // Added registrationNumber
+    address: '', // Added address
+    pincode: '', // Added pincode
   });
 
   const [errors, setErrors] = useState({});
-  const [profilePicPreview, setProfilePicPreview] = useState(profilepic);
-  const [newPasswordVisible, setNewPasswordVisible] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false); // Changed from newPasswordVisible to passwordVisible
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -33,18 +31,6 @@ export default function Signup() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  };
-
-  const handleProfilePicChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData({ ...formData, profilePic: file });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePicPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
 
@@ -56,22 +42,20 @@ export default function Signup() {
     if (Object.keys(validationErrors).length === 0) {
       // Form is valid, submit data
       try {
-        const formDataToSend = new FormData();
-        for (const key in formData) {
-          formDataToSend.append(key, formData[key]);
-        }
-
-        const response = await axiosInstance.post('/api/auth/signup', formDataToSend, {
+        const response = await axiosInstance.post('/api/organizations/register', formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json',
           },
         });
 
         if (response.status === 200) {
-          const userData = response.data;
-          login(userData,userData.token); // Update AuthContext with user data
+          const orgData = response.data.organization; // Assuming the response contains organization data
+          const token = response.data.token;
+          // Need to update AuthContext to handle organization login
+          // For now, assuming login function can handle both user and org data
+          login(orgData, token, true); // Pass true to indicate organization login
           setTimeout(() => {
-            navigate('/profile'); // Redirect to profile page after successful signup
+            navigate('/'); // Redirect to organization dashboard or home page after successful signup
           }, 1000);
         } else {
           // Check if the error response has the expected format
@@ -82,7 +66,7 @@ export default function Signup() {
           }
         }
       } catch (error) {
-        setErrors({ api: 'An error occurred during signup.' }); // Display generic error message
+        setErrors({ api: 'An error occurred during organization signup.' }); // Display generic error message
       }
     }
   };
@@ -90,11 +74,8 @@ export default function Signup() {
   const validateForm = (data) => {
     const errors = {};
 
-    if (!data.firstName) {
-      errors.firstName = 'First Name is required';
-    }
-    if (!data.lastName) {
-      errors.lastName = 'Last Name is required';
+    if (!data.name) { // Changed from organizationName to name
+      errors.name = 'Organization Name is required'; // Updated error message key
     }
     if (!data.email) {
       errors.email = 'Please include a valid email';
@@ -116,38 +97,33 @@ export default function Signup() {
     } else if (/\d/.test(data.city)) {
       errors.city = 'City name cannot contain digits';
     }
-    if (!data.newPassword) {
-      errors.newPassword = 'Please enter a password with 6 or more characters';
-    } else if (data.newPassword.length < 6) {
-      errors.newPassword = "Password must be at least 6 characters long";
+    if (!data.password) { // Changed from newPassword to password
+      errors.password = 'Please enter a password with 6 or more characters'; // Updated error message key
+    } else if (data.password.length < 6) {
+      errors.password = "Password must be at least 6 characters long"; // Updated error message key
     }
-    if (data.newPassword !== data.confirmPassword) {
+    if (data.password !== data.confirmPassword) { // Changed from newPassword to password
       errors.confirmPassword = 'Passwords do not match';
     }
-    if (!data.gender) {
-      errors.gender = 'Gender is required';
+    if (!data.address) { // Added validation for address
+      errors.address = 'Address is required';
     }
+    if (!data.pincode) { // Added validation for pincode
+      errors.pincode = 'Pincode is required';
+    }
+
 
     return errors;
   };
 
   return (
     <main className="container mx-3 md:mx-auto flex flex-col items-center gap-4 my-16">
-      <h1 className="text-center text-primary text-3xl">Sign Up!</h1>
-      <label className="flex flex-col items-center justify-center">
-        <img src={profilePicPreview} alt="upload profile pic" className="w-48 h-56 object-contain rounded-full" />
-        <input type="file" accept="image/*" onChange={handleProfilePicChange} className='hidden' />
-      </label>
+      <h1 className="text-center text-primary text-3xl">Organization Sign Up!</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-[80%] max-w-[600px]">
-        <label htmlFor="firstName" className="flex flex-col">
-          <span>First Name</span>
-          <Input type="text" name="firstName" id="firstName" value={formData.firstName} onChange={handleChange} />
-          {errors.firstName && <span className="text-red-500">{errors.firstName}</span>}
-        </label>
-        <label htmlFor="lastName" className="flex flex-col">
-          <span>Last Name</span>
-          <Input type="text" name="lastName" id="lastName" value={formData.lastName} onChange={handleChange} />
-          {errors.lastName && <span className="text-red-500">{errors.lastName}</span>}
+        <label htmlFor="name" className="flex flex-col sm:col-span-2"> {/* Changed htmlFor and name */}
+          <span>Organization Name</span>
+          <Input type="text" name="name" id="name" value={formData.name} onChange={handleChange} /> {/* Changed name and value */}
+          {errors.name && <span className="text-red-500">{errors.name}</span>} {/* Updated error key */}
         </label>
         <label htmlFor="email" className="flex flex-col">
           <span>Email</span>
@@ -176,17 +152,17 @@ export default function Signup() {
           <Input type="text" name="city" id="city" value={formData.city} onChange={handleChange} />
           {errors.city && <span className="text-red-500">{errors.city}</span>}
         </label>
-        <label htmlFor="newPassword" className="flex flex-col relative">
-          <span>New Password</span>
-          <Input type={newPasswordVisible ? "text" : "password"} name="newPassword" id="newPassword" value={formData.newPassword} onChange={handleChange} />
+        <label htmlFor="password" className="flex flex-col relative"> {/* Changed htmlFor and name */}
+          <span>Password</span> {/* Changed label text */}
+          <Input type={passwordVisible ? "text" : "password"} name="password" id="password" value={formData.password} onChange={handleChange} /> {/* Changed name and value, and type toggle state */}
           <button
             type="button"
-            onClick={() => setNewPasswordVisible(!newPasswordVisible)}
+            onClick={() => setPasswordVisible(!passwordVisible)} 
             className="absolute right-3 top-[2.7rem] -translate-y-1/2"
           >
-            {newPasswordVisible ? <EyeIcon className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            {passwordVisible ? <EyeIcon className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />} {/* Changed icon toggle state */}
           </button>
-          {errors.newPassword && <span className="text-red-500">{errors.newPassword}</span>}
+          {errors.password && <span className="text-red-500">{errors.password}</span>} {/* Updated error key */}
         </label>
         <label htmlFor="confirmPassword" className="flex flex-col relative">
           <span>Confirm Password</span>
@@ -200,31 +176,26 @@ export default function Signup() {
           </button>
           {errors.confirmPassword && <span className="text-red-500">{errors.confirmPassword}</span>}
         </label>
-        <div className="flex flex-col sm:col-span-2">
-          <span>Gender</span>
-          <div className="flex gap-4">
-            <label htmlFor="male" className="flex items-center">
-              <Input type="radio" id="male" name="gender" value="male" checked={formData.gender === 'male'} onChange={handleChange} />
-              <span className="ml-2">Male</span>
-            </label>
-            <label htmlFor="female" className="flex items-center">
-              <Input type="radio" id="female" name="gender" value="female" checked={formData.gender === 'female'} onChange={handleChange} />
-              <span className="ml-2">Female</span>
-            </label>
-            <label htmlFor="other" className="flex items-center">
-              <Input type="radio" id="other" name="gender" value="other" checked={formData.gender === 'other'} onChange={handleChange} />
-              <span className="ml-2">Other</span>
-            </label>
-          </div>
-          {errors.gender && <span className="text-red-500">{errors.gender}</span>}
-        </div>
-        {errors.api && <span className="text-red-500">{errors.api}</span>} {/* Display API error */}
+        {/* Added new fields for organization registration */}
+        <label htmlFor="registrationNumber" className="flex flex-col">
+          <span>Registration Number</span>
+          <Input type="text" name="registrationNumber" id="registrationNumber" value={formData.registrationNumber} onChange={handleChange} />
+          {errors.registrationNumber && <span className="text-red-500">{errors.registrationNumber}</span>}
+        </label>
+        <label htmlFor="address" className="flex flex-col">
+          <span>Address</span>
+          <Input type="text" name="address" id="address" value={formData.address} onChange={handleChange} />
+          {errors.address && <span className="text-red-500">{errors.address}</span>}
+        </label>
+        <label htmlFor="pincode" className="flex flex-col">
+          <span>Pincode</span>
+          <Input type="text" name="pincode" id="pincode" value={formData.pincode} onChange={handleChange} />
+          {errors.pincode && <span className="text-red-500">{errors.pincode}</span>}
+        </label>
+        {errors.api && <span className="text-red-500 sm:col-span-2">{errors.api}</span>} {/* Display API error */}
         <Button type="submit" className="sm:col-span-2">Sign Up</Button>
       </form>
-      <div className="flex flex-col items-center gap-2">
-        <p>Already have an account? <Link to="/login" className="underline">Login</Link></p>
-        <p>Or, <Link to="/organization/signup" className="underline">sign up as an organization</Link></p>
-      </div>
+      <p>Already have an organization account? <Link to="/organization/login" className="underline">Login</Link></p>
     </main>
   );
 }

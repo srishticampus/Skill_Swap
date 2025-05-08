@@ -4,7 +4,6 @@ const OrganizationSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
   email: {
     type: String,
@@ -17,7 +16,6 @@ const OrganizationSchema = new mongoose.Schema({
   },
   registrationNumber: {
     type: String,
-    required: true,
     unique: true,
   },
   address: {
