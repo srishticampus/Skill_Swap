@@ -100,6 +100,9 @@ function Navbar() {
           </Link>
           {user && (
             <>
+              <Link to="/exchange-skills" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/exchange-skills" ? "text-primary" : ""}`}>
+                Exchange Skills
+              </Link>
               <Link to="/swap-request-form" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/swap-request-form" ? "text-primary" : ""}`}>
                 Request Swap
               </Link>

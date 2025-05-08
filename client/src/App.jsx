@@ -20,9 +20,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import MentorRequests from "./components/pages/admin/MentorRequests";
 import CategoryManagement from "./components/pages/admin/CategoryManagement";
 import ContactSubmissions from "./components/pages/admin/ContactSubmissions";
-import SwapRequestForm from "./components/SwapRequestForm";
+import SwapRequestForm from "./components/pages/SwapRequestForm";
 import SwapRequests from "./components/pages/SwapRequests";
 import EditSwapRequest from "./components/pages/EditSwapRequest";
+import ExchangeSkills from "./components/pages/ExchangeSkills";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="/swap-request-form" element={<SwapRequestForm />} />
           <Route path="/swap-requests" element={<SwapRequests />} />
           <Route path="/edit-swap-request/:id" element={<EditSwapRequest />} />
+          <Route path="/exchange-skills" element={<ExchangeSkills />} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />

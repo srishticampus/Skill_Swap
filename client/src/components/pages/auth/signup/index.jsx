@@ -74,7 +74,12 @@ export default function Signup() {
             navigate('/profile'); // Redirect to profile page after successful signup
           }, 1000);
         } else {
-          setErrors({ api: response.data.message }); // Display error message from the API
+          // Check if the error response has the expected format
+          if (response.data && response.data.errors && response.data.errors.length > 0) {
+            setErrors({ api: response.data.errors[0].msg }); // Display the first error message from the API
+          } else {
+            setErrors({ api: 'An unexpected error occurred.' }); // Fallback generic error message
+          }
         }
       } catch (error) {
         setErrors({ api: 'An error occurred during signup.' }); // Display generic error message

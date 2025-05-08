@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { isNumberObject } from "util/types";
 
 // Multer configuration
 const storage = multer.memoryStorage(); // Store the file in memory
@@ -105,7 +106,7 @@ router.post(
         { expiresIn: 360000 },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({ user: { id: user.id, isAdmin: user.isAdmin || false },token });
         }
       );
     } catch (err) {

@@ -19,12 +19,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Skeleton } from './ui/skeleton';
+import { Skeleton } from '../ui/skeleton';
 import { cn } from "@/lib/utils"
 import { CalendarIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
-import { MultiSelect } from './multi-select';
-import axiosInstance from '../api/axios';
+import { MultiSelect } from '../multi-select';
+import axiosInstance from '../../api/axios';
 import { toast } from 'sonner';
 
 const FormSchema = z.object({
@@ -124,9 +124,9 @@ const [categories, setCategories] = useState([]); // State for fetched categorie
             render={({ field }) => {
               return (
                <FormItem>
-                 <FormLabel>Service Category</FormLabel>
+                 <FormLabel className="mt-0">Service Category</FormLabel>
                  {loadingCategories ? ( // Show skeleton while loading
-                   <Skeleton className="h-10 w-full" />
+                   <Skeleton className="h-5 w-full" />
                  ) : (
                  <MultiSelect
                    options={categories}
@@ -180,7 +180,8 @@ const [categories, setCategories] = useState([]); // State for fetched categorie
                   <Input
                     type="number"
                     placeholder="Enter years of experience"
-                    {...field}
+                    { ...form.register('yearsOfExperience', { valueAsNumber: true } ) } 
+                    // {...field}
                   />
                 </FormControl>
                 <FormMessage />
@@ -204,7 +205,7 @@ const [categories, setCategories] = useState([]); // State for fetched categorie
             control={form.control}
             name="deadline"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>Deadline</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -212,7 +213,7 @@ const [categories, setCategories] = useState([]); // State for fetched categorie
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
+                          " pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -231,7 +232,7 @@ const [categories, setCategories] = useState([]); // State for fetched categorie
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) =>
-                        date > new Date()
+                        date <= new Date()
                       }
                       initialFocus
                     />
@@ -241,8 +242,8 @@ const [categories, setCategories] = useState([]); // State for fetched categorie
               </FormItem>
             )}
           />
-          <div className="space-y-8"> {/* Container for Contact Details */}
-            <FormItem>
+          {/* <div className="space-y-8"> Container for Contact Details */}
+            <FormItem className="col-span-1 sm:col-span-2">
               <FormLabel>Contact Details</FormLabel> {/* Combined label */}
             </FormItem>
             <FormField
@@ -285,7 +286,7 @@ const [categories, setCategories] = useState([]); // State for fetched categorie
               )}
             />
           </div>
-        </div>
+        {/* </div> */}
         <Button type="submit">Submit</Button>
       </form>
     </Form>

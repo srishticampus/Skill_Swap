@@ -57,7 +57,7 @@ function EditSwapRequest() {
           serviceCategory: response.data.serviceCategory?.map(cat => cat._id) || [], // Set as array of IDs for MultiSelect
           serviceRequired: response.data.serviceRequired || '',
           serviceDescription: response.data.serviceDescription || '',
-          yearsOfExperience: response.data.yearsOfExperience || '',
+          yearsOfExperience: response.data.yearsOfExperience!=null?response.data.yearsOfExperience : "",
           preferredLocation: response.data.preferredLocation || '',
           deadline: response.data.deadline ? new Date(response.data.deadline).toISOString().split('T')[0] : '', // Format for date input
           contactDetails: response.data.createdBy?.email || '', // Adjust based on actual structure

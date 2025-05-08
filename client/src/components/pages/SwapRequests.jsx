@@ -19,8 +19,10 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from 'lucide-react';
 import axiosInstance from '../../api/axios';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext'; // Import useAuth hook
 
 function SwapRequests() {
+  const { user } = useAuth(); // Get the current user
   const [swapRequests, setSwapRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate(); // Initialize useNavigate
@@ -84,13 +86,16 @@ function SwapRequests() {
   ];
 
   useEffect(() => {
-    fetchSwapRequests();
-  }, []);
+      fetchSwapRequests();
+    
+  }, []); 
 
   const fetchSwapRequests = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/api/swap-requests');
+      // Fetch swap requests only for the current user
+      console.log(user)
+      const response = await axiosInstance.get(`/api/swap-requests?createdBy=${user.id}`);
       console.log('Fetched swap requests data:', response.data); // Log the fetched data
       setSwapRequests(response.data);
       toast.success('Swap requests loaded.');
