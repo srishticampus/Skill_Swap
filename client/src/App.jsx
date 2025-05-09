@@ -2,16 +2,21 @@ import { Route, Routes } from "react-router";
 
 import Landing from "./components/pages/landing";
 import AdminLayout from "./components/pages/admin/layout";
+import Organization from "./components/pages/organization/layout";
 import About from "./components/pages/about";
 import Layout from "./components/pages/layout";
 import Contact from "./components/pages/contact";
-import Dashboard from "./components/pages/admin/dashboard";
+import AdminDashboard from "./components/pages/admin/dashboard";
+import OrganizationDashboard from "./components/pages/organization/dashboard";
+import OrganizationProfile from "./components/pages/organization/profile";
+import OrganizationMembers from "./components/pages/organization/members";
+import MemberDetails from "./components/pages/organization/member-details";
 import Signup from "./components/pages/auth/signup";
 import Login from "./components/pages/auth/login";
 import OrgLogin from "./components/pages/auth/OrgLogin";
 import OrgSignup from "./components/pages/auth/OrgSignup";
-import OrgForgotPassword from "./components/pages/organization/OrgForgotPassword";
-import OrgResetPassword from "./components/pages/organization/OrgResetPassword";
+import OrgForgotPassword from "./components/pages/auth/OrgForgotPassword";
+import OrgResetPassword from "./components/pages/auth/OrgResetPassword";
 import ForgotPassword from "./components/pages/forgot-password";
 import ResetPassword from "./components/pages/reset-password";
 import UpdatePersonalInfo from "./components/pages/update-personal-info";
@@ -28,6 +33,10 @@ import SwapRequestForm from "./components/pages/SwapRequestForm";
 import SwapRequests from "./components/pages/SwapRequests";
 import EditSwapRequest from "./components/pages/EditSwapRequest";
 import ExchangeSkills from "./components/pages/ExchangeSkills";
+import AddMember from "./components/pages/organization/add-member";
+import ViewAllSwaps from "./components/pages/organization/ViewAllSwaps";
+import ViewReviews from "./components/pages/organization/ViewReviews";
+import Complaints from "./components/pages/organization/Complaints";
 
 function App() {
   return (
@@ -55,11 +64,21 @@ function App() {
           <Route path="/exchange-skills" element={<ExchangeSkills />} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-          <Route index element={<Dashboard />} />
+          <Route index element={<AdminDashboard />} />
           <Route path="/admin/user-management" element={<UserManagement />} />
           <Route path="/admin/mentor-requests" element={<MentorRequests />} />
           <Route path="/admin/categories" element={<CategoryManagement />} />
           <Route path="/admin/contact-submissions" element={<ContactSubmissions />} />
+        </Route>
+        <Route path="/organization" element={<Organization />}>
+          <Route index element={<OrganizationDashboard />} />
+          <Route path="/organization/profile" element={<OrganizationProfile />} />
+          <Route path="/organization/members" element={<OrganizationMembers />} />
+          <Route path="/organization/members/details/:id" element={<MemberDetails />} />
+          <Route path="/organization/members/add" element={<AddMember />} />
+          <Route path="/organization/swaps" element={<ViewAllSwaps />} />
+          <Route path="/organization/reviews" element={<ViewReviews />} />
+          <Route path="/organization/complaints" element={<Complaints />} />
         </Route>
       </Routes>
     </AuthProvider>
