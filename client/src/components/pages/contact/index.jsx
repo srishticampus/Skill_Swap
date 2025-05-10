@@ -102,7 +102,7 @@ const Contact = () => {
             </form>
             {/* Contact info */}
             <div className="flex flex-1 w-full flex-col justify-evenly gap-6 ml-6">
-              <div className="flex items-center gap-8 p-6 border border-[#ccc] rounded-2xl">
+              <a href="tel:+911234567890" className="flex items-center gap-8 p-6 border border-[#ccc] rounded-2xl no-underline text-current">
                 <div className="w-16 h-16 rounded-full border border-[#ccc] flex justify-center items-center">
                   <Phone />
                 </div>
@@ -111,8 +111,8 @@ const Contact = () => {
                   <p className="text-sm">Available Monday to Friday</p>
                   <p className="text-sm">9:00am to 5:00pm</p>
                 </div>
-              </div>
-              <div className="flex items-center gap-8 p-6 border border-[#ccc] rounded-2xl">
+              </a>
+              <a href="mailto:skillswap@gmail.com" className="flex items-center gap-8 p-6 border border-[#ccc] rounded-2xl no-underline text-current">
                 <div className="w-16 h-16 rounded-full border border-[#ccc] flex justify-center items-center">
                   <Mail />
                 </div>
@@ -122,8 +122,8 @@ const Contact = () => {
                     We will respond within 24 hours on weekdays.
                   </p>
                 </div>
-              </div>
-              <div className="flex items-center gap-8 p-6 border border-[#ccc] rounded-2xl">
+              </a>
+              <a href="https://www.google.com/maps/search/?api=1&query=Skill%20Swap%20Headquarters%2C%201234%20Avenue%2C%20Suite%20567" target="_blank" rel="noopener noreferrer" className="flex items-center gap-8 p-6 border border-[#ccc] rounded-2xl no-underline text-current">
                 <div className="w-16 h-16 rounded-full border border-[#ccc] flex justify-center items-center">
                   <MapPin />
                 </div>
@@ -132,7 +132,7 @@ const Contact = () => {
                     Skill Swap Headquarters, 1234 Avenue, Suite 567
                   </p>
                 </div>
-              </div>
+              </a>
             </div>
           </div>
         </section>
