@@ -42,7 +42,7 @@ export default function OrgLogin() {
           // Need to update AuthContext to handle organization login
           // For now, assuming login function can handle both user and org data
           login(orgData, token, true); // Pass true to indicate organization login
-          navigate('/'); // Redirect to home page or organization dashboard after successful login
+          navigate('/organization'); // Redirect to home page or organization dashboard after successful login
         } else {
           setErrors({ api: response.data.message }); // Display error message from the API
         }

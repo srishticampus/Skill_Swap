@@ -55,7 +55,7 @@ export default function OrgSignup() {
           // For now, assuming login function can handle both user and org data
           login(orgData, token, true); // Pass true to indicate organization login
           setTimeout(() => {
-            navigate('/'); // Redirect to organization dashboard or home page after successful signup
+            navigate('/organization'); // Redirect to organization dashboard or home page after successful signup
           }, 1000);
         } else {
           // Check if the error response has the expected format
@@ -157,7 +157,7 @@ export default function OrgSignup() {
           <Input type={passwordVisible ? "text" : "password"} name="password" id="password" value={formData.password} onChange={handleChange} /> {/* Changed name and value, and type toggle state */}
           <button
             type="button"
-            onClick={() => setPasswordVisible(!passwordVisible)} 
+            onClick={() => setPasswordVisible(!passwordVisible)}
             className="absolute right-3 top-[2.7rem] -translate-y-1/2"
           >
             {passwordVisible ? <EyeIcon className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />} {/* Changed icon toggle state */}
