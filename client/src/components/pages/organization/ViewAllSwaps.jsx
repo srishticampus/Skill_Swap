@@ -19,9 +19,40 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // Import Input for search bar
 import { Search } from 'lucide-react'; // Import Search icon
-import axiosInstance from '@/api/axios';
-import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+
+const placeholderSwaps = [
+  {
+    _id: 'placeholder1',
+    createdBy: { name: 'John Doe' },
+    serviceCategory: [{ name: 'Programming' }, { name: 'Design' }],
+    serviceTitle: 'React Component Help',
+    serviceDescription: 'Need help with building a complex React component.',
+    deadline: '2025-12-31T00:00:00.000Z',
+    requestedTo: { name: 'Jane Smith' },
+    status: 'Open',
+  },
+  {
+    _id: 'placeholder2',
+    createdBy: { name: 'Jane Smith' },
+    serviceCategory: [{ name: 'Writing' }],
+    serviceTitle: 'Blog Post Review',
+    serviceDescription: 'Review and edit a blog post about software engineering.',
+    deadline: '2025-11-15T00:00:00.000Z',
+    requestedTo: null, // Example of null requestedTo
+    status: 'Pending',
+  },
+  {
+    _id: 'placeholder3',
+    createdBy: { name: 'Peter Jones' },
+    serviceCategory: [{ name: 'Marketing' }],
+    serviceTitle: 'Social Media Strategy',
+    serviceDescription: 'Develop a social media strategy for a new product launch.',
+    deadline: '2026-01-31T00:00:00.000Z',
+    requestedTo: { name: 'John Doe' },
+    status: 'Completed',
+  },
+];
 
 function ViewAllSwaps() {
   const { user } = useAuth();
@@ -75,14 +106,11 @@ function ViewAllSwaps() {
   const fetchAllSwaps = async () => {
     try {
       setLoading(true);
-      // Fetch all swap requests for the organization
-      const response = await axiosInstance.get('/api/swap-requests'); // Assuming this endpoint fetches all swaps
-      console.log('Fetched all swaps data:', response.data);
-      setSwaps(response.data);
-      toast.success('All swaps loaded.');
+      // Use placeholder data instead of fetching from API
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+      setSwaps(placeholderSwaps);
     } catch (error) {
-      console.error('Error fetching all swaps:', error);
-      toast.error('Failed to load all swaps.');
+      console.error('Error setting placeholder swaps:', error);
     } finally {
       setLoading(false);
     }

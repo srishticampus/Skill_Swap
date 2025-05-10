@@ -13,6 +13,7 @@ import { verifyToken } from "./controllers/auth/index.js";
 import notificationRoutes from "./controllers/notifications.js";
 import { submitContactForm, getAllContactForms, getContactFormById, deleteContactForm } from './controllers/contact.js';
 import categoryRoutes from './controllers/category.js'; // Import category routes
+import organizationRoutes from './controllers/organization/index.js'; // Import organization routes
 import path from "path";
 
 export const app = express();
@@ -43,6 +44,8 @@ app.use("/api/auth", authRoutes);
 
 // Use organization authentication routes
 app.use("/api/organizations", organizationAuthRoutes);
+// Use organization routes
+app.use("/api/organizations",organizationRoutes)
 
 // Use admin routes
 app.use("/api/admin", adminRoutes);

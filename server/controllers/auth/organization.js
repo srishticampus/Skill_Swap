@@ -120,7 +120,7 @@ router.post(
 
       jwt.sign(
         payload,
-        process.env.JWT_SECRET, // Use process.env for environment variables
+        import.meta.env.VITE_JWT_SECRET, // Use process.env for environment variables
         { expiresIn: 604800 }, // Set expiration to 7 days (in seconds)
         (err, token) => {
           if (err) throw err;
