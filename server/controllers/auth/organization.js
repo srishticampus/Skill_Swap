@@ -46,7 +46,8 @@ router.post(
         registrationNumber,
         address,
         pincode,
-        lastLogin: Date.now()
+        lastLogin: Date.now(),
+        status: 'pending'
       });
 
       const salt = await bcrypt.genSalt(10);
