@@ -36,9 +36,6 @@ const Footer = () => {
               <Link to="/" className="hover:text-[#E54C00] transition">
                 Home
               </Link>
-              <Link to="/shop" className="hover:text-[#E54C00] transition">
-                Shop
-              </Link>
               <Link to="/about" className="hover:text-[#E54C00] transition">
                 About
               </Link>
@@ -50,7 +47,7 @@ const Footer = () => {
         </div>
         <div className="border-t border-white/20 mt-8 pt-4 text-center md:text-left">
           <p className="text-sm opacity-75">
-            &copy; 2025 PetConnect. All rights reserved.
+            &copy; 2025 Skill Swap. All rights reserved.
           </p>
         </div>
       </div>
