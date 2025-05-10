@@ -41,6 +41,11 @@ const items = [
     icon: Building2
   },
   {
+    title: "Organization Requests",
+    url: "/admin/organization-requests",
+    icon: Building2
+  },
+  {
     title: "Skill Swappers",
     url: "/admin/skill-swappers",
     icon: Users

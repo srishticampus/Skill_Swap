@@ -37,6 +37,7 @@ import AddMember from "./components/pages/organization/add-member";
 import ViewAllSwaps from "./components/pages/organization/ViewAllSwaps";
 import ViewReviews from "./components/pages/organization/ViewReviews";
 import Complaints from "./components/pages/organization/Complaints";
+import OrganizationRequests from "./components/pages/admin/OrganizationRequests";
 
 function App() {
   return (
@@ -69,6 +70,7 @@ function App() {
           <Route path="/admin/mentor-requests" element={<MentorRequests />} />
           <Route path="/admin/categories" element={<CategoryManagement />} />
           <Route path="/admin/contact-submissions" element={<ContactSubmissions />} />
+          <Route path="/admin/organization-requests" element={<OrganizationRequests />} />
         </Route>
         <Route path="/organization" element={<Organization />}>
           <Route index element={<OrganizationDashboard />} />
