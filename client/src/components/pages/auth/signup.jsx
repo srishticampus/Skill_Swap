@@ -66,8 +66,13 @@ export default function Signup() {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
+          // Allow 2xx and 4xx status codes to be handled
+          validateStatus: function (status) {
+            return status >= 200 && status < 300 || status >= 400 && status < 500;
+          },
         });
 
+        // Now check response.status here
         if (response.status === 200) {
           const userData = response.data;
           login(userData,userData.token); // Update AuthContext with user data
@@ -128,6 +133,10 @@ export default function Signup() {
     if (!data.gender) {
       errors.gender = 'Gender is required';
     }
+    if (!data.profilePic) {
+      errors.profilePic = 'Profile picture is required';
+    }
+
 
     return errors;
   };
@@ -138,6 +147,7 @@ export default function Signup() {
       <label className="flex flex-col items-center justify-center">
         <img src={profilePicPreview} alt="upload profile pic" className="w-48 h-56 object-contain rounded-full" />
         <input type="file" accept="image/*" onChange={handleProfilePicChange} className='hidden' />
+        {errors.profilePic && <span className="text-red-500">{errors.profilePic}</span>}
       </label>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-[80%] max-w-[600px]">
         <label htmlFor="firstName" className="flex flex-col">
