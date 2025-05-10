@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../../../api/axios"; // Assuming this path is correct
 import * as RechartsPrimitive from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,12 +11,57 @@ import {
 } from "@/components/ui/chart"; // Assuming this is the correct import path based on user's file path
 
 export default function Dashboard() {
-  // Placeholder data - replace with actual data fetching logic
+  const [totalSwaps, setTotalSwaps] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [requestsOverview, setRequestsOverview] = useState({
+    totalRequests: 0,
+    approvedRequests: 0,
+    pendingRequests: 0,
+  });
+
+  // Derived data for the chart based on fetched requestsOverview
   const organizationStatusData = [
-    { name: "total-requests", value: 33, label: "Total Requests", color: "#00c49f" }, // Green
-    { name: "approved-requests", value: 40, label: "Approved Requests", color: "#ADD8E6" }, // Light Blue
-    { name: "pending-requests", value: 27, label: "Pending Requests", color: "#ffbb28" }, // Yellow
+    { name: "total-requests", value: requestsOverview.totalRequests, label: "Total Requests", color: "#00c49f" }, // Green
+    { name: "approved-requests", value: requestsOverview.approvedRequests, label: "Approved Requests", color: "#ADD8E6" }, // Light Blue
+    { name: "pending-requests", value: requestsOverview.pendingRequests, label: "Pending Requests", color: "#ffbb28" }, // Yellow
   ];
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Fetch Total Swaps
+        const swapsResponse = await axiosInstance.get('/api/admin/stats/swaps/total'); // Replace with your actual API endpoint
+
+          const swapsData = swapsResponse.data;
+          setTotalSwaps(swapsData.totalSwaps); // Assuming the response has a \'totalSwaps\' field
+
+
+        // Fetch Total Skill Swappers (Users)
+        const usersResponse = await axiosInstance.get('/api/admin/stats/users/total'); // Replace with your actual API endpoint
+
+          const usersData = usersResponse.data;
+          setTotalUsers(usersData.totalUsers); // Assuming the response has a \'totalUsers\' field
+
+        // Fetch Organization Status Overview
+        const requestsResponse = await axiosInstance.get('/api/admin/stats/requests/overview'); // Replace with your actual API endpoint
+
+          const requestsData = requestsResponse.data;
+          setRequestsOverview(requestsData); // Assuming the response matches the state shape
+
+
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+        // Handle errors, potentially set state to indicate error
+        setTotalSwaps(0);
+        setTotalUsers(0);
+        setRequestsOverview({ totalRequests: 0, approvedRequests: 0, pendingRequests: 0 });
+      }
+    };
+
+    fetchStats();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  // Placeholder data - replace with actual data fetching logic
 
   const organizationStatusConfig = {
     "total-requests": { label: "Total Requests", color: "#00c49f" }, // Green
@@ -51,9 +98,10 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">2,993</div>
-              <p className="text-xs text-green-500">
-                +20% since last month
+              <div className="text-2xl font-bold">{totalSwaps}</div>
+              {/* You might fetch the percentage change from the API too if needed */}
+              <p className="text-xs text-gray-500">
+                Data from API
               </p>
             </CardContent>
           </Card>
@@ -71,6 +119,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">1,254</div>
+              {/* Keep placeholder data for now */}
               <p className="text-xs text-green-500">
                 +8% since last month
               </p>
@@ -89,9 +138,10 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,254</div>
-              <p className="text-xs text-green-500">
-                +8% since last month
+              <div className="text-2xl font-bold">{totalUsers}</div>
+              {/* You might fetch the percentage change from the API too if needed */}
+              <p className="text-xs text-gray-500">
+                Data from API
               </p>
             </CardContent>
           </Card>
