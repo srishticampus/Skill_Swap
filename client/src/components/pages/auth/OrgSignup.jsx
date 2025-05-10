@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router';
 import AuthContext from '@/context/AuthContext';
 import axiosInstance from '@/api/axios';
 import { Link } from 'react-router';
+import countries from '@/constants/countries';
 
 export default function OrgSignup() {
   const [formData, setFormData] = useState({
@@ -139,11 +140,11 @@ export default function OrgSignup() {
           <span>Country</span>
           <select name="country" id="country" value={formData.country} onChange={handleChange} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
             <option value="">Select Country</option>
-            <option value="USA">USA</option>
-            <option value="Canada">Canada</option>
-            <option value="UK">UK</option>
-            <option value="Australia">Australia</option>
-            {/* Add more countries as needed */}
+            {countries.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
           </select>
           {errors.country && <span className="text-red-500">{errors.country}</span>}
         </label>
