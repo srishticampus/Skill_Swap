@@ -23,28 +23,28 @@ import {
 const complaints = [
   {
     id: 1,
-    givenBy: { name: "Ashika", avatar: "/path/to/ashika-avatar.png" }, // Replace with actual path or URL
+    givenBy: { name: "Ashika", avatar: "https://picsum.photos/200" }, // Replace with actual path or URL
     against: "Web Designing",
     description: "software application functions correctly and meet specified requirements",
     status: "Resolved", // Assuming 'Resolved' status based on button label
   },
   {
     id: 2,
-    givenBy: { name: "Ashika", avatar: "/path/to/ashika-avatar.png" },
+    givenBy: { name: "Ashika", avatar: "https://picsum.photos/200" },
     against: "Web Designing",
     description: "software application functions correctly and meet specified requirements",
     status: "Resolved",
   },
   {
     id: 3,
-    givenBy: { name: "Ashika", avatar: "/path/to/ashika-avatar.png" },
+    givenBy: { name: "Ashika", avatar: "https://picsum.photos/200" },
     against: "Web Designing",
     description: "software application functions correctly and meet specified requirements",
     status: "Resolved",
   },
   {
     id: 4,
-    givenBy: { name: "Ashika", avatar: "/path/to/ashika-avatar.png" },
+    givenBy: { name: "Ashika", avatar: "https://picsum.photos/200" },
     against: "Web Designing",
     description: "software application functions correctly and meet specified requirements",
     status: "Resolved",
