@@ -1,6 +1,7 @@
 import express from "express";
 import Organization from "../../models/organization.js"; // Assuming Organization model path
 import { adminCheck } from "./middleware.js"; // Import adminCheck middleware
+import { auth } from "../auth/index.js"; // Assuming this path is correct
 
 export const router = express.Router();
 
@@ -10,7 +11,7 @@ export const router = express.Router();
 // @route   GET api/admin/organizations/pending
 // @desc    Get all pending organization requests
 // @access  Private (Admin only)
-router.get("/pending", adminCheck, async (req, res) => {
+router.get("/pending",auth, adminCheck, async (req, res) => {
   try {
     const pendingOrganizations = await Organization.find({ status: 'pending' }).select('-password'); // Exclude password
     res.json(pendingOrganizations);
@@ -23,7 +24,7 @@ router.get("/pending", adminCheck, async (req, res) => {
 // @route   PUT api/admin/organizations/approve/:id
 // @desc    Approve an organization request
 // @access  Private (Admin only)
-router.put("/approve/:id", adminCheck, async (req, res) => {
+router.put("/approve/:id",auth,  adminCheck, async (req, res) => {
   try {
     let organization = await Organization.findById(req.params.id);
 
@@ -50,7 +51,7 @@ router.put("/approve/:id", adminCheck, async (req, res) => {
 // @route   PUT api/admin/organizations/reject/:id
 // @desc    Reject an organization request
 // @access  Private (Admin only)
-router.put("/reject/:id", adminCheck, async (req, res) => {
+router.put("/reject/:id",auth,  adminCheck, async (req, res) => {
   try {
     let organization = await Organization.findById(req.params.id);
 

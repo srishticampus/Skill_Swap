@@ -20,7 +20,7 @@ const OrganizationRequests = () => {
     try {
       setLoading(true);
       // Adjust API endpoint as needed
-      const response = await axiosInstance.get('/api/admin/organizations/pending');
+      const response = await axiosInstance.get('api/admin/organizations/pending');
       setOrganizationRequests(response.data);
       setLoading(false);
     } catch (err) {
@@ -41,6 +41,26 @@ const OrganizationRequests = () => {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString();
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      await axiosInstance.put(`/api/admin/organizations/approve/${id}`);
+      setOrganizationRequests(organizationRequests.filter(org => org._id !== id));
+    } catch (err) {
+      console.error("Error approving organization:", err);
+      // Handle error, e.g., show a toast notification
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await axiosInstance.put(`/api/admin/organizations/reject/${id}`);
+      setOrganizationRequests(organizationRequests.filter(org => org._id !== id));
+    } catch (err) {
+      console.error("Error rejecting organization:", err);
+      // Handle error
+    }
   };
 
   if (loading) {
@@ -98,6 +118,10 @@ const OrganizationRequests = () => {
                    {/* Replace with actual link structure */}
                   <Link to={`/admin/organizations/${request._id}`}>View More</Link>
                 </Button>
+                <div className="flex gap-2 mt-4">
+                  <Button variant="default" className="flex-1" onClick={() => handleApprove(request._id)}>Approve</Button>
+                  <Button variant="destructive" className="flex-1" onClick={() => handleReject(request._id)}>Reject</Button>
+                </div>
               </CardContent>
             </Card>
           ))}
