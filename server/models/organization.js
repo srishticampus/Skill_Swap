@@ -47,6 +47,11 @@ const OrganizationSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending',
   },
+  active:{
+    type: Boolean,
+    default: true,
+  },
+
   lastLogin: {
     type: Date,
   },

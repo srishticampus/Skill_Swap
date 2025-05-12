@@ -35,7 +35,7 @@ function OrganizationDetails() {
       console.log("Activate response:", res.data);
       // Update the local state to reflect the status change if needed
       if (organization) {
-        setOrganization({...organization, status: 'active'});
+        setOrganization({...organization, active: true});
       }
       // Optionally show a success message to the user
     } catch (err) {
@@ -51,7 +51,7 @@ function OrganizationDetails() {
       console.log("Deactivate response:", res.data);
       // Update the local state to reflect the status change if needed
       if (organization) {
-        setOrganization({...organization, status: 'inactive'});
+        setOrganization({...organization, active: false});
       }
       // Optionally show a success message to the user
     } catch (err) {
@@ -91,11 +91,15 @@ function OrganizationDetails() {
 
             <p className="text-sm text-gray-500 mb-1">Address</p>
             <p className="text-base font-medium mb-4">{organization.address}</p>
-
+            {/* Active */}
+            <p className="text-sm text-gray-500 mb-1">Active</p>
+            <p className={`text-base font-medium mb-4 ${organization.active ? 'text-green-600' :'text-red-600'}`}>
+                {organization.active ? "Active" : 'Not Active'}
+            </p>
             <p className="text-sm text-gray-500 mb-1">Certificate</p>
             <Button
               variant="link"
-              className="p-0 text-blue-600 hover:underline text-base font-medium"
+              className="p-0 h-auto text-blue-600 hover:underline text-base font-medium"
               asChild
               onClick={() => {
                 console.log("Certificate button clicked for:", organization.certificate);
@@ -126,13 +130,14 @@ function OrganizationDetails() {
                 {organization.status ? organization.status.toUpperCase() : 'N/A'}
             </p>
 
+
             {/* View Review Button */}
             <p className="text-sm text-gray-500 mb-1">Reviews</p> {/* Corrected label */}
             {/* View Review Button */}
             <Link to={`/admin/organizations/details/${id}/reviews`}>
               <Button
                 variant="link"
-                className="p-0 text-blue-600 hover:underline text-base font-medium"
+                className="p-0 h-auto text-blue-600 hover:underline text-base font-medium"
               >
                 View Reviews
               </Button>
@@ -148,7 +153,7 @@ function OrganizationDetails() {
             size="lg"
             className="px-8 py-3 text-green-700 border-green-700 hover:bg-green-50"
             onClick={handleActivate}
-            disabled={organization.status === 'active'} // Disable if already active
+            disabled={organization.active === true} // Disable if already active
           >
             Activate
           </Button>
@@ -157,7 +162,7 @@ function OrganizationDetails() {
             size="lg"
             className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white"
             onClick={handleDeactivate}
-            disabled={organization.status === 'inactive'} // Disable if already inactive
+            disabled={organization.active === false} // Disable if already inactive
           >
             Deactivate
           </Button>

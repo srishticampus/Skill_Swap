@@ -100,7 +100,7 @@ router.put("/activate/:id", auth, adminCheck, async (req, res) => {
 
         // You might want to add checks here, e.g., only activate if status is approved or inactive
         // For now, we'll just set the status to 'active'
-        organization.status = 'active';
+        organization.active = true;
         await organization.save();
 
         res.json({ msg: "Organization activated", organization });
@@ -125,7 +125,7 @@ router.put("/deactivate/:id", auth, adminCheck, async (req, res) => {
         }
 
         // Set status to 'inactive'
-        organization.status = 'inactive';
+        organization.active = false;
         await organization.save();
 
         res.json({ msg: "Organization deactivated", organization });
