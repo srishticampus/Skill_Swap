@@ -35,6 +35,7 @@ import SwapRequestForm from "./components/pages/SwapRequestForm";
 import SwapRequests from "./components/pages/SwapRequests";
 import EditSwapRequest from "./components/pages/EditSwapRequest";
 import ExchangeSkills from "./components/pages/ExchangeSkills";
+import SwapRequestDetails from "./components/pages/SwapRequestDetails"; // Import the new component
 import AddMember from "./components/pages/organization/add-member";
 import ViewAllSwaps from "./components/pages/organization/ViewAllSwaps";
 import ViewReviews from "./components/pages/organization/ViewReviews";
@@ -69,6 +70,7 @@ function App() {
           <Route path="/swap-requests" element={<SwapRequests />} />
           <Route path="/edit-swap-request/:id" element={<EditSwapRequest />} />
           <Route path="/exchange-skills" element={<ExchangeSkills />} />
+          <Route path="/exchange-skills/:id" element={<SwapRequestDetails />} /> {/* Add the route for details page */}
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />

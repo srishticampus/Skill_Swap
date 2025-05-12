@@ -6,27 +6,65 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import axiosInstance from '@/api/axios'; // Import axiosInstance
 import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton for loading state
+import { Link } from 'react-router';
 
 const ExchangeSkills = () => {
   const [swapRequests, setSwapRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFiltering, setIsFiltering] = useState(false); // Add filtering state
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [serviceRequiredFilter, setServiceRequiredFilter] = useState('any');
+  const [serviceCategoryFilter, setServiceCategoryFilter] = useState('any');
+  const [categories, setCategories] = useState([]); // State to store categories for filter
 
+  // Effect to fetch categories only once on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get('/api/categories'); // Assuming an endpoint for categories
+        setCategories(response.data);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+
+    fetchCategories();
+  }, []); // Empty dependency array means run only on mount
+
+  // Effect to fetch swap requests based on search/filter changes
   useEffect(() => {
     const fetchSwapRequests = async () => {
+      // Use isFiltering for subsequent fetches (filtering/searching)
+      setIsFiltering(true);
+      setError(null); // Clear previous errors
+
       try {
-        const response = await axiosInstance.get('/api/swap-requests'); // Adjust endpoint as needed
+        const params = {};
+        if (searchTerm) {
+          params.searchTerm = searchTerm;
+        }
+        if (serviceRequiredFilter !== 'any') {
+          params.serviceRequired = serviceRequiredFilter;
+        }
+        if (serviceCategoryFilter !== 'any') {
+           params.serviceCategory = serviceCategoryFilter;
+        }
+
+        const response = await axiosInstance.get('/api/swap-requests', { params }); // Pass params as query parameters
         setSwapRequests(response.data);
-        console.log(response.data)
-        setLoading(false);
+        console.log(response.data);
+
       } catch (err) {
         setError(err);
-        setLoading(false);
+      } finally {
+        setLoading(false); // Ensure initial loading state is set to false after the first fetch completes
+        setIsFiltering(false); // Set filtering state false after fetch completes
       }
     };
 
     fetchSwapRequests();
-  }, []);
+  }, [searchTerm, serviceRequiredFilter, serviceCategoryFilter]); // Dependencies for search/filter
 
   if (loading) {
     return (
@@ -83,28 +121,38 @@ const ExchangeSkills = () => {
       {/* Search and Filter Section */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <Input
-          placeholder="Search Skills you Searching For...."
+          placeholder="Search Skills, Services Offered..."
           className="flex-grow"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Search</Button>
-        <Select>
+        {/* The search button is no longer strictly necessary as typing updates state and useEffect refetches */}
+        {/* <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Search</Button> */}
+        <Select onValueChange={setServiceRequiredFilter} value={serviceRequiredFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Service Required" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="any">Any</SelectItem>
-            <SelectItem value="web-designing">Web Designing</SelectItem>
-            <SelectItem value="testing">Testing</SelectItem>
+            <SelectItem value="any">Any Service Required</SelectItem>
+            {/* You might fetch actual service required options from backend if they are dynamic */}
+            <SelectItem value="Web Development">Web Development</SelectItem>
+            <SelectItem value="Mobile Development">Mobile Development</SelectItem>
+            <SelectItem value="UI/UX Design">UI/UX Design</SelectItem>
+            <SelectItem value="Graphic Design">Graphic Design</SelectItem>
+            <SelectItem value="Writing">Writing</SelectItem>
+            <SelectItem value="Marketing">Marketing</SelectItem>
+            <SelectItem value="Other">Other</SelectItem>
           </SelectContent>
         </Select>
-         <Select>
+         <Select onValueChange={setServiceCategoryFilter} value={serviceCategoryFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Any Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="any">Any</SelectItem>
-            <SelectItem value="programming">Programming</SelectItem>
-            <SelectItem value="design">Design</SelectItem>
+            <SelectItem value="any">Any Category</SelectItem>
+            {categories.map(category => (
+               <SelectItem key={category._id} value={category._id}>{category.name}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -152,7 +200,7 @@ const ExchangeSkills = () => {
                 </div>
               </div>
               <div className="flex justify-between gap-2">
-                <Button variant="outline" className="flex-grow border-primary text-primary hover:bg-primary/10">View Details</Button>
+                <Button variant="outline" asChild className="flex-grow border-primary text-primary hover:bg-primary/10"><Link to={`/exchange-skills/${request._id}`}>View Details</Link></Button>
                 <Button className="flex-grow bg-primary text-primary-foreground hover:bg-primary/90">Place a Request</Button>
               </div>
             </CardContent>

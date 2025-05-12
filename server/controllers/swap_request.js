@@ -48,29 +48,70 @@ export const createSwapRequest = async (req, res) => {
   }
 };
 
-// Get all swap requests
+// Get all swap requests with filtering and searching
 export const getAllSwapRequests = async (req, res) => {
   try {
-    const { createdBy } = req.query; // Get createdBy from query parameters
+    const { createdBy, searchTerm, serviceRequired, serviceCategory } = req.query;
     let query = {};
 
+    // Filter by createdBy (either specific user or exclude logged-in user)
     if (createdBy) {
-      // If createdBy query parameter is present, filter by that user ID
-      query = { createdBy: createdBy };
+      query.createdBy = createdBy;
     } else {
-      // If no createdBy parameter, filter out requests created by the logged-in user
-      // Extract user ID from token
       const token = req.headers.authorization?.split(' ')[1];
       if (token) {
         try {
           const decoded = jwt.verify(token, import.meta.env.VITE_JWT_SECRET);
           const userId = decoded.user.id;
-          query = { createdBy: { $ne: userId } };
+          query.createdBy = { $ne: userId };
         } catch (err) {
-          // If token is invalid, proceed without filtering by logged-in user
           console.error('Error verifying token:', err);
+          // If token is invalid, proceed without filtering by logged-in user
+          // No createdBy filter added to query
         }
       }
+    }
+
+    // Add searchTerm filter using $or for multiple fields
+    if (searchTerm) {
+      const searchRegex = new RegExp(searchTerm, 'i'); // Case-insensitive regex
+      const searchConditions = {
+        $or: [
+          { serviceTitle: searchRegex },
+          { serviceDetails: searchRegex },
+          // You could potentially add searching on populated user fields here
+          // but it would require Mongoose aggregation which is more complex.
+          // For simplicity, sticking to SwapRequest fields for now.
+        ]
+      };
+
+      // Combine search conditions with existing query conditions
+      if (Object.keys(query).length > 0) {
+        query = { $and: [query, searchConditions] };
+      } else {
+        query = searchConditions;
+      }
+    }
+
+    // Add serviceRequired filter
+    if (serviceRequired && serviceRequired !== 'any') {
+       const serviceRequiredCondition = { serviceRequired: serviceRequired };
+       if (Object.keys(query).length > 0) {
+           query = { $and: [query, serviceRequiredCondition] };
+       } else {
+           query = serviceRequiredCondition;
+       }
+    }
+
+    // Add serviceCategory filter
+    // serviceCategory in the query is expected to be a single category ID string
+    if (serviceCategory && serviceCategory !== 'any') {
+       const serviceCategoryCondition = { serviceCategory: serviceCategory };
+       if (Object.keys(query).length > 0) {
+           query = { $and: [query, serviceCategoryCondition] };
+       } else {
+           query = serviceCategoryCondition;
+       }
     }
 
     // Find swap requests based on the constructed query
@@ -81,7 +122,8 @@ export const getAllSwapRequests = async (req, res) => {
     res.status(200).json(swapRequests);
 
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error fetching swap requests:', err); // Log the error details on the server
+    res.status(500).json({ message: 'Failed to fetch swap requests', error: err.message });
   }
 };
 
