@@ -29,6 +29,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import MentorRequests from "./components/pages/admin/MentorRequests";
 import CategoryManagement from "./components/pages/admin/CategoryManagement";
 import ContactSubmissions from "./components/pages/admin/ContactSubmissions";
+import SkillSwappersPage from "./components/pages/admin/SkillSwappersPage";
+import SkillSwapperDetailsPage from "./components/pages/admin/SkillSwapperDetailsPage"; // Import the new component
 import SwapRequestForm from "./components/pages/SwapRequestForm";
 import SwapRequests from "./components/pages/SwapRequests";
 import EditSwapRequest from "./components/pages/EditSwapRequest";
@@ -77,6 +79,8 @@ function App() {
           <Route path="/admin/organizations" element={<Organizations />} />
           <Route path="/admin/organizations/details/:id" element={<OrganizationDetails />} />
           <Route path="/admin/organizations/details/:id/reviews" element={<OrganizationReviews />} />
+          <Route path="/admin/skill-swappers" element={<SkillSwappersPage />} />
+          <Route path="/admin/skill-swappers/:id" element={<SkillSwapperDetailsPage />} /> {/* Add the new route for details */}
         </Route>
         <Route path="/organization" element={<Organization />}>
           <Route index element={<OrganizationDashboard />} />
