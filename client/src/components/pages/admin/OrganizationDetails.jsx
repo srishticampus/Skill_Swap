@@ -1,7 +1,9 @@
 import React from 'react';
+import { Link, useParams } from "react-router";
 import { Button } from "@/components/ui/button"; // Assuming a button component exists
 
 function OrganizationDetails() {
+  const { id } = useParams(); // Get the organization ID from the URL
   // Placeholder data - This would ideally come from API calls based on the selected organization
   const organization = {
     name: "Skill Gain Org Pvt Ltd.",
@@ -44,8 +46,17 @@ function OrganizationDetails() {
             <p className="text-base font-medium mb-4">{organization.address}</p>
 
             <p className="text-sm text-gray-500 mb-1">Certificate</p>
-            {/* This should ideally be a link to download or view the certificate */}
-            <a href="#" className="text-blue-600 hover:underline text-base font-medium">{organization.certificate}</a>
+            <Button
+              variant="link"
+              className="p-0 text-blue-600 hover:underline text-base font-medium"
+              asChild
+              onClick={() => {
+                console.log("Certificate button clicked");
+                // TODO: Implement navigation to the certificate page for this organization
+              }}
+            >
+              <a href="#" >{organization.certificate}</a>
+            </Button>
           </div>
 
           {/* Right Column */}
@@ -58,11 +69,24 @@ function OrganizationDetails() {
 
             <p className="text-sm text-gray-500 mb-1">Pincode</p>
             <p className="text-base font-medium mb-4">{organization.pincode}</p>
+            {/* View Review Button */}
+            <p className="text-sm text-gray-500 mb-1">Pincode</p>
+
+            {/* View Review Button */}
+            <Link to={`/admin/organizations/details/${id}/reviews`}>
+              <Button
+                variant="link"
+                className="p-0 text-blue-600 hover:underline text-base font-medium"
+              >
+                View Reviews
+              </Button>
+            </Link>
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Activate/Deactivate Buttons */}
         <div className="flex justify-center gap-4 mt-8">
+
           <Button
             variant="outline"
             size="lg"
