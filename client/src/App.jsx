@@ -43,6 +43,7 @@ import OrganizationRequests from "./components/pages/admin/OrganizationRequests"
 import Organizations from "./components/pages/admin/Organizations";
 import OrganizationDetails from "./components/pages/admin/OrganizationDetails";
 import OrganizationReviews from "./components/pages/admin/OrganizationReviews";
+import AdminComplaints from "./components/pages/admin/complaints";
 
 function App() {
   return (
@@ -81,6 +82,7 @@ function App() {
           <Route path="/admin/organizations/details/:id/reviews" element={<OrganizationReviews />} />
           <Route path="/admin/skill-swappers" element={<SkillSwappersPage />} />
           <Route path="/admin/skill-swappers/:id" element={<SkillSwapperDetailsPage />} /> {/* Add the new route for details */}
+          <Route path="/admin/complaints" element={<AdminComplaints />} />
         </Route>
         <Route path="/organization" element={<Organization />}>
           <Route index element={<OrganizationDashboard />} />
