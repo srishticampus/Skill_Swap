@@ -41,11 +41,6 @@ const items = [
     icon: Building2
   },
   {
-    title: "Organization Requests",
-    url: "/admin/organization-requests",
-    icon: Building2
-  },
-  {
     title: "Skill Swappers",
     url: "/admin/skill-swappers",
     icon: Users
@@ -137,11 +132,15 @@ function AppSidebar() {
 export default function Admin() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+
+  const currentItem = items.find(item => item.url === pathname);
+  const pageTitle = currentItem ? currentItem.title : "Dashboard"; // Default title
 
   return (
     <SidebarProvider>
@@ -154,7 +153,7 @@ export default function Admin() {
           <header className="flex justify-between items-center p-4 m-6 bg-white rounded-lg">
             <div className="flex items-center gap-4">
               <SidebarTrigger size="32" />
-              <h1 className="text-xl text-secondary-foreground">Dashboard</h1>
+              <h1 className="text-xl text-secondary-foreground">{pageTitle}</h1>
             </div>
             <Dialog>
               <DialogTrigger asChild>

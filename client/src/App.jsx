@@ -38,6 +38,8 @@ import ViewAllSwaps from "./components/pages/organization/ViewAllSwaps";
 import ViewReviews from "./components/pages/organization/ViewReviews";
 import Complaints from "./components/pages/organization/Complaints";
 import OrganizationRequests from "./components/pages/admin/OrganizationRequests";
+import Organizations from "./components/pages/admin/Organizations";
+import OrganizationDetails from "./components/pages/admin/OrganizationDetails";
 
 function App() {
   return (
@@ -71,6 +73,8 @@ function App() {
           <Route path="/admin/categories" element={<CategoryManagement />} />
           <Route path="/admin/contact-submissions" element={<ContactSubmissions />} />
           <Route path="/admin/organization-requests" element={<OrganizationRequests />} />
+          <Route path="/admin/organizations" element={<Organizations />} />
+          <Route path="/admin/organizations/details/:id" element={<OrganizationDetails />} />
         </Route>
         <Route path="/organization" element={<Organization />}>
           <Route index element={<OrganizationDashboard />} />
