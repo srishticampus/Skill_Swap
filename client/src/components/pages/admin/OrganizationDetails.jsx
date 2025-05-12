@@ -1,35 +1,82 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from "react-router";
 import { Button } from "@/components/ui/button"; // Assuming a button component exists
+import axiosInstance from '@/api/axios'; // Import axiosInstance
 
 function OrganizationDetails() {
   const { id } = useParams(); // Get the organization ID from the URL
-  // Placeholder data - This would ideally come from API calls based on the selected organization
-  const organization = {
-    name: "Skill Gain Org Pvt Ltd.",
-    phone: "+91 1234567890",
-    address: "Gain Plaza, Trivandrum , India",
-    certificate: "gaincertificate.pdf",
-    email: "skillgainorg@gmail.com",
-    registerNumber: "reg122356",
-    pincode: "695588",
+  const [organization, setOrganization] = useState(null); // State for organization data
+  const [loading, setLoading] = useState(true); // State for loading status
+  const [error, setError] = useState(null); // State for error status
+
+  // Fetch organization data when the component mounts or id changes
+  useEffect(() => {
+    const fetchOrganization = async () => {
+      try {
+        const res = await axiosInstance.get(`api/admin/organizations/${id}`);
+        setOrganization(res.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching organization details:", err);
+        setError("Failed to load organization details.");
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchOrganization();
+    }
+  }, [id]); // Dependency array includes id
+
+  // Handle activation
+  const handleActivate = async () => {
+    try {
+      const res = await axiosInstance.put(`api/admin/organizations/activate/${id}`);
+      console.log("Activate response:", res.data);
+      // Update the local state to reflect the status change if needed
+      if (organization) {
+        setOrganization({...organization, status: 'active'});
+      }
+      // Optionally show a success message to the user
+    } catch (err) {
+      console.error("Error activating organization:", err);
+      // Optionally show an error message to the user
+    }
   };
 
-  // Placeholder functions for button actions
-  const handleActivate = () => {
-    console.log("Activate button clicked");
-    // Implement activation logic here
+  // Handle deactivation
+  const handleDeactivate = async () => {
+    try {
+      const res = await axiosInstance.put(`api/admin/organizations/deactivate/${id}`);
+      console.log("Deactivate response:", res.data);
+      // Update the local state to reflect the status change if needed
+      if (organization) {
+        setOrganization({...organization, status: 'inactive'});
+      }
+      // Optionally show a success message to the user
+    } catch (err) {
+      console.error("Error deactivating organization:", err);
+      // Optionally show an error message to the user
+    }
   };
 
-  const handleDeactivate = () => {
-    console.log("Deactivate button clicked");
-    // Implement deactivation logic here
-  };
+  if (loading) {
+    return <div className="p-6 text-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-center text-red-500">{error}</div>;
+  }
+
+  if (!organization) {
+      return <div className="p-6 text-center">Organization not found.</div>;
+  }
+
 
   return (
     <div className="p-6 min-h-screen bg-gray-100">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-purple-700">Activate / Deactivate</h2>
+        <h2 className="text-3xl font-bold text-purple-700">Organization Details</h2> {/* Changed title */}
       </div>
 
       <div className="bg-white rounded-lg p-8 shadow-lg max-w-2xl mx-auto" style={{ minHeight: '400px' }}> {/* Added minHeight for visual spacing */}
@@ -51,11 +98,14 @@ function OrganizationDetails() {
               className="p-0 text-blue-600 hover:underline text-base font-medium"
               asChild
               onClick={() => {
-                console.log("Certificate button clicked");
-                // TODO: Implement navigation to the certificate page for this organization
+                console.log("Certificate button clicked for:", organization.certificate);
+                // TODO: Implement navigation to the certificate page or open the certificate
+                // You might want to use a proper link or modal here
+                // window.open(`/api/admin/organizations/${id}/certificate`, '_blank'); // Example if serving certificate via API
               }}
             >
-              <a href="#" >{organization.certificate}</a>
+              {/* Display certificate name or a placeholder */}
+              {organization.certificate ? <a>{organization.certificate}</a> : <span>No Certificate</span>}
             </Button>
           </div>
 
@@ -69,9 +119,15 @@ function OrganizationDetails() {
 
             <p className="text-sm text-gray-500 mb-1">Pincode</p>
             <p className="text-base font-medium mb-4">{organization.pincode}</p>
-            {/* View Review Button */}
-            <p className="text-sm text-gray-500 mb-1">Pincode</p>
 
+            {/* Status */}
+            <p className="text-sm text-gray-500 mb-1">Status</p>
+            <p className={`text-base font-medium mb-4 ${organization.status === 'active' ? 'text-green-600' : organization.status === 'inactive' ? 'text-red-600' : 'text-yellow-600'}`}>
+                {organization.status ? organization.status.toUpperCase() : 'N/A'}
+            </p>
+
+            {/* View Review Button */}
+            <p className="text-sm text-gray-500 mb-1">Reviews</p> {/* Corrected label */}
             {/* View Review Button */}
             <Link to={`/admin/organizations/details/${id}/reviews`}>
               <Button
@@ -90,16 +146,18 @@ function OrganizationDetails() {
           <Button
             variant="outline"
             size="lg"
-            className="px-8 py-3 text-purple-700 border-purple-700 hover:bg-purple-50"
+            className="px-8 py-3 text-green-700 border-green-700 hover:bg-green-50"
             onClick={handleActivate}
+            disabled={organization.status === 'active'} // Disable if already active
           >
             Activate
           </Button>
           <Button
             variant="default"
             size="lg"
-            className="px-8 py-3 bg-purple-700 hover:bg-purple-800 text-white"
+            className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white"
             onClick={handleDeactivate}
+            disabled={organization.status === 'inactive'} // Disable if already inactive
           >
             Deactivate
           </Button>

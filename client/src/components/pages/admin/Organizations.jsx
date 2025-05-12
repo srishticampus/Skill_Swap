@@ -1,6 +1,7 @@
-import { useState } from "react";
-import React from 'react';
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import axiosInstance from "@/api/axios";
+
 import {
   Table,
   TableBody,
@@ -51,15 +52,20 @@ const organizationData = [
 
 function Organizations() {
   const navigate = useNavigate();
-  // Placeholder state for pagination
+  const [organizations, setOrganizations] = useState([]); // State to hold fetched organizations
+  const [loading, setLoading] = useState(true); // State for loading status
+  const [error, setError] = useState(null); // State for error handling
+
   const [currentPage, setCurrentPage] = useState(1);
 
   const handleViewPendingRequests = () => {
     navigate("/admin/organization-requests");
   };
+
   const [itemsPerPage, setItemsPerPage] = useState(4); // Matching the design's "Show 4 per page"
 
-  const totalItems = 10; // Placeholder for total items
+  // Calculate total items and total pages based on fetched data
+  const totalItems = organizations.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const handlePageChange = (page) => {
@@ -67,6 +73,23 @@ function Organizations() {
       setCurrentPage(page);
     }
   };
+
+  // Fetch organizations from the API
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      try {
+        const res = await axiosInstance.get('/api/admin/organizations'); // Adjust API endpoint if necessary
+        setOrganizations(res.data);
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError(err);
+        setLoading(false);
+      }
+    };
+
+    fetchOrganizations();
+  }, []); // Empty dependency array means this effect runs once on mount
 
   const handleItemsPerPageChange = (value) => {
     setItemsPerPage(value);
@@ -94,25 +117,46 @@ function Organizations() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {organizationData.map((org) => (
-              <TableRow key={org.slNo}>
-                <TableCell className="font-medium">{org.slNo}.</TableCell>
-                <TableCell>{org.name}</TableCell>
-                <TableCell>{org.registerNumber}</TableCell>
-                <TableCell>{org.email}</TableCell>
-                <TableCell>{org.approvedDate}</TableCell>
-                <TableCell className="text-blue-600 hover:underline cursor-pointer">{org.link}</TableCell>
-                <TableCell className="text-center">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/admin/organizations/details/${org.slNo}`)}
-                    >
-                        <Eye className="h-5 w-5 text-primary" />
-                    </Button>
-                </TableCell>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center">Loading organizations...</TableCell>
               </TableRow>
-            ))}
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-red-500">Error loading organizations: {error.message}</TableCell>
+              </TableRow>
+            ) : organizations.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center">No organizations found.</TableCell>
+              </TableRow>
+            ) : (
+              // Map over fetched organizations and render rows
+              organizations.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((org, index) => (
+                <TableRow key={org._id}> {/* Use _id as the key */}
+                  {/* Calculate Sl No based on current page and index */}
+                  <TableCell className="font-medium">{(currentPage - 1) * itemsPerPage + index + 1}.</TableCell>
+                  <TableCell>{org.name}</TableCell>
+                  <TableCell>{org.registerNumber}</TableCell>
+                  <TableCell>{org.email}</TableCell>
+                  {/* Format the approved date (assuming createdAt field exists) */}
+                  <TableCell>{org.createdAt ? new Date(org.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
+                  {/* Link column - keeping placeholder or removing based on requirement */}
+                  {/* This column doesn't directly map to API data, removing or adding a placeholder */}
+                  {/* <TableCell className="text-blue-600 hover:underline cursor-pointer">{org.link || 'N/A'}</TableCell> */}
+                   <TableCell>N/A</TableCell> {/* Placeholder as there's no 'link' in API */}
+                  <TableCell className="text-center">
+                      <Button
+                          variant="ghost"
+                          size="sm"
+                          // Use organization._id for the navigation link
+                          onClick={() => navigate(`/admin/organizations/details/${org._id}`)}
+                      >
+                          <Eye className="h-5 w-5 text-primary" />
+                      </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
 
