@@ -106,7 +106,7 @@ const AddMember = () => {
                 </div>
               </RadioGroup>
             </div>
-            <Button type="submit" className="w-full md:col-span-2 bg-gradient-to-r from-primary to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+            <Button type="submit" className="w-full md:col-span-2 bg-gradient-to-r from-primary to-indigo-600 hover:from-primary hover:to-indigo-700 text-white">
               Submit
             </Button>
           </form>

@@ -87,7 +87,7 @@ const OrganizationProfile = () => {
 
       {/* Main Content */}
       <main className="container mx-auto py-8">
-        <h2 className="text-2xl font-semibold text-center mb-8 text-purple-700 dark:text-purple-400">View Organization Profile</h2>
+        <h2 className="text-2xl font-semibold text-center mb-8 text-primary dark:text-purple-400">View Organization Profile</h2>
 
         {/* Organization Info Card */}
         <Card className="max-w-3xl mx-auto bg-gray-200 dark:bg-gray-700 rounded-lg shadow-lg">

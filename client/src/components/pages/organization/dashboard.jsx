@@ -18,11 +18,11 @@ const Dashboard = () => {
     <div className="flex flex-col gap-4 p-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Dashboard</h1>
-    
+
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-purple-600 text-white">
+        <Card className="bg-primary text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white">
               Total Members
@@ -36,7 +36,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-purple-600 text-white">
+        <Card className="bg-primary text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white">
               Total Complaints
@@ -50,7 +50,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-purple-600 text-white">
+        <Card className="bg-primary text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white">
               Pending Swaps
@@ -64,7 +64,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-purple-600 text-white">
+        <Card className="bg-primary text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-white">
               Completed Swaps
@@ -116,7 +116,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <h2 className="text-xl font-bold text-purple-700 mt-4">Best Performers</h2>
+      <h2 className="text-xl font-bold text-primary mt-4">Best Performers</h2>
       <Separator className="my-4" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

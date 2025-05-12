@@ -67,7 +67,7 @@ const Members = () => {
           />
         </div>
         <Link to="/organization/members/add" className="ml-4">
-          <Button className="bg-gradient-to-r from-primary to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+          <Button className="bg-gradient-to-r from-primary to-indigo-600 hover:from-primary hover:to-indigo-700 text-white">
             Add New Member
           </Button>
         </Link>
@@ -104,7 +104,7 @@ const Members = () => {
                 </div>
                 <div className="flex space-x-4 mb-4">
                   <Button variant="outline" className="flex-1 border-primary text-primary hover:bg-purple-900">Active</Button>
-                  <Button className="flex-1 bg-gradient-to-r from-primary to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">Deactive</Button>
+                  <Button className="flex-1 bg-gradient-to-r from-primary to-indigo-600 hover:from-primary hover:to-indigo-700 text-white">Deactive</Button>
                 </div>
                 <div className="text-right">
                   <a href={`/organization/members/details/${member.id}`} className="text-primary hover:underline flex items-center justify-end">

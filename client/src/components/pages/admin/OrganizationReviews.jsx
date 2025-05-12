@@ -65,7 +65,7 @@ function OrganizationReviews() {
     <div className="p-6 min-h-screen bg-gray-100">
       {/* Header based on the image */}
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-purple-700">View Review</h2>
+        <h2 className="text-3xl font-bold text-primary">View Review</h2>
       </div>
 
       {/* Container for review cards */}
@@ -82,7 +82,7 @@ function OrganizationReviews() {
                 {/* <img src={review.avatarUrl} alt={review.reviewerName} className="w-full h-full rounded-full object-cover" /> */}
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-purple-700">{review.reviewerName}</h3>
+                <h3 className="text-lg font-semibold text-primary">{review.reviewerName}</h3>
                 <p className="text-sm text-gray-600">{review.reviewerSkills}</p>
               </div>
             </div>

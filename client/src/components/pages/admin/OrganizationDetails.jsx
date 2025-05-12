@@ -76,7 +76,7 @@ function OrganizationDetails() {
   return (
     <div className="p-6 min-h-screen bg-gray-100">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-purple-700">Organization Details</h2> {/* Changed title */}
+        <h2 className="text-3xl font-bold text-primary">Organization Details</h2> {/* Changed title */}
       </div>
 
       <div className="bg-white rounded-lg p-8 shadow-lg max-w-2xl mx-auto" style={{ minHeight: '400px' }}> {/* Added minHeight for visual spacing */}

@@ -40,7 +40,7 @@ const SwapRequestDetails = () => {
               className="w-24 h-24 rounded-full object-cover mr-6"
             />
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-purple-700 mb-4">{swapRequestData.user.name}</h1> {/* Use purple text like in the image */}
+              <h1 className="text-3xl font-bold text-primary mb-4">{swapRequestData.user.name}</h1> {/* Use primary text like in the image */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-gray-700">
                 <div className="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
@@ -89,7 +89,7 @@ const SwapRequestDetails = () => {
       {/* Bottom Section: Technical Info */}
       <Card className="rounded-lg shadow-md">
         <CardContent className="p-6">
-          <h2 className="text-2xl font-semibold text-purple-700 mb-6">Technical Info</h2> {/* Use purple text */}
+          <h2 className="text-2xl font-semibold text-primary mb-6">Technical Info</h2> {/* Use purple text */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-gray-700">
             <div>
               <p className="text-gray-500 mb-1">Resume</p>

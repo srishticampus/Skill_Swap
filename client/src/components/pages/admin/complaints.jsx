@@ -68,7 +68,7 @@ const ManageComplaints = () => {
   return (
     <div className="p-6"> {/* Adjusted padding to fit within layout */}
       <div className="bg-white rounded-lg p-6"> {/* White container with padding */}
-        <h2 className="text-2xl font-semibold text-center text-purple-700 mb-6">View All Complaints</h2> {/* Styled title */}
+        <h2 className="text-2xl font-semibold text-center text-primary mb-6">View All Complaints</h2> {/* Styled title */}
 
         <div className="overflow-x-auto"> {/* Ensure responsiveness for table */}
           <Table>
@@ -100,7 +100,7 @@ const ManageComplaints = () => {
                   <TableCell>{complaint.against}</TableCell>
                   <TableCell>{complaint.description}</TableCell>
                   <TableCell>
-                    <Button variant="outline" className="bg-gradient-to-r from-purple-600 to-purple-800 text-white hover:from-purple-700 hover:to-purple-900">
+                    <Button variant="outline" className="bg-gradient-to-r from-purple-600 to-purple-800 text-white hover:from-primary hover:to-purple-900">
                       {complaint.status}
                     </Button>
                   </TableCell>

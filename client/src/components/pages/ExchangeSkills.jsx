@@ -200,8 +200,8 @@ const ExchangeSkills = () => {
                 </div>
               </div>
               <div className="flex justify-between gap-2">
-                <Button variant="outline" asChild className="flex-grow border-primary text-primary hover:bg-primary/10"><Link to={`/exchange-skills/${request._id}`}>View Details</Link></Button>
-                <Button className="flex-grow bg-primary text-primary-foreground hover:bg-primary/90">Place a Request</Button>
+                <Button variant="outline" asChild className="flex-grow"><Link to={`/exchange-skills/${request._id}`}>View Details</Link></Button>
+                <Button className="flex-grow">Place a Request</Button>
               </div>
             </CardContent>
           </Card>

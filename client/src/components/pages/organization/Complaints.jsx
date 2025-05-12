@@ -84,7 +84,7 @@ const columns = [
     accessorKey: "action",
     header: "Action",
     cell: ({ row }) => (
-      <Button variant="outline" className="bg-purple-600 text-white hover:bg-purple-700">
+      <Button variant="outline" className="bg-primary text-white hover:bg-primary">
         {row.original.status}
       </Button>
     ),
@@ -108,10 +108,10 @@ function Complaints() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6 text-purple-700">View All Complaints</h2>
+      <h2 className="text-2xl font-bold mb-6 text-primary">View All Complaints</h2>
       <div className="bg-white rounded-lg shadow p-4">
         <Table>
-          <TableHeader className="bg-purple-600 text-white">
+          <TableHeader className="bg-primary text-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
