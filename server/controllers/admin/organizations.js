@@ -49,6 +49,7 @@ router.put("/approve/:id",auth,  adminCheck, async (req, res) => {
     }
 
     organization.status = 'approved';
+    organization.active = true;
     await organization.save();
 
     // TODO: Optionally send a notification email to the organization

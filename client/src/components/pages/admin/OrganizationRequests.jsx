@@ -116,7 +116,7 @@ const OrganizationRequests = () => {
                 {/* Assuming there's a specific page to view details */}
                 <Button variant="outline" className="w-full mt-4" asChild>
                    {/* Replace with actual link structure */}
-                  <Link to={`/admin/organizations/${request._id}`}>View More</Link>
+                  <Link to={`/admin/organizations/details/${request._id}`}>View More</Link>
                 </Button>
                 <div className="flex gap-2 mt-4">
                   <Button variant="default" className="flex-1" onClick={() => handleApprove(request._id)}>Approve</Button>

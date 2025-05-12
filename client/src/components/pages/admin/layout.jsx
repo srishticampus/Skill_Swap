@@ -55,11 +55,11 @@ const items = [
     url: "/admin/complaints",
     icon: User
   },
-  {
-    title: "User Management",
-    url: "/admin/user-management",
-    icon: Users // You can choose a more appropriate icon
-  },
+  // {
+  //   title: "User Management",
+  //   url: "/admin/user-management",
+  //   icon: Users // You can choose a more appropriate icon
+  // },
   {
     title: "Mentor Requests",
     url: "/admin/mentor-requests",
