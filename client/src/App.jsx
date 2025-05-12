@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router";
 
 import Landing from "./components/pages/landing";
+import HomePage from "./components/pages/home"; // Import the new HomePage component
 import AdminLayout from "./components/pages/admin/layout";
 import Organization from "./components/pages/organization/layout";
 import About from "./components/pages/about";
@@ -24,7 +25,7 @@ import AuthLanding from "./components/pages/landing/authLanding";
 import ProfilePage from "./components/pages/profile/profile";
 import UserManagement from "./components/pages/admin/UserManagement";
 import Marketplace from "./components/pages/Marketplace";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext"; // Import useAuth
 import ProtectedRoute from "./components/ProtectedRoute";
 import MentorRequests from "./components/pages/admin/MentorRequests";
 import CategoryManagement from "./components/pages/admin/CategoryManagement";
@@ -46,12 +47,19 @@ import OrganizationDetails from "./components/pages/admin/OrganizationDetails";
 import OrganizationReviews from "./components/pages/admin/OrganizationReviews";
 import AdminComplaints from "./components/pages/admin/complaints";
 
+// Helper component to determine root page based on auth state
+const RootRouteHandler = () => {
+  const { token } = useAuth(); // Assuming 'token' indicates logged-in status
+  return token ? <HomePage /> : <Landing />;
+};
+
+
 function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<RootRouteHandler />} /> {/* Use the handler for the root path */}
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/signup" element={<Signup />} />
