@@ -5,10 +5,10 @@ const swapRequestSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  serviceCategory: {
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
-    default: []
-  },
+  serviceCategory: [{    
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Category' 
+  }],
   serviceRequired: {
     type: String,
     required: true

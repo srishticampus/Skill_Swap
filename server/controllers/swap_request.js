@@ -116,9 +116,10 @@ export const getAllSwapRequests = async (req, res) => {
 
     // Find swap requests based on the constructed query
     const swapRequests = await SwapRequest.find(query)
-      .populate('createdBy')
-      .populate('serviceCategory');
-
+    .populate('serviceCategory')
+    .populate('createdBy')
+    .exec();
+    console.log(swapRequests)
     res.status(200).json(swapRequests);
 
   } catch (err) {
@@ -130,7 +131,7 @@ export const getAllSwapRequests = async (req, res) => {
 // Get a specific swap request by ID
 export const getSwapRequestById = async (req, res) => {
   try {
-    const swapRequest = await SwapRequest.findById(req.params.id).populate('createdBy');
+    const swapRequest = await SwapRequest.findById(req.params.id).populate('createdBy').populate({path:"serviceCategory",select:"_id name"});
     if (!swapRequest) {
       return res.status(404).json({ message: 'Swap request not found' });
     }
