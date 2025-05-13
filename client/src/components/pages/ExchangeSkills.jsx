@@ -7,10 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import axiosInstance from '@/api/axios'; // Import axiosInstance
 import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton for loading state
 import { Link } from 'react-router';
+import { toast } from "sonner"
 
 const ExchangeSkills = () => {
   const [swapRequests, setSwapRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [placingRequest, setPlacingRequest] = useState(false); // Track if a request is being placed
   const [isFiltering, setIsFiltering] = useState(false); // Add filtering state
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,6 +68,43 @@ const ExchangeSkills = () => {
     fetchSwapRequests();
   }, [searchTerm, serviceRequiredFilter, serviceCategoryFilter]); // Dependencies for search/filter
 
+  const handlePlaceRequest = async (swapRequestId) => {
+    setPlacingRequest(true);
+    try {
+      const token = localStorage.getItem('token'); // Assuming you store the token in localStorage
+      if (!token) {
+        console.error('No token provided');
+        toast("Error",{
+          variant: "destructive",
+          description: "No token provided. Please log in.",
+        })
+        return;
+      }
+  
+      const response = await axiosInstance.post(`/api/swap-requests/${swapRequestId}/place-request`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      console.log('Request placed:', response.data);
+      toast("Success",{
+        description: "Request placed successfully!",
+      })
+      // Optionally, update the UI to reflect that the request has been placed
+      // For example,
+    } catch (error) {
+      console.error('Error placing request:', error);
+      toast("Error", {
+        variant: "destructive",
+        description: String(error.response?.data?.message || "Failed to place request."),
+      })
+      // Handle error, e.g., show an error message to the user
+    } finally {
+      setPlacingRequest(false);
+    }
+  };
+  
   if (loading) {
     return (
       <div className="container mx-auto py-8">
@@ -201,7 +240,25 @@ const ExchangeSkills = () => {
               </div>
               <div className="flex justify-between gap-2">
                 <Button variant="outline" asChild className="flex-grow"><Link to={`/exchange-skills/${request._id}`}>View Details</Link></Button>
-                <Button className="flex-grow">Place a Request</Button>
+                <Button
+                  className="flex-grow"
+                  onClick={() => handlePlaceRequest(request._id)}
+                  disabled={request.hasPlacedRequest || placingRequest}
+                >
+                  {request.hasPlacedRequest ? (
+                    "Request Placed"
+                  ) : placingRequest ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Placing...
+                    </>
+                  ) : (
+                    "Place a Request"
+                  )}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -210,5 +267,7 @@ const ExchangeSkills = () => {
     </div>
   );
 };
+
+
 
 export default ExchangeSkills;

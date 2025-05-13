@@ -1,4 +1,5 @@
 import SwapRequest from '../models/swap_request.js';
+import SwapRequestInteraction from '../models/swap_request_interaction.js'; // Import the SwapRequestInteraction model
 import Category from '../models/category.js'; // Import Category model
 import jwt from 'jsonwebtoken';
  
@@ -116,11 +117,37 @@ export const getAllSwapRequests = async (req, res) => {
 
     // Find swap requests based on the constructed query
     const swapRequests = await SwapRequest.find(query)
-    .populate('serviceCategory')
-    .populate('createdBy')
-    .exec();
-    console.log(swapRequests)
-    res.status(200).json(swapRequests);
+      .populate('serviceCategory')
+      .populate('createdBy')
+      .exec();
+    
+    // Extract user ID from token
+    let userId = null;
+    const token = req.headers.authorization?.split(' ')[1];
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, import.meta.env.VITE_JWT_SECRET);
+        userId = decoded.user.id;
+      } catch (err) {
+        console.error('Error verifying token:', err);
+        // If token is invalid, proceed without filtering by logged-in user
+        // No createdBy filter added to query
+      }
+    }
+
+    const swapRequestsWithInteraction = await Promise.all(swapRequests.map(async (swapRequest) => {
+      const existingInteraction = await SwapRequestInteraction.findOne({
+        swapRequest: swapRequest._id,
+        user: userId
+      });
+
+      return {
+        ...swapRequest.toObject(),
+        hasPlacedRequest: !!existingInteraction
+      };
+    }));
+
+    res.status(200).json(swapRequestsWithInteraction);
 
   } catch (err) {
     console.error('Error fetching swap requests:', err); // Log the error details on the server
@@ -229,6 +256,76 @@ export const deleteSwapRequestById = async (req, res) => {
       }
 
       res.status(200).json({ message: 'Swap request deleted' });
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Place a request on a swap request
+export const placeRequest = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: 'Failed to authenticate token' });
+      }
+
+      const userId = decoded.user.id;
+      const swapRequestId = req.params.id;
+
+      // Check if the user is trying to place a request on their own swap request
+      const swapRequest = await SwapRequest.findById(swapRequestId);
+      if (!swapRequest) {
+        return res.status(404).json({ message: 'Swap request not found' });
+      }
+
+      if (swapRequest.createdBy.toString() === userId) {
+        return res.status(400).json({ message: 'You cannot place a request on your own swap request' });
+      }
+
+      // Check if the user has already placed a request on this swap request
+      const existingInteraction = await SwapRequestInteraction.findOne({
+        swapRequest: swapRequestId,
+        user: userId
+      });
+
+      if (existingInteraction) {
+        return res.status(400).json({ message: 'You have already placed a request on this swap request' });
+      }
+
+      // Create a new swap request interaction
+      const newSwapRequestInteraction = new SwapRequestInteraction({
+        swapRequest: swapRequestId,
+        user: userId,
+        message: req.body.message || '' // Allow the user to send a message with the request
+      });
+
+      const savedSwapRequestInteraction = await newSwapRequestInteraction.save();
+
+      // Create a notification for the user who created the swap request
+      // Assuming you have a Notification model and controller
+      // You might want to move this to a separate function or service
+      const notification = {
+        user: swapRequest.createdBy,
+        type: 'swap_request_placed',
+        message: `User ${userId} has placed a request on your swap request: ${swapRequest.serviceTitle}`,
+        relatedSwapRequest: swapRequestId,
+        relatedUser: userId
+      };
+
+      // You'll need to import your Notification model and controller here
+      // and use them to save the notification
+      // For example:
+      // const newNotification = new Notification(notification);
+      // await newNotification.save();
+      // Replace the above lines with your actual notification creation logic
+
+      res.status(201).json(savedSwapRequestInteraction);
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
