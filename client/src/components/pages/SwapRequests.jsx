@@ -150,7 +150,7 @@ function SwapRequests() {
     <div className="container mx-auto py-10">
       <h1 className="text-2xl font-bold mb-6 text-center text-primary">Posted Swaps</h1>
       <div className="rounded-md border">
-        <Table>
+        <Table rel={false}>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id} className="bg-primary hover:bg-primary/90 text-white">

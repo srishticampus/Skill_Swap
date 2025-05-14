@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Bell } from "lucide-react";
+import { Bell, Star } from "lucide-react";
 import { useLocation, Link, Outlet } from 'react-router';
 import { useAuth } from "@/context/AuthContext";
 import skillswap from "@/assets/skillswap.svg";
@@ -13,6 +13,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  navigationMenuTriggerStyle,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+} from "@/components/ui/navigation-menu"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react";
 import axiosInstance from "@/api/axios";
@@ -81,47 +90,88 @@ function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
-      <div className="container flex items-center justify-between px-4 py-3 mx-auto">
-        <img src={skillswap} alt="skillswap" className="my-5 rounded-full" />
+    <div className="container w-full flex items-baseline justify-between px-4 py-3 mx-auto">
+      <div className="flex items-center justify-between w-full">
+        <Link to="/">
+          <img src={skillswap} alt="skillswap" className="mr-12 rounded-full" />
+        </Link>
+        <NavigationMenu viewport={false}>
+          <NavigationMenuList className="flex items-center w-full">
+            <NavigationMenuItem>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <Link to="/" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/" ? "text-primary" : ""}`}>
+                  Home
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <Link to="/about" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/about" ? "text-primary" : ""}`}>
+                  About
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <Link to="/contact" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/contact" ? "text-primary" : ""}`}>
+                  Contact
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            {user && (
+              <>
+                <NavigationMenuItem>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    <Link to="/exchange-skills" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/exchange-skills" ? "text-primary" : ""}`}>
+                      Exchange Skills
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </>
+            )}
+            {user && (
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>
+                  Swap Requests
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                    <Link to="/swap-request-form">Request Swap</Link>
+                  </NavigationMenuLink>
 
-        <div className="hidden md:flex items-center gap-6">
-          <Link to="/" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/" ? "text-primary" : ""}`}>
-            Home
-          </Link>
-          <Link to="/about" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/about" ? "text-primary" : ""}`}>
-            About
-          </Link>
-          <Link to="/contact" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/contact" ? "text-primary" : ""}`}>
-            Contact
-          </Link>
-          {user && (
-            <>
-              <Link to="/exchange-skills" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/exchange-skills" ? "text-primary" : ""}`}>
-                Exchange Skills
-              </Link>
-              <Link to="/swap-request-form" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/swap-request-form" ? "text-primary" : ""}`}>
-                Request Swap
-              </Link>
-              <Link to="/swap-requests" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/swap-requests" ? "text-primary" : ""}`}>
-                My Swap Requests
-              </Link>
-            </>
-          )}
-          {user?.isAdmin && (
-            <Link to="/admin" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/admin" ? "text-primary" : ""}`}>
-              Admin Dashboard
-            </Link>
-          )}
-        </div>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
+                    <Link to="/swap-requests">My Swap Requests</Link>
+                  </NavigationMenuLink>
 
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
+                      <Link to="/sent-swap-requests">Sent Swap Requests</Link>
+                    </NavigationMenuLink>
+
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
+                      <Link to="/received-swap-requests">Received Swap Requests</Link>
+                    </NavigationMenuLink>
+
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            )}
+            {user?.isAdmin && (
+              <NavigationMenuItem>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <Link to="/admin" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/admin" ? "text-primary" : ""}`}>
+                    Admin Dashboard
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            )}
+          </NavigationMenuList>
+        </NavigationMenu>
         <div className="flex items-center gap-2">
           {user ? (
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="rounded-full">
-                    <Bell/>
+                    <Bell />
                     {unreadNotifications > 0 && (
                       <Badge className="ml-2">{unreadNotifications}</Badge>
                     )}
@@ -150,9 +200,10 @@ function Navbar() {
               </Button>
             </>
           )}
+
         </div>
       </div>
-    </nav>
+    </div>
   );
 }
 
@@ -161,8 +212,8 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar/>
-      <Outlet/>
+      <Navbar />
+      <Outlet />
       <Footer />
     </div>
   );
