@@ -49,7 +49,12 @@ export const createSwapRequest = async (req, res) => {
   }
 };
 
-// Get all swap requests with filtering and searching
+/** Get all swap requests with filtering and searching
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {void}
+ * @throws {Error} Error if there is an issue with the request
+ */
 export const getAllSwapRequests = async (req, res) => {
   try {
     const { createdBy, searchTerm, serviceRequired, serviceCategory } = req.query;
@@ -330,4 +335,43 @@ export const placeRequest = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+};
+
+// Get all swap requests created by others which are placed by the current user
+export const getSentSwapRequests = async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => {
+            if (err) {
+                return res.status(403).json({ message: 'Failed to authenticate token' });
+            }
+
+            const userId = decoded.user.id;
+
+            // Find swap request interactions for the current user
+            const swapRequestInteractions = await SwapRequestInteraction.find({ user: userId })
+                .populate({
+                    path: 'swapRequest',
+                    populate: [
+                        { path: 'serviceCategory' },
+                        { path: 'createdBy' }
+                    ]
+                })
+                .exec();
+
+            // Extract the swap requests from the interactions
+            const swapRequests = swapRequestInteractions.map(interaction => interaction.swapRequest);
+
+            // Filter out any null swap requests (if any interactions are invalid)
+            const validSwapRequests = swapRequests.filter(swapRequest => swapRequest !== null);
+
+            res.status(200).json(validSwapRequests);
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 };
