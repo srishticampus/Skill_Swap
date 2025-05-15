@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from "sonner"
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,65 @@ const ReceivedSwapRequests = () => {
 
     fetchReceivedSwapRequests();
   }, []);
+
+  const handleApprove = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token provided');
+        setError('No token provided. Please log in.');
+        return;
+      }
+
+      await axiosInstance.put(`/api/swap-request-interactions/${id}/approve`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Update the state to reflect the approved request
+      setRequests(prevRequests =>
+        prevRequests.map(request =>
+          request._id === id ? { ...request, status: 'accepted' } : request
+        )
+      );
+
+      toast.success("Swap request approved!")
+    } catch (err) {
+      console.error('Error approving swap request:', err);
+      setError(err.message || 'Failed to approve swap request');
+      toast.error(err.message || 'Failed to approve swap request')
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token provided');
+        setError('No token provided. Please log in.');
+        return;
+      }
+
+      await axiosInstance.put(`/api/swap-request-interactions/${id}/reject`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Update the state to reflect the rejected request
+      setRequests(prevRequests =>
+        prevRequests.map(request =>
+          request._id === id ? { ...request, status: 'rejected' } : request
+        )
+      );
+      toast.success("Swap request rejected!")
+    } catch (err) {
+      console.error('Error rejecting swap request:', err);
+      setError(err.message || 'Failed to reject swap request');
+      toast.error(err.message || 'Failed to reject swap request')
+    }
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -90,8 +150,8 @@ const ReceivedSwapRequests = () => {
                   <p className="text-sm text-gray-700">Before 21 April 2025</p>
                 </div>
                 <div className="flex justify-between mt-4">
-                  <button className="bg-purple-200 text-purple-700 rounded-full px-4 py-2 hover:bg-purple-300">Approve</button>
-                  <button className="bg-purple-200 text-purple-700 rounded-full px-4 py-2 hover:bg-purple-300">Reject</button>
+                  <button className="bg-purple-200 text-purple-700 rounded-full px-4 py-2 hover:bg-purple-300" onClick={() => handleApprove(request._id)}>Approve</button>
+                  <button className="bg-purple-200 text-purple-700 rounded-full px-4 py-2 hover:bg-purple-300" onClick={() => handleReject(request._id)}>Reject</button>
                 </div>
               </CardContent>
             </Card>

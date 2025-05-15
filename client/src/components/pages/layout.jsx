@@ -150,6 +150,9 @@ function Navbar() {
                     <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
                       <Link to="/received-swap-requests">Received Swap Requests</Link>
                     </NavigationMenuLink>
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
+                      <Link to="/approved-swap-requests">Approved Swap Requests</Link>
+                    </NavigationMenuLink>
 
                 </NavigationMenuContent>
               </NavigationMenuItem>
