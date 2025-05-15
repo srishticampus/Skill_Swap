@@ -417,3 +417,43 @@ export const getReceivedSwapRequests = async (req, res) => {
    res.status(500).json({ message: err.message });
  }
 };
+
+// Approve a swap request interaction by ID
+export const approveSwapRequestInteraction = async (req, res) => {
+ try {
+   const { id } = req.params;
+
+   const swapRequestInteraction = await SwapRequestInteraction.findById(id);
+
+   if (!swapRequestInteraction) {
+     return res.status(404).json({ message: 'Swap request interaction not found' });
+   }
+
+   swapRequestInteraction.status = 'accepted';
+   await swapRequestInteraction.save();
+
+   res.status(200).json({ message: 'Swap request interaction approved' });
+ } catch (err) {
+   res.status(500).json({ message: err.message });
+ }
+};
+
+// Reject a swap request interaction by ID
+export const rejectSwapRequestInteraction = async (req, res) => {
+ try {
+   const { id } = req.params;
+
+   const swapRequestInteraction = await SwapRequestInteraction.findById(id);
+
+   if (!swapRequestInteraction) {
+     return res.status(404).json({ message: 'Swap request interaction not found' });
+   }
+
+   swapRequestInteraction.status = 'rejected';
+   await swapRequestInteraction.save();
+
+   res.status(200).json({ message: 'Swap request interaction rejected' });
+ } catch (err) {
+   res.status(500).json({ message: err.message });
+ }
+};

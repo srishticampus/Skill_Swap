@@ -1,4 +1,5 @@
 import express from "express";
+import { approveSwapRequestInteraction, rejectSwapRequestInteraction } from './controllers/swap_request.js';
 import cors from "cors";
 import morgan from "morgan";
 import logger from "pino-http";
@@ -68,6 +69,8 @@ app.delete('/api/swap-requests/:id', verifyToken, deleteSwapRequestById);
 app.post('/api/swap-requests/:id/place-request', verifyToken, placeRequest);
 app.get('/api/sent-swap-requests', verifyToken, getSentSwapRequests);
 app.get('/api/received-swap-requests', verifyToken, getReceivedSwapRequests);
+app.put('/api/swap-request-interactions/:id/approve', verifyToken, approveSwapRequestInteraction);
+app.put('/api/swap-request-interactions/:id/reject', verifyToken, rejectSwapRequestInteraction);
 
 // Add profile update routes (already added above)
 // app.post("/api/auth/update-profile", authRoutes);
