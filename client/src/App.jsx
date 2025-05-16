@@ -49,6 +49,7 @@ import AdminComplaints from "./components/pages/admin/complaints";
 import SentSwapRequests from "./components/pages/SentSwapRequests";
 import ReceivedSwapRequests from "./components/pages/ReceivedSwapRequests";
 import ApprovedSwapRequests from "./components/pages/ApprovedSwapRequests";
+import SwapRequestDetailsPage from "./components/pages/SwapRequestDetailsPage";
 
 // Helper component to determine root page based on auth state
 const RootRouteHandler = () => {
@@ -85,6 +86,7 @@ function App() {
           <Route path="/exchange-skills" element={<ExchangeSkills />} />
           <Route path="/exchange-skills/:id" element={<SwapRequestDetails />} /> {/* Add the route for details page */}
           <Route path="/approved-swap-requests" element={<ApprovedSwapRequests />} />
+          <Route path="/swap-requests/:id" element={<SwapRequestDetailsPage />} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />

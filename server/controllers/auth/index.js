@@ -17,7 +17,7 @@ const upload = multer({ storage: storage });
 // Middleware function to verify JWT token
 export const auth = (req, res, next) => {
   const token = req.header("x-auth-token");
-
+  console.log("auth: token:", token);
   if (!token) {
     return res.status(401).json({ msg: "No token, authorization denied" });
   }

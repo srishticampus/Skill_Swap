@@ -163,11 +163,30 @@ export const getAllSwapRequests = async (req, res) => {
 // Get a specific swap request by ID
 export const getSwapRequestById = async (req, res) => {
   try {
-    const swapRequest = await SwapRequest.findById(req.params.id).populate('createdBy').populate({path:"serviceCategory",select:"_id name"});
+    const swapRequest = await SwapRequest.findById(req.params.id)
+      .populate('createdBy')
+      .populate({ path: "serviceCategory", select: "_id name" });
+
     if (!swapRequest) {
       return res.status(404).json({ message: 'Swap request not found' });
     }
-    res.status(200).json(swapRequest);
+
+    // Find the corresponding SwapRequestInteraction to get the updates
+    const swapRequestInteraction = await SwapRequestInteraction.findOne({ swapRequest: req.params.id });
+
+    if (!swapRequestInteraction) {
+      return res.status(404).json({ message: 'Swap request interaction not found' });
+    }
+
+    // Populate the updates array in the swapRequestInteraction
+    await swapRequestInteraction.populate('updates.user');
+
+    const swapRequestData = {
+      ...swapRequest.toObject(),
+      updates: swapRequestInteraction.updates || []
+    };
+
+    res.status(200).json(swapRequestData);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -456,4 +475,125 @@ export const rejectSwapRequestInteraction = async (req, res) => {
  } catch (err) {
    res.status(500).json({ message: err.message });
  }
+};
+
+// Get all approved swap requests for the current user
+export const getApprovedSwapRequests = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    console.log("getApprovedSwapRequests: token:", token);
+    jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: 'Failed to authenticate token' });
+      }
+      console.log("getApprovedSwapRequests: decoded:", decoded);
+      const userId = decoded.user.id;
+
+      // Find swap request interactions where the user is involved and the status is 'accepted'
+      const approvedInteractions = await SwapRequestInteraction.find({
+        $or: [
+          { user: userId },
+          { 'swapRequest.createdBy': userId }
+        ],
+        status: 'accepted'
+      })
+      .populate({
+        path: 'swapRequest',
+        populate: [
+          { path: 'serviceCategory' },
+          { path: 'createdBy' }
+        ]
+      })
+      .populate('user')
+      .exec();
+
+    // Extract the swap requests from the interactions
+    const swapRequests = approvedInteractions.map(interaction => interaction.swapRequest);
+
+      res.status(200).json(swapRequests);
+    });
+  } catch (err) {
+    console.log("Error in getApprovedSwapRequests:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Add a status update to a swap request
+export const addStatusUpdate = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: 'Failed to authenticate token' });
+      }
+
+      const userId = decoded.user.id;
+      const swapRequestId = req.params.id;
+
+      // Check if the user is involved in the swap request
+      const swapRequestInteraction = await SwapRequestInteraction.findOne({
+        swapRequest: swapRequestId,
+        $or: [{ user: userId }, { swapRequest: { $in: (await SwapRequest.find({ createdBy: userId })).map(sr => sr._id) } }]
+      });
+
+      if (!swapRequestInteraction) {
+        return res.status(404).json({ message: 'Swap request interaction not found' });
+      }
+
+      // Add the status update to the swap request interaction
+      swapRequestInteraction.updates.push({
+        user: userId,
+        content: req.body.updateContent
+      });
+
+      await swapRequestInteraction.save();
+
+      res.status(200).json({ message: 'Status update added' });
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Mark a swap request as completed
+export const markAsCompleted = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: 'Failed to authenticate token' });
+      }
+
+      const userId = decoded.user.id;
+      const swapRequestId = req.params.id;
+
+      // Check if the user is involved in the swap request
+      const swapRequestInteraction = await SwapRequestInteraction.findOne({
+        swapRequest: swapRequestId,
+        $or: [{ user: userId }, { swapRequest: { $in: (await SwapRequest.find({ createdBy: userId })).map(sr => sr._id) } }]
+      });
+
+      if (!swapRequestInteraction) {
+        return res.status(404).json({ message: 'Swap request interaction not found' });
+      }
+
+      swapRequestInteraction.status = 'completed';
+      await swapRequestInteraction.save();
+
+      res.status(200).json({ message: 'Swap request marked as completed' });
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

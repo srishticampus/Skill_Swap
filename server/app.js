@@ -9,7 +9,7 @@ import { router as authRoutes } from "./controllers/auth/index.js";
 import { router as organizationAuthRoutes } from "./controllers/auth/organization.js"; // Import organization auth routes
 import { router as adminRoutes } from "./controllers/admin/index.js";
 import { router as marketplaceRoutes } from "./controllers/marketplace/index.js";
-import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById, placeRequest,getSentSwapRequests,getReceivedSwapRequests } from './controllers/swap_request.js';
+import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById, placeRequest,getSentSwapRequests,getReceivedSwapRequests, getApprovedSwapRequests, addStatusUpdate, markAsCompleted } from "./controllers/swap_request.js";
 import { verifyToken } from "./controllers/auth/index.js";
 import notificationRoutes from "./controllers/notifications.js";
 import { submitContactForm, getAllContactForms, getContactFormById, deleteContactForm } from './controllers/contact.js';
@@ -60,6 +60,11 @@ app.use("/api/notifications", notificationRoutes);//I have also removed prefix o
 // Use category routes
 app.use("/api/categories", categoryRoutes); // Route category routes
 
+// New Swap Request routes
+app.get('/api/swap-requests/approved', verifyToken, getApprovedSwapRequests);
+app.post('/api/swap-requests/:id/update', verifyToken, addStatusUpdate);
+app.put('/api/swap-requests/:id/complete', verifyToken, markAsCompleted);
+
 // Swap Request routes
 app.post('/api/swap-requests', createSwapRequest);
 app.get('/api/swap-requests', getAllSwapRequests);
@@ -71,6 +76,11 @@ app.get('/api/sent-swap-requests', verifyToken, getSentSwapRequests);
 app.get('/api/received-swap-requests', verifyToken, getReceivedSwapRequests);
 app.put('/api/swap-request-interactions/:id/approve', verifyToken, approveSwapRequestInteraction);
 app.put('/api/swap-request-interactions/:id/reject', verifyToken, rejectSwapRequestInteraction);
+
+// New Swap Request routes
+app.get('/api/swap-requests/approved', verifyToken, getApprovedSwapRequests);
+app.post('/api/swap-requests/:id/update', verifyToken, addStatusUpdate);
+app.put('/api/swap-requests/:id/complete', verifyToken, markAsCompleted);
 
 // Add profile update routes (already added above)
 // app.post("/api/auth/update-profile", authRoutes);

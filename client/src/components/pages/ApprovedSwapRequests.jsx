@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import {
   createColumnHelper,
   flexRender,
@@ -15,46 +15,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-
+import UpdateSwapRequestDialog from "@/components/UpdateSwapRequestDialog";
+import axiosInstance from "@/api/axios";
 const ApprovedSwapRequests = () => {
-  const swapRequests = [
-    {
-      id: 1,
-      profilePic: 'https://via.placeholder.com/50',
-      name: 'Nikitha',
-      category: 'Python, Java',
-      skills: 'SDLC',
-      deadline: '25 April 2025',
-      status: 'Update',
-    },
-    {
-      id: 2,
-      profilePic: 'https://via.placeholder.com/50',
-      name: 'Nikitha',
-      category: 'Python, Java',
-      skills: 'SDLC',
-      deadline: '25 April 2025',
-      status: 'Update',
-    },
-    {
-      id: 3,
-      profilePic: 'https://via.placeholder.com/50',
-      name: 'Nikitha',
-      category: 'Python, Java',
-      skills: 'SDLC',
-      deadline: '25 April 2025',
-      status: 'Update',
-    },
-    {
-      id: 4,
-      profilePic: 'https://via.placeholder.com/50',
-      name: 'Nikitha',
-      category: 'Python, Java',
-      skills: 'SDLC',
-      deadline: '25 April 2025',
-      status: 'Update',
-    },
-  ];
+  const [swapRequests, setSwapRequests] = useState([]);
+
+  useEffect(() => {
+    const fetchApprovedSwapRequests = async () => {
+      try {
+        const response = await axiosInstance.get('/api/swap-requests/approved');
+        setSwapRequests(response.data);
+      } catch (error) {
+        console.error('Error fetching approved swap requests:', error);
+      }
+    };
+
+    fetchApprovedSwapRequests();
+  }, []);
 
   const columnHelper = createColumnHelper();
 
@@ -80,12 +57,33 @@ const ApprovedSwapRequests = () => {
     }),
     columnHelper.accessor('status', {
       header: 'Status',
+      cell: ({ row }) => (
+        <Button onClick={() => handleUpdateClick(row.original.id)}>Update</Button>
+      ),
     }),
     columnHelper.accessor('track', {
       header: 'Track Request',
-      cell: () => <div>Track</div>,
+      cell: ({ row }) => (
+        <Button onClick={() => handleTrackClick(row.original.id)}>Track</Button>
+      ),
     }),
+    
   ];
+
+  const handleTrackClick = (swapRequestId) => {
+    // Implement navigation to the swap request details page
+    window.location.href = `/swap-requests/${swapRequestId}`;
+  };
+
+  const [selectedSwapRequestId, setSelectedSwapRequestId] = useState(null);
+
+  const handleUpdateClick = (swapRequestId) => {
+    setSelectedSwapRequestId(swapRequestId);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedSwapRequestId(null);
+  };
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -187,6 +185,12 @@ const ApprovedSwapRequests = () => {
           </Button>
         </div>
       </div>
+      {selectedSwapRequestId && (
+        <UpdateSwapRequestDialog
+          swapRequestId={selectedSwapRequestId}
+          onClose={handleCloseDialog}
+        />
+      )}
     </div>
   );
 };
