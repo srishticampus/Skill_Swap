@@ -87,6 +87,10 @@ const UserSchema = new mongoose.Schema({
     ref: 'Organization',
     default: null,
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
   date: {
     type: Date,
     default: Date.now,

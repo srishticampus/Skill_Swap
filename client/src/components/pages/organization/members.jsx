@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,51 +7,79 @@ import { Search, MapPin, Phone, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router';
+import axios from '@/api/axios'; // Import axios
 
 const Members = () => {
-  // Dummy data for members
-  const members = [
-    {
-      id: 1,
-      name: 'David D',
-      gender: 'male',
-      email: 'davidd@gmail.com',
-      location: 'Trivandrum, India',
-      phone: '+91 1234567890',
-      requestsHandled: '9+',
-      avatarUrl: '/src/assets/profile-pic.png', // Replace with actual image path
-    },
-    {
-      id: 2,
-      name: 'David D',
-      gender: 'male',
-      email: 'davidd@gmail.com',
-      location: 'Trivandrum, India',
-      phone: '+91 1234567890',
-      requestsHandled: '9+',
-      avatarUrl: '/src/assets/profile-pic.png', // Replace with actual image path
-    },
-    {
-      id: 3,
-      name: 'David D',
-      gender: 'male',
-      email: 'davidd@gmail.com',
-      location: 'Trivandrum, India',
-      phone: '+91 1234567890',
-      requestsHandled: '9+',
-      avatarUrl: '/src/assets/profile-pic.png', // Replace with actual image path
-    },
-    {
-      id: 4,
-      name: 'David D',
-      gender: 'male',
-      email: 'davidd@gmail.com',
-      location: 'Trivandrum, India',
-      phone: '+91 1234567890',
-      requestsHandled: '9+',
-      avatarUrl: '/src/assets/profile-pic.png', // Replace with actual image path
-    },
-  ];
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef(null); // Create a ref for the search input
+  const inputWasFocusedRef = useRef(false); // Ref to track if the input was focused before fetch
+
+  const fetchMembers = async () => {
+    // Capture focus state before the async operation
+    inputWasFocusedRef.current = searchInputRef.current === document.activeElement;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get('/api/organizations/members', {
+        params: { search: searchQuery },
+      });
+      setMembers(response.data);
+    } catch (err) {
+      setError(err);
+      console.error("Error fetching members:", err);
+    } finally {
+      setLoading(false);
+      // Focus restoration will be handled by a separate useEffect
+    }
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchMembers();
+    }, 500); // Delay API call by 500ms
+
+    return () => clearTimeout(delayDebounceFn); // Cleanup timeout on unmount or searchQuery change
+  }, [searchQuery]); // Refetch when searchQuery changes
+
+  // Effect to restore focus after loading is complete
+  useEffect(() => {
+    if (!loading && inputWasFocusedRef.current && searchInputRef.current) {
+      searchInputRef.current.focus();
+      // Reset the ref after restoring focus
+      inputWasFocusedRef.current = false;
+    }
+  }, [loading]); // Trigger this effect when loading state changes
+
+  const handleSearchInputChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleActivateDeactivate = async (memberId, isActive) => {
+    try {
+      const endpoint = isActive ? `/api/organizations/members/${memberId}/activate` : `/api/organizations/members/${memberId}/deactivate`;
+      await axios.put(endpoint);
+      // Update the member's status in the local state
+      setMembers(members.map(member =>
+        member._id === memberId ? { ...member, isActive: isActive } : member
+      ));
+    } catch (err) {
+      console.error(`Error ${isActive ? 'activating' : 'deactivating'} member:`, err);
+      // Optionally show an error message to the user
+    }
+  };
+
+
+  if (loading) {
+    return <div className="container mx-auto p-6 text-white min-h-screen">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="container mx-auto p-6 text-white min-h-screen">Error: {error.message}</div>;
+  }
 
   return (
     <div className="container mx-auto p-6 text-white min-h-screen">
@@ -63,11 +91,14 @@ const Members = () => {
           <Input
             type="text"
             placeholder="Search here..."
-            className="pl-10 pr-4 py-2 rounded-full bg-white border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary w-full"
+            className="pl-10 pr-4 py-2 rounded-full bg-white text-foreground border-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary w-full"
+            value={searchQuery}
+            onChange={handleSearchInputChange}
+            ref={searchInputRef} // Attach the ref to the input element
           />
         </div>
-        <Link to="/organization/members/add" className="ml-4">
-          <Button className="bg-gradient-to-r from-primary to-indigo-600 hover:from-primary hover:to-indigo-700 text-white">
+        <Link to="/organizations/members/add" className="ml-4">
+          <Button >
             Add New Member
           </Button>
         </Link>
@@ -75,10 +106,10 @@ const Members = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {members.map((member) => (
-          <Card key={member.id} className="bg-white border-gray-200 rounded-lg overflow-hidden">
+          <Card key={member._id} className="bg-white border-gray-200 rounded-lg overflow-hidden">
             <CardContent className="p-6 flex items-center">
               <Avatar className="w-24 h-24 mr-6">
-                <AvatarImage src={member.avatarUrl} alt={member.name} />
+                <AvatarImage src={member.profilePicture || '/src/assets/profile-pic.png'} alt={member.name} /> {/* Use profilePicture from API */}
                 <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
@@ -92,7 +123,7 @@ const Members = () => {
 
                 <div className="flex items-center text-gray-600 text-sm mb-1">
                   <MapPin size={16} className="mr-1" />
-                  <span>{member.location}</span>
+                  <span>{`${member.city}, ${member.country}`}</span> {/* Use city and country from API */}
                 </div>
                 <div className="flex items-center text-gray-600 text-sm mb-4">
                   <Phone size={16} className="mr-1" />
@@ -100,16 +131,30 @@ const Members = () => {
                 </div>
                 <div className="flex items-center mb-4">
                   <span className="text-sm text-gray-600 mr-2">Total Request Handled</span>
-                  <Badge className="bg-primary text-white rounded-full px-3 py-1 text-xs">{member.requestsHandled}</Badge>
+                  <Badge className="bg-primary text-white rounded-full px-3 py-1 text-xs">{member.requestsHandled || 'N/A'}</Badge> {/* requestsHandled might not be in User model, use default */}
                 </div>
                 <div className="flex space-x-4 mb-4">
-                  <Button variant="outline" className="flex-1 border-primary text-primary hover:bg-purple-900">Active</Button>
-                  <Button className="flex-1 bg-gradient-to-r from-primary to-indigo-600 hover:from-primary hover:to-indigo-700 text-white">Deactive</Button>
+                  <Button
+                    variant={member.isActive ? "outline" : "default"} // Change variant based on isActive
+                    className="flex-1"
+                    onClick={() => handleActivateDeactivate(member._id, true)}
+                    disabled={member.isActive} // Disable if already active
+                  >
+                    Active
+                  </Button>
+                  <Button
+                    variant={member.isActive ? "default" : "outline"} // Change variant based on isActive
+                    className="flex-1 "
+                    onClick={() => handleActivateDeactivate(member._id, false)}
+                    disabled={!member.isActive} // Disable if already inactive
+                  >
+                    Deactive
+                  </Button>
                 </div>
                 <div className="text-right">
-                  <a href={`/organization/members/details/${member.id}`} className="text-primary hover:underline flex items-center justify-end">
+                  <Link to={`/organization/members/details/${member._id}`} className="text-primary hover:underline flex items-center justify-end"> {/* Corrected path */}
                     View More <ArrowRight size={16} className="ml-1" />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </CardContent>
@@ -121,3 +166,4 @@ const Members = () => {
 };
 
 export default Members;
+

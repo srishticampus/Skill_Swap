@@ -94,4 +94,115 @@ router.post(
   }
 );
 
+// @route   GET /api/organization/members
+// @desc    Get all members for an organization with optional search
+// @access  Private (Organization)
+router.get("/members", organizationAuth, async (req, res) => {
+  try {
+    const organizationId = req.organization.id;
+    const { search } = req.query;
+
+    let query = { organization: organizationId };
+
+    if (search) {
+      // Case-insensitive search on name or email
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const members = await User.find(query).select('-password'); // Exclude password
+
+    res.json(members);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// @route   GET /api/organization/members/:id
+// @desc    Get a single member's details by ID
+// @access  Private (Organization)
+router.get("/members/:id", organizationAuth, async (req, res) => {
+  try {
+    const organizationId = req.organization.id;
+    const memberId = req.params.id;
+
+    const member = await User.findOne({
+      _id: memberId,
+      organization: organizationId,
+    }).select('-password'); // Exclude password
+
+    if (!member) {
+      return res.status(404).json({ msg: "Member not found or does not belong to this organization" });
+    }
+
+    res.json(member);
+  } catch (err) {
+    console.error(err.message);
+    // Check if the error is a CastError (invalid ID format)
+    if (err.kind === 'ObjectId') {
+      return res.status(400).json({ msg: "Invalid member ID format" });
+    }
+    res.status(500).send("Server Error");
+  }
+});
+
+// @route   PUT /api/organization/members/:id/activate
+// @desc    Activate a member
+// @access  Private (Organization)
+router.put("/members/:id/activate", organizationAuth, async (req, res) => {
+  try {
+    const organizationId = req.organization.id;
+    const memberId = req.params.id;
+
+    const member = await User.findOneAndUpdate(
+      { _id: memberId, organization: organizationId },
+      { $set: { isActive: true } },
+      { new: true }
+    ).select('-password');
+
+    if (!member) {
+      return res.status(404).json({ msg: "Member not found or does not belong to this organization" });
+    }
+
+    res.json(member);
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(400).json({ msg: "Invalid member ID format" });
+    }
+    res.status(500).send("Server Error");
+  }
+});
+
+// @route   PUT /api/organization/members/:id/deactivate
+// @desc    Deactivate a member
+// @access  Private (Organization)
+router.put("/members/:id/deactivate", organizationAuth, async (req, res) => {
+  try {
+    const organizationId = req.organization.id;
+    const memberId = req.params.id;
+
+    const member = await User.findOneAndUpdate(
+      { _id: memberId, organization: organizationId },
+      { $set: { isActive: false } },
+      { new: true }
+    ).select('-password');
+
+    if (!member) {
+      return res.status(404).json({ msg: "Member not found or does not belong to this organization" });
+    }
+
+    res.json(member);
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(400).json({ msg: "Invalid member ID format" });
+    }
+    res.status(500).send("Server Error");
+  }
+});
+
 export default router;
