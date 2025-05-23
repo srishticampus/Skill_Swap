@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Plus } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-
+import countries from '@/constants/countries';
 
 const AddMember = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -73,15 +73,15 @@ const AddMember = () => {
             <div className="grid gap-2">
               <Label htmlFor="country">Country</Label>
               <Select>
-                <SelectTrigger id="country">
+                <SelectTrigger className="w-full" id="country">
                   <SelectValue placeholder="Select country" />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* Add country options here */}
-                  <SelectItem value="usa">USA</SelectItem>
-                  <SelectItem value="canada">Canada</SelectItem>
-                  <SelectItem value="india">India</SelectItem>
-                  {/* Add more countries as needed */}
+                  {countries.map((country) => (
+                    <SelectItem key={country} value={country.toLowerCase().replace(/\s+/g, '-')}>
+                      {country}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -106,7 +106,7 @@ const AddMember = () => {
                 </div>
               </RadioGroup>
             </div>
-            <Button type="submit" className="w-full md:col-span-2 bg-gradient-to-r from-primary to-indigo-600 hover:from-primary hover:to-indigo-700 text-white">
+            <Button type="submit" className="w-full md:col-span-2 ">
               Submit
             </Button>
           </form>
