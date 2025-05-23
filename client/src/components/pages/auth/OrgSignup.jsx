@@ -67,7 +67,11 @@ export default function OrgSignup() {
           }
         }
       } catch (error) {
-        setErrors({ api: 'An error occurred during organization signup.' }); // Display generic error message
+        if (error.response && error.response.data && error.response.data.errors && error.response.data.errors.length > 0) {
+          setErrors({ api: error.response.data.errors[0].msg }); // Display the first error message from the API
+        } else {
+          setErrors({ api: 'An error occurred during organization signup.' }); // Fallback generic error message
+        }
       }
     }
   };
