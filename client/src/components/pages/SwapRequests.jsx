@@ -86,9 +86,12 @@ function SwapRequests() {
   ];
 
   useEffect(() => {
+    console.log('User object in useEffect:', user);
+    console.log('User ID in useEffect:', user?.user?.id);
+    // Only fetch swap requests if the user object and user ID are available
     fetchSwapRequests();
 
-  }, []);
+  }, [user]); // Add user as a dependency
 
   const fetchSwapRequests = async () => {
     try {
@@ -96,7 +99,7 @@ function SwapRequests() {
       // Fetch swap requests only for the current user
       console.log('User object before API call:', user); // Added log
       console.log('User ID before API call:', user?.id); // Added log
-      const response = await axiosInstance.get(`/api/swap-requests?createdBy=${user?.user?.id}`); // Corrected path to user ID
+      const response = await axiosInstance.get(`/api/swap-requests?createdBy=${user?.user?.id || user?.id}`); // Corrected path to user ID
       console.log('Fetched swap requests data:', response.data); // Log the fetched data
       setSwapRequests(response.data);
       toast.success('Swap requests loaded.');
