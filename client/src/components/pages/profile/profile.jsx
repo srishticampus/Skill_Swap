@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -49,7 +47,6 @@ import { Label } from "@/components/ui/label"
 import { Button } from "../../ui/button"
 import EditProfile from "./edit-profile";
 import EditTechnicalInfo from "./edit-technical";
-import { useAuth } from "@/context/AuthContext";
 import axiosInstance from '@/api/axios';
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input";
@@ -66,12 +63,13 @@ const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTechModalOpen, setIsTechModalOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
-  const [isMentorRequestModalOpen, setIsMentorRequestModalOpen] = useState(false);
+  const [isMentorRequestModalOpen, setIsMentorRequestModalOpen] = useState(false); // Re-added mentor request modal state
   const [mentorRequestText, setMentorRequestText] = useState("");
   const [isAddCertificationModalOpen, setIsAddCertificationModalOpen] = useState(false);
   const [certificationType, setCertificationType] = useState("text");
   const [certificationValue, setCertificationValue] = useState("");
   const [certificationFile, setCertificationFile] = useState(null);
+  const [categories, setCategories] = useState([]); // State for all categories
 
 
   const fetchProfileData = useCallback(async () => {
@@ -92,17 +90,19 @@ const ProfilePage = () => {
     fetchProfileData();
   }, [fetchProfileData]);
 
-  const openEditModal = () => {
-    setIsEditModalOpen(true);
-  };
+  // Fetch all categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get('/api/categories');
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-  const closeEditModal = () => {
-    setIsEditModalOpen(false);
-  };
-
-  const handleMentorRequestOpen = () => {
-    setIsMentorRequestModalOpen(true);
-  };
 
   const handleMentorRequestClose = () => {
     setIsMentorRequestModalOpen(false);
@@ -185,6 +185,13 @@ const ProfilePage = () => {
   };
 
 
+  // Resolve category IDs to names
+  const userCategories = profileData?.categories?.map(categoryId => {
+    const category = categories.find(cat => cat._id === categoryId);
+    return category ? category.name : 'Unknown Category';
+  }).filter(Boolean) || [];
+
+
   if (!profileData) {
     return <div>Loading...</div>;
   }
@@ -220,7 +227,7 @@ const ProfilePage = () => {
                       </DialogDescription>
                     </DialogHeader>
                     <EditProfile setIsEditModalOpen={setIsEditModalOpen} onProfileUpdate={fetchProfileData} />
-                   
+
                   </DialogContent>
                 </Dialog>
 
@@ -440,6 +447,19 @@ const ProfilePage = () => {
                 {profileData.skills?.map((skill, index) => (
                   <Badge key={index}>
                     {skill}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div className="col-span-1">
+              <div className="flex items-center gap-2">
+                <List className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Categories</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {userCategories.map((categoryName, index) => (
+                  <Badge key={index}>
+                    {categoryName}
                   </Badge>
                 ))}
               </div>

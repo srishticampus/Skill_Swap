@@ -104,6 +104,7 @@ export const MultiSelect = React.forwardRef(function MultiSelect(
   };
 
   const toggleOption = (option) => {
+    console.log("Option in toggleOption:", option);
     const newSelectedValues = selectedValues.includes(option)
       ? selectedValues.filter((value) => value !== option)
       : [...selectedValues, option];
@@ -225,7 +226,7 @@ export const MultiSelect = React.forwardRef(function MultiSelect(
         onEscapeKeyDown={() => setIsPopoverOpen(false)}
       >
         <Command>
-          {search&&<CommandInput placeholder="Search..." onKeyDown={handleInputKeyDown} />}
+          {search && <CommandInput placeholder="Search..." onKeyDown={handleInputKeyDown} />}
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>

@@ -32,7 +32,17 @@ router.post(
     check("city", "City is required").not().isEmpty(),
     check("country", "Country is required").not().isEmpty(),
     check("gender", "Gender is required").not().isEmpty(),
-    check("categories", "Categories are required").isArray({ min: 1 }),
+    check("categories", "Categories are required")
+      .custom(value => {
+        if (Array.isArray(value) && value.length > 0) {
+          return true;
+        }
+        if (typeof value === 'string' && value.trim() !== '') {
+          return true;
+        }
+        return false;
+      })
+      .withMessage("Categories are required and must be a non-empty array or a non-empty string"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -40,8 +50,15 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, phone, city, country, gender, categories } = req.body;
+    const { name, email, password, phone, city, country, gender } = req.body;
+    let categories = req.body.categories;
     let profilePicturePath = ""; // Initialize profile picture path
+
+    console.log("Signup: Categories before modification:", categories);
+    if (categories && !Array.isArray(categories)) {
+      categories = [categories];
+    }
+    console.log("Signup: Categories after modification:", categories);
 
     try {
       // Check if user already exists

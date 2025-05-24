@@ -46,7 +46,17 @@ router.post(
     check("country", "Country is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("Country name cannot contain digits"),
     check("city", "City is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("City name cannot contain digits"),
     check("gender", "Gender is required").not().isEmpty(),
-    check("categories", "Categories are required").isArray({ min: 1 }),
+    check("categories", "Categories are required")
+      .custom(value => {
+        if (Array.isArray(value) && value.length > 0) {
+          return true;
+        }
+        if (typeof value === 'string' && value.trim() !== '') {
+          return true;
+        }
+        return false;
+      })
+      .withMessage("Categories are required and must be a non-empty array or a non-empty string"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -54,7 +64,11 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { firstName, lastName, email, newPassword, phone, country, city, gender, categories } = req.body;
+    let { firstName, lastName, email, newPassword, phone, country, city, gender, categories } = req.body;
+
+    if (categories && !Array.isArray(categories)) {
+      categories = [categories];
+    }
 
     try {
       let user = await User.findOne({ email });
@@ -354,7 +368,17 @@ router.post(
     check("country", "Country is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("Country name cannot contain digits"),
     check("city", "City is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("City name cannot contain digits"),
     check("gender", "Gender is required").not().isEmpty(),
-    check("categories", "Categories are required").isArray({ min: 1 }),
+    check("categories", "Categories are required")
+      .custom(value => {
+        if (Array.isArray(value) && value.length > 0) {
+          return true;
+        }
+        if (typeof value === 'string' && value.trim() !== '') {
+          return true;
+        }
+        return false;
+      })
+      .withMessage("Categories are required and must be a non-empty array or a non-empty string"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -362,7 +386,11 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, phone, country, city, gender, categories } = req.body;
+    let { name, email, phone, country, city, gender, categories } = req.body;
+
+    if (categories && !Array.isArray(categories)) {
+      categories = [categories];
+    }
 
     try {
       const user = await User.findById(req.user.id);
