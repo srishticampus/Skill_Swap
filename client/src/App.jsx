@@ -41,6 +41,7 @@ import AddMember from "./components/pages/organization/add-member";
 import ViewAllSwaps from "./components/pages/organization/ViewAllSwaps";
 import ViewReviews from "./components/pages/organization/ViewReviews";
 import Complaints from "./components/pages/organization/Complaints";
+import OrganizationCategoryManagement from "./components/pages/organization/CategoryManagement"; // Import the new component
 import OrganizationRequests from "./components/pages/admin/OrganizationRequests";
 import Organizations from "./components/pages/admin/Organizations";
 import OrganizationDetails from "./components/pages/admin/OrganizationDetails";
@@ -111,6 +112,7 @@ function App() {
           <Route path="/organization/swaps" element={<ViewAllSwaps />} />
           <Route path="/organization/reviews" element={<ViewReviews />} />
           <Route path="/organization/complaints" element={<Complaints />} />
+          <Route path="/organization/categories" element={<OrganizationCategoryManagement />} /> {/* Add the new route */}
         </Route>
       </Routes>
     </AuthProvider>

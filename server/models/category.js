@@ -8,6 +8,11 @@ const categorySchema = new mongoose.Schema({
   },
   description: {
     type: String
+  },
+  organizationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Organization',
+    default: null
   }
 }, {
   timestamps: true

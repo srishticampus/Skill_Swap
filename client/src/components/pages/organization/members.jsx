@@ -97,7 +97,7 @@ const Members = () => {
             ref={searchInputRef} // Attach the ref to the input element
           />
         </div>
-        <Link to="/organizations/members/add" className="ml-4">
+        <Link to="/organization/members/add" className="ml-4">
           <Button >
             Add New Member
           </Button>
