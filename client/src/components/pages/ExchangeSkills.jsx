@@ -50,7 +50,7 @@ const ExchangeSkills = () => {
           params.serviceRequired = serviceRequiredFilter;
         }
         if (serviceCategoryFilter !== 'any') {
-           params.serviceCategory = serviceCategoryFilter;
+          params.serviceCategory = serviceCategoryFilter;
         }
 
         const response = await axiosInstance.get('/api/swap-requests', { params }); // Pass params as query parameters
@@ -70,25 +70,27 @@ const ExchangeSkills = () => {
 
   const handlePlaceRequest = async (swapRequestId) => {
     setPlacingRequest(true);
+    console.log('swapRequestId:', swapRequestId); // Add this line
     try {
       const token = localStorage.getItem('token'); // Assuming you store the token in localStorage
+      console.log('Token:', token); // Add this line
       if (!token) {
         console.error('No token provided');
-        toast("Error",{
+        toast("Error", {
           variant: "destructive",
           description: "No token provided. Please log in.",
         })
         return;
       }
-  
+
       const response = await axiosInstance.post(`/api/swap-requests/${swapRequestId}/place-request`, {}, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       console.log('Request placed:', response.data);
-      toast("Success",{
+      toast("Success", {
         description: "Request placed successfully!",
       })
       // Optionally, update the UI to reflect that the request has been placed
@@ -104,7 +106,7 @@ const ExchangeSkills = () => {
       setPlacingRequest(false);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="container mx-auto py-8">
@@ -183,14 +185,14 @@ const ExchangeSkills = () => {
             <SelectItem value="Other">Other</SelectItem>
           </SelectContent>
         </Select>
-         <Select onValueChange={setServiceCategoryFilter} value={serviceCategoryFilter}>
+        <Select onValueChange={setServiceCategoryFilter} value={serviceCategoryFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Any Category" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="any">Any Category</SelectItem>
             {categories.map(category => (
-               <SelectItem key={category._id} value={category._id}>{category.name}</SelectItem>
+              <SelectItem key={category._id} value={category._id}>{category.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -220,13 +222,13 @@ const ExchangeSkills = () => {
                   {request.preferredLocation}
                 </p>
                 <p className="flex items-center mb-1">
-                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                     <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                   </svg>
+                  </svg>
                   {request.yearsOfExperience ? `${request.yearsOfExperience} years of experience` : 'N/A'}
                 </p>
-                 {/* Rating display - needs adjustment based on actual data structure */}
+                {/* Rating display - needs adjustment based on actual data structure */}
               </div>
               <div className="flex justify-between text-sm mb-4">
                 <div>
@@ -235,7 +237,7 @@ const ExchangeSkills = () => {
                 </div>
                 <div>
                   <p className="text-gray-500">Service Offered</p>
-                   <Badge variant="outline" className="text-primary border-primary">{request.serviceTitle || 'N/A'}</Badge>
+                  <Badge variant="outline" className="text-primary border-primary">{request.serviceTitle || 'N/A'}</Badge>
                 </div>
               </div>
               <div className="flex justify-between gap-2">

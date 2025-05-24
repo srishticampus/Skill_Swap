@@ -23,7 +23,20 @@ const swapRequestInteractionSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  updates: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    message: {
+      type: String
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 });
 
 const SwapRequestInteraction = mongoose.model('SwapRequestInteraction', swapRequestInteractionSchema);

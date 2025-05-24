@@ -2,6 +2,8 @@ import SwapRequest from '../models/swap_request.js';
 import SwapRequestInteraction from '../models/swap_request_interaction.js'; // Import the SwapRequestInteraction model
 import Category from '../models/category.js'; // Import Category model
 import jwt from 'jsonwebtoken';
+import { match } from 'assert';
+import mongoose from 'mongoose';
  
 // Create a new swap request
 export const createSwapRequest = async (req, res) => {
@@ -163,31 +165,40 @@ export const getAllSwapRequests = async (req, res) => {
 // Get a specific swap request by ID
 export const getSwapRequestById = async (req, res) => {
   try {
+    console.log(`Fetching swap request with ID: ${req.params.id}`);
     const swapRequest = await SwapRequest.findById(req.params.id)
       .populate('createdBy')
       .populate({ path: "serviceCategory", select: "_id name" });
 
     if (!swapRequest) {
+      console.log('Swap request not found for ID:', req.params.id);
       return res.status(404).json({ message: 'Swap request not found' });
     }
 
+    console.log(`Found swap request: ${swapRequest._id}. Finding interaction.`);
     // Find the corresponding SwapRequestInteraction to get the updates
-    const swapRequestInteraction = await SwapRequestInteraction.findOne({ swapRequest: req.params.id });
+    let swapRequestInteraction = await SwapRequestInteraction.findOne({ swapRequest: req.params.id });
 
+    // If no interaction is found, create an empty object
     if (!swapRequestInteraction) {
-      return res.status(404).json({ message: 'Swap request interaction not found' });
+      console.log(`No interaction found for swap request: ${req.params.id}.`);
+      swapRequestInteraction = { updates: [] };
+    } else {
+      console.log(`Found interaction for swap request: ${req.params.id}. Populating updates.`);
+      // Populate the updates array in the swapRequestInteraction
+      await swapRequestInteraction.populate('updates.user');
+      console.log(`Updates populated for interaction: ${swapRequestInteraction._id}.`);
     }
-
-    // Populate the updates array in the swapRequestInteraction
-    await swapRequestInteraction.populate('updates.user');
 
     const swapRequestData = {
       ...swapRequest.toObject(),
       updates: swapRequestInteraction.updates || []
     };
 
+    console.log(`Successfully fetched swap request data for ID: ${req.params.id}`);
     res.status(200).json(swapRequestData);
   } catch (err) {
+    console.error(`Error in getSwapRequestById for ID ${req.params.id}:`, err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -298,7 +309,7 @@ export const placeRequest = async (req, res) => {
       if (err) {
         return res.status(403).json({ message: 'Failed to authenticate token' });
       }
-
+      console.log("Decoded token:", decoded);
       const userId = decoded.user.id;
       const swapRequestId = req.params.id;
 
@@ -330,7 +341,8 @@ export const placeRequest = async (req, res) => {
       });
 
       const savedSwapRequestInteraction = await newSwapRequestInteraction.save();
-
+      console.log("New SwapRequestInteraction saved:", savedSwapRequestInteraction);
+      console.log("SwapRequest ID:", swapRequestId);
       // Create a notification for the user who created the swap request
       // Assuming you have a Notification model and controller
       // You might want to move this to a separate function or service
@@ -418,7 +430,8 @@ export const getReceivedSwapRequests = async (req, res) => {
 
      // Find swap request interactions for the swap requests created by the current user
      const swapRequestInteractions = await SwapRequestInteraction.find({
-       swapRequest: { $in: swapRequestIds }
+       swapRequest: { $in: swapRequestIds },
+       status: "pending" // Only get pending interactions
      })
        .populate({
          path: 'swapRequest',
@@ -441,6 +454,15 @@ export const getReceivedSwapRequests = async (req, res) => {
 export const approveSwapRequestInteraction = async (req, res) => {
  try {
    const { id } = req.params;
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: 'Failed to authenticate token' });
+    }
+    const userId = decoded.user.id;
 
    const swapRequestInteraction = await SwapRequestInteraction.findById(id);
 
@@ -449,9 +471,11 @@ export const approveSwapRequestInteraction = async (req, res) => {
    }
 
    swapRequestInteraction.status = 'accepted';
+   
    await swapRequestInteraction.save();
 
    res.status(200).json({ message: 'Swap request interaction approved' });
+    });
  } catch (err) {
    res.status(500).json({ message: err.message });
  }
@@ -491,27 +515,64 @@ export const getApprovedSwapRequests = async (req, res) => {
       }
       console.log("getApprovedSwapRequests: decoded:", decoded);
       const userId = decoded.user.id;
+      console.log("getApprovedSwapRequests: userId:", userId);
 
-      // Find swap request interactions where the user is involved and the status is 'accepted'
-      const approvedInteractions = await SwapRequestInteraction.find({
-        $or: [
-          { user: userId },
-          { 'swapRequest.createdBy': userId }
-        ],
-        status: 'accepted'
-      })
-      .populate({
-        path: 'swapRequest',
-        populate: [
-          { path: 'serviceCategory' },
-          { path: 'createdBy' }
-        ]
-      })
-      .populate('user')
-      .exec();
+      const approvedInteractions = await SwapRequestInteraction.aggregate([
+        {
+          $match: { status: 'accepted' }
+        },
+        {
+          $lookup: {
+            from: 'swaprequests',
+            localField: 'swapRequest',
+            foreignField: '_id',
+            as: 'swapRequest'
+          }
+        },
+        { $unwind: '$swapRequest' },
+        {
+          $match: {
+            $or: [
+              { user: new mongoose.Types.ObjectId(userId) },
+              { 'swapRequest.createdBy': new mongoose.Types.ObjectId(userId) }
+            ]
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        { $unwind: '$user' },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'swapRequest.serviceCategory',
+            foreignField: '_id',
+            as: 'swapRequest.serviceCategory'
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'swapRequest.createdBy',
+            foreignField: '_id',
+            as: 'swapRequest.createdBy'
+          }
+        },
+        {
+          $unwind: {
+            path: '$swapRequest.createdBy',
+            preserveNullAndEmptyArrays: true
+          }
+        }
+      ]);
 
     // Extract the swap requests from the interactions
-    const swapRequests = approvedInteractions.map(interaction => interaction.swapRequest);
+    const swapRequests = approvedInteractions.map(interaction => interaction.swapRequest).filter(swapRequest => swapRequest !== null);
 
       res.status(200).json(swapRequests);
     });

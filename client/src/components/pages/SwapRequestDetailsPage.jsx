@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
-import axios from 'axios';
+import axiosInstance from '@/api/axios';
 
 const SwapRequestDetailsPage = () => {
   const { id } = useParams(); // Extract swap request ID from URL params

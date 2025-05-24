@@ -77,11 +77,6 @@ app.get('/api/received-swap-requests', verifyToken, getReceivedSwapRequests);
 app.put('/api/swap-request-interactions/:id/approve', verifyToken, approveSwapRequestInteraction);
 app.put('/api/swap-request-interactions/:id/reject', verifyToken, rejectSwapRequestInteraction);
 
-// New Swap Request routes
-app.get('/api/swap-requests/approved', verifyToken, getApprovedSwapRequests);
-app.post('/api/swap-requests/:id/update', verifyToken, addStatusUpdate);
-app.put('/api/swap-requests/:id/complete', verifyToken, markAsCompleted);
-
 // Add profile update routes (already added above)
 // app.post("/api/auth/update-profile", authRoutes);
 // app.post("/api/auth/update-technical", authRoutes);

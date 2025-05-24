@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   createColumnHelper,
   flexRender,
@@ -36,38 +36,43 @@ const ApprovedSwapRequests = () => {
   const columnHelper = createColumnHelper();
 
   const columns = [
-    columnHelper.accessor('id', {
+    columnHelper.accessor('_id', {
       header: 'SI No',
     }),
-    columnHelper.accessor('profilePic', {
+    columnHelper.accessor('createdBy.profilePicture', {
       header: 'Profile Pic',
-      cell: info => <img src={info.getValue()} alt="Profile" className="w-10 h-10 rounded-full" />,
+      cell: info => <img src={`${import.meta.env.VITE_API_URL}/${info.getValue()}`} alt="Profile" className="w-10 h-10 rounded-full" />,
     }),
-    columnHelper.accessor('name', {
+    columnHelper.accessor('createdBy.name', {
       header: 'Name',
     }),
-    columnHelper.accessor('category', {
+    columnHelper.accessor('serviceCategory', {
       header: 'Category',
+      cell: info => info.getValue().map(cat => cat.name).join(', '),
     }),
-    columnHelper.accessor('skills', {
+    columnHelper.accessor('createdBy.skills', {
       header: 'Skills',
+      cell: info => info.getValue() ? info.getValue().join(', ') : '',
     }),
     columnHelper.accessor('deadline', {
       header: 'Deadline',
     }),
-    columnHelper.accessor('status', {
+    columnHelper.accessor('requestStatus', {
       header: 'Status',
       cell: ({ row }) => (
-        <Button onClick={() => handleUpdateClick(row.original.id)}>Update</Button>
+        <div className="flex items-center gap-2">
+          <span>{row.original.requestStatus}</span>
+          <Button onClick={() => handleUpdateClick(row.original._id)}>Update</Button>
+        </div>
       ),
     }),
-    columnHelper.accessor('track', {
+    columnHelper.accessor('_id', {
       header: 'Track Request',
       cell: ({ row }) => (
-        <Button onClick={() => handleTrackClick(row.original.id)}>Track</Button>
+        <Button onClick={() => handleTrackClick(row.original._id)}>Track</Button>
       ),
     }),
-    
+
   ];
 
   const handleTrackClick = (swapRequestId) => {
@@ -114,9 +119,9 @@ const ApprovedSwapRequests = () => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
