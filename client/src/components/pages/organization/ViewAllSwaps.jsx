@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // Import Input for search bar
 import { Search } from 'lucide-react'; // Import Search icon
 import { useAuth } from '@/context/AuthContext';
+import axiosInstance from '@/api/axios';
 
 const placeholderSwaps = [
   {
@@ -106,11 +107,11 @@ function ViewAllSwaps() {
   const fetchAllSwaps = async () => {
     try {
       setLoading(true);
-      // Use placeholder data instead of fetching from API
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-      setSwaps(placeholderSwaps);
+      const response = await axiosInstance.get('/api/organizations/swaps');
+      setSwaps(response.data);
     } catch (error) {
-      console.error('Error setting placeholder swaps:', error);
+      console.error('Error fetching organization swaps:', error);
+      // Optionally set an error state to display a message to the user
     } finally {
       setLoading(false);
     }
@@ -166,9 +167,9 @@ function ViewAllSwaps() {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
