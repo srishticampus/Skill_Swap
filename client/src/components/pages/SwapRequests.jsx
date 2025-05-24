@@ -56,7 +56,7 @@ function SwapRequests() {
     }),
     columnHelper.accessor('yearsOfExperience', {
       header: 'Years of Experience',
-      cell: info => (info.getValue()!== undefined || info.getValue() !== null) ? info.getValue() : 'N/A',
+      cell: info => (info.getValue() !== undefined || info.getValue() !== null) ? info.getValue() : 'N/A',
     }),
     columnHelper.accessor('preferredLocation', {
       header: 'Location',
@@ -86,16 +86,17 @@ function SwapRequests() {
   ];
 
   useEffect(() => {
-      fetchSwapRequests();
-    
-  }, []); 
+    fetchSwapRequests();
+
+  }, []);
 
   const fetchSwapRequests = async () => {
     try {
       setLoading(true);
       // Fetch swap requests only for the current user
-      console.log(user)
-      const response = await axiosInstance.get(`/api/swap-requests?createdBy=${user.id}`);
+      console.log('User object before API call:', user); // Added log
+      console.log('User ID before API call:', user?.id); // Added log
+      const response = await axiosInstance.get(`/api/swap-requests?createdBy=${user?.user?.id}`); // Corrected path to user ID
       console.log('Fetched swap requests data:', response.data); // Log the fetched data
       setSwapRequests(response.data);
       toast.success('Swap requests loaded.');
@@ -159,9 +160,9 @@ function SwapRequests() {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>

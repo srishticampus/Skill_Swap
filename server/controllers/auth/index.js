@@ -8,8 +8,6 @@ import nodemailer from 'nodemailer';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { isNumberObject } from "util/types";
-
 // Multer configuration
 const storage = multer.memoryStorage(); // Store the file in memory
 const upload = multer({ storage: storage });
@@ -102,6 +100,7 @@ router.post(
         },
       };
 
+      console.log("VITE_JWT_SECRET:", import.meta.env.VITE_JWT_SECRET);
       jwt.sign(
         payload,
         import.meta.env.VITE_JWT_SECRET,

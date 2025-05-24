@@ -55,7 +55,8 @@ export default function Signup() {
   };
 
   const handleCategoryChange = (selectedOptions) => {
-    setFormData({ ...formData, categories: selectedOptions.map(option => option.value) });
+    // selectedOptions is an array of category IDs (strings)
+    setFormData({ ...formData, categories: selectedOptions });
   };
 
   const handleProfilePicChange = (e) => {
@@ -73,7 +74,9 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('handleSubmit: Current formData.categories', formData.categories); // Re-add log
     const validationErrors = validateForm(formData);
+    console.log('handleSubmit: Validation errors', validationErrors); // Re-add log
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
@@ -81,7 +84,14 @@ export default function Signup() {
       try {
         const formDataToSend = new FormData();
         for (const key in formData) {
-          formDataToSend.append(key, formData[key]);
+          if (key === 'categories' && Array.isArray(formData[key])) {
+            // Append each category ID individually for arrays
+            formData[key].forEach(category => {
+              formDataToSend.append(key, category);
+            });
+          } else {
+            formDataToSend.append(key, formData[key]);
+          }
         }
 
         const response = await axiosInstance.post('/api/auth/signup', formDataToSend, {
@@ -97,7 +107,7 @@ export default function Signup() {
         // Now check response.status here
         if (response.status === 200) {
           const userData = response.data;
-          login(userData,userData.token); // Update AuthContext with user data
+          login(userData, userData.token); // Update AuthContext with user data
           setTimeout(() => {
             navigate('/profile'); // Redirect to profile page after successful signup
           }, 1000);
