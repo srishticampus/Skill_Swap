@@ -32,6 +32,7 @@ router.post(
     check("city", "City is required").not().isEmpty(),
     check("country", "Country is required").not().isEmpty(),
     check("gender", "Gender is required").not().isEmpty(),
+    check("categories", "Categories are required").isArray({ min: 1 }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -39,7 +40,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, phone, city, country, gender } = req.body;
+    const { name, email, password, phone, city, country, gender, categories } = req.body;
     let profilePicturePath = ""; // Initialize profile picture path
 
     try {
@@ -73,6 +74,7 @@ router.post(
         city,
         country,
         gender,
+        categories,
         profilePicture: profilePicturePath, // Store the file path
         organization: req.organization.id, // Associate user with the organization
       });

@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import profilepic from "@/assets/profile-pic.png";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import AuthContext from '@/context/AuthContext';
 import axiosInstance from '@/api/axios';
 import { Link } from 'react-router';
 import countries from '@/constants/countries';
+import { MultiSelect } from '@/components/multi-select'; // Import MultiSelect
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -21,19 +22,40 @@ export default function Signup() {
     confirmPassword: '',
     gender: '',
     profilePic: null,
+    categories: [], // Add categories field
   });
 
   const [errors, setErrors] = useState({});
   const [profilePicPreview, setProfilePicPreview] = useState(profilepic);
   const [newPasswordVisible, setNewPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [categories, setCategories] = useState([]); // State for categories
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get('/api/categories');
+        // Assuming the response data is an array of category objects with _id and name
+        setCategories(response.data.map(cat => ({ value: cat._id, label: cat.name })));
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        // Handle error, maybe set an error state
+      }
+    };
+
+    fetchCategories();
+  }, []); // Empty dependency array means this runs once on mount
 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleCategoryChange = (selectedOptions) => {
+    setFormData({ ...formData, categories: selectedOptions.map(option => option.value) });
   };
 
   const handleProfilePicChange = (e) => {
@@ -136,6 +158,9 @@ export default function Signup() {
     if (!data.profilePic) {
       errors.profilePic = 'Profile picture is required';
     }
+    if (!data.categories || data.categories.length === 0) {
+      errors.categories = 'Categories are required';
+    }
 
 
     return errors;
@@ -228,6 +253,18 @@ export default function Signup() {
             </label>
           </div>
           {errors.gender && <span className="text-red-500">{errors.gender}</span>}
+        </div>
+        <div className="flex flex-col sm:col-span-2">
+          <span>Categories</span>
+          <MultiSelect
+            options={categories}
+            onValueChange={handleCategoryChange}
+            placeholder="Select categories"
+            variant="inverted"
+            animation={2}
+            maxSelected={-1}
+          />
+          {errors.categories && <span className="text-red-500">{errors.categories}</span>}
         </div>
         {errors.api && <span className="text-red-500">{errors.api}</span>} {/* Display API error */}
         <Button type="submit" className="sm:col-span-2">Sign Up</Button>

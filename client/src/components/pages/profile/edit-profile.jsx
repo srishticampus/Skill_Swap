@@ -4,6 +4,7 @@ import profilepic from "@/assets/profile-pic.png";
 import { Input } from "@/components/ui/input";
 import axiosInstance from '@/api/axios';
 import { toast } from 'sonner';
+import { MultiSelect } from '@/components/multi-select'; // Import MultiSelect
 
 export default function EditProfile({setIsEditModalOpen, onProfileUpdate}) {
   const [formData, setFormData] = useState({
@@ -16,30 +17,42 @@ export default function EditProfile({setIsEditModalOpen, onProfileUpdate}) {
     confirmPassword: '',
     gender: '',
     profilePic: null,
+    categories: [], // Add categories field
   });
 
   const [errors, setErrors] = useState({});
   const [profilePicPreview, setProfilePicPreview] = useState(profilepic);
+  const [categories, setCategories] = useState([]); // State for categories
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserDataAndCategories = async () => {
       try {
-        const response = await axiosInstance.get('/api/auth/profile');
-        const userData = response.data;
+        // Fetch user data
+        const userResponse = await axiosInstance.get('/api/auth/profile');
+        const userData = userResponse.data;
         setFormData(userData);
         setProfilePicPreview(userData.profilePicture || profilepic);
+
+        // Fetch categories
+        const categoryResponse = await axiosInstance.get('/api/categories');
+        setCategories(categoryResponse.data.map(cat => ({ value: cat._id, label: cat.name })));
+
       } catch (error) {
-        console.error('Error fetching profile data:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchUserData();
+    fetchUserDataAndCategories();
   }, []);
 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleCategoryChange = (selectedOptions) => {
+    setFormData({ ...formData, categories: selectedOptions.map(option => option.value) });
   };
 
   const handleProfilePicChange = (e) => {
@@ -123,6 +136,10 @@ export default function EditProfile({setIsEditModalOpen, onProfileUpdate}) {
     if (!data.gender) {
         errors.gender = 'Gender is required';
     }
+    if (!data.categories || data.categories.length === 0) {
+      errors.categories = 'Categories are required';
+    }
+
 
     return errors;
   };
@@ -166,7 +183,23 @@ export default function EditProfile({setIsEditModalOpen, onProfileUpdate}) {
                 <Input type="text" name="city" id="city" value={formData.city} onChange={handleChange} />
                 {errors.city && <span className="text-red-500">{errors.city}</span>}
             </label>
-            <div className="flex flex-col sm:col-span-2">
+            <div className="flex flex-col" style={{ zIndex: 50 }}> {/* Removed sm:col-span-2 */}
+              <span>Categories</span>
+              <MultiSelect
+                options={categories}
+                onValueChange={handleCategoryChange}
+                placeholder="Select categories"
+                variant="inverted"
+                // animation={2}
+                maxSelected={-1}
+                maxCount={1}
+                search={false}
+                defaultValue={formData.categories?.map(catId => categories.find(cat => cat.value === catId)).filter(Boolean)} // Set default value
+                modalPopover={true} // Set modalPopover to true
+              />
+              {errors.categories && <span className="text-red-500">{errors.categories}</span>}
+            </div>
+            <div className="flex flex-col sm:col-span-2"> {/* Moved Gender below Categories */}
                 <span>Gender</span>
                 <div className="flex gap-4">
                     <label htmlFor="male" className="flex items-center">

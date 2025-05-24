@@ -48,6 +48,7 @@ router.post(
     check("country", "Country is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("Country name cannot contain digits"),
     check("city", "City is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("City name cannot contain digits"),
     check("gender", "Gender is required").not().isEmpty(),
+    check("categories", "Categories are required").isArray({ min: 1 }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -55,7 +56,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { firstName, lastName, email, newPassword, phone, country, city, gender } = req.body;
+    const { firstName, lastName, email, newPassword, phone, country, city, gender, categories } = req.body;
 
     try {
       let user = await User.findOne({ email });
@@ -74,6 +75,7 @@ router.post(
         country,
         city,
         gender,
+        categories,
         lastLogin: Date.now()
       });
 
@@ -353,6 +355,7 @@ router.post(
     check("country", "Country is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("Country name cannot contain digits"),
     check("city", "City is required").not().isEmpty().matches(/^[^0-9]*$/).withMessage("City name cannot contain digits"),
     check("gender", "Gender is required").not().isEmpty(),
+    check("categories", "Categories are required").isArray({ min: 1 }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -360,7 +363,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, phone, country, city, gender } = req.body;
+    const { name, email, phone, country, city, gender, categories } = req.body;
 
     try {
       const user = await User.findById(req.user.id);
@@ -375,6 +378,7 @@ router.post(
       user.country = country;
       user.city = city;
       user.gender = gender;
+      user.categories = categories;
 
       if (req.file) {
         const profilePicFilename = `${Date.now()}-${req.file.originalname}`;

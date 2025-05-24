@@ -98,6 +98,11 @@ const UserSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
   },
+  categories: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true
+  }],
 });
 
 UserSchema.set("toJSON", {

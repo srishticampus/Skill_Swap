@@ -82,6 +82,7 @@ export const MultiSelect = React.forwardRef(function MultiSelect(
     maxCount = 3,
     modalPopover = false,
     asChild = false,
+    search = true,
     className,
     ...props
   },
@@ -224,7 +225,7 @@ export const MultiSelect = React.forwardRef(function MultiSelect(
         onEscapeKeyDown={() => setIsPopoverOpen(false)}
       >
         <Command>
-          <CommandInput placeholder="Search..." onKeyDown={handleInputKeyDown} />
+          {search&&<CommandInput placeholder="Search..." onKeyDown={handleInputKeyDown} />}
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
