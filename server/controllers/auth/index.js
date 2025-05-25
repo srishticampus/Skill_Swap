@@ -354,6 +354,29 @@ router.get("/profile", auth, async (req, res) => {
   }
 });
 
+// @route   GET api/auth/users/:id
+// @desc    Get user by ID (Authenticated users)
+// @access  Private
+router.get("/users/:id", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password").populate('categories');
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    const profilePictureUrl = user.profilePicture ? `/uploads/${path.basename(user.profilePicture)}` : null;
+    res.json({...user.toObject(), profilePictureUrl});
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === "ObjectId") {
+      return res.status(404).json({ msg: "User not found" });
+    }
+    res.status(500).send("Server Error");
+  }
+});
+
+
 // @route   POST api/auth/update-profile
 // @desc    Update user profile
 // @access  Private

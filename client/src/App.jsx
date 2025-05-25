@@ -90,7 +90,7 @@ function App() {
           <Route path="/exchange-skills/:id" element={<SwapRequestDetails />} /> {/* Add the route for details page */}
           <Route path="/approved-swap-requests" element={<ApprovedSwapRequests />} />
           <Route path="/swap-requests/:id" element={<SwapRequestDetailsPage />} />
-          <Route path="/add-review" element={<AddReview />} /> {/* Add the route for add swap review page */}
+          <Route path="/add-review/:userId" element={<AddReview />} /> {/* Add the route for add swap review page */}
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
