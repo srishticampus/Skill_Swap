@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import Organization from "../../models/organization.js";
 // Multer configuration
 const storage = multer.memoryStorage(); // Store the file in memory
 const upload = multer({ storage: storage });
@@ -219,8 +220,22 @@ router.post(
         payload,
         import.meta.env.VITE_JWT_SECRET,
         { expiresIn: 604800 }, // Set expiration to 7 days (in seconds)
-        (err, token) => {
+        async (err, token) => {
           if (err) throw err;
+          if (!user.isActive) {
+            return res.status(400).json({ errors: [{ msg: "Your account is not active. Please contact the administrator." }] });
+          }
+
+          if (user.organization) {
+            const organization = await Organization.findById(user.organization);
+            if (!organization) {
+              return res.status(500).send("Server error: Organization not found");
+            }
+            if (!organization.active) {
+              return res.status(400).json({ errors: [{ msg: "Your organization is not active. Please contact the administrator." }] });
+            }
+          }
+
           res.json({ token, user: { id: user.id, isAdmin: user.isAdmin || false } });
         }
       );

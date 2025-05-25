@@ -125,6 +125,9 @@ router.post(
         { expiresIn: 604800 }, // Set expiration to 7 days (in seconds)
         (err, token) => {
           if (err) throw err;
+          if (!organization.active) {
+            return res.status(400).json({ errors: [{ msg: "Your organization is not active. Please contact the administrator." }] });
+          }
           res.json({ token, organization: { id: organization.id } });
         }
       );
