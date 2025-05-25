@@ -50,6 +50,19 @@ const ManageComplaints = () => {
   // Handle page change
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const handleResolve = async (complaintId) => {
+    try {
+      await axios.put(`/api/admin/complaints/${complaintId}/resolve`);
+      // Update the status in the local state
+      setComplaints(complaints.map(complaint =>
+        complaint._id === complaintId ? { ...complaint, status: 'resolved' } : complaint
+      ));
+    } catch (err) {
+      console.error('Error resolving complaint:', err);
+      // Optionally show an error message to the user
+    }
+  };
+
   if (loading) {
     return <div>Loading complaints...</div>;
   }
@@ -71,7 +84,8 @@ const ManageComplaints = () => {
                 <TableHead className="text-white">Complaints Given By</TableHead>
                 <TableHead className="text-white">Complaints Against</TableHead>
                 <TableHead className="text-white">Description</TableHead>
-                {/* <TableHead className="text-white">Action</TableHead> */} {/* Removed Action column for now */}
+                <TableHead className="text-white">Status</TableHead>
+                <TableHead className="text-white">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -91,6 +105,18 @@ const ManageComplaints = () => {
                   </TableCell>
                   <TableCell>{complaint.complaintAgainst}</TableCell> {/* Use complaintAgainst */}
                   <TableCell>{complaint.description}</TableCell>
+                  <TableCell>{complaint.status}</TableCell>
+                  <TableCell>
+                    {complaint.status === 'pending' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleResolve(complaint._id)}
+                      >
+                        Resolve
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

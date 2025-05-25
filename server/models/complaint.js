@@ -18,6 +18,11 @@ const ComplaintSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  status: {
+    type: String,
+    enum: ['pending', 'resolved'],
+    default: 'pending',
+  },
 });
 
 export default mongoose.model("Complaint", ComplaintSchema);
