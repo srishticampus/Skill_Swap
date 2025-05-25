@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from '@/api/axios'; // Assuming axios is configured here
 import {
   Table,
   TableBody,
@@ -24,56 +25,32 @@ import {
 } from "@tanstack/react-table";
 
 // Dummy data for complaints
-const dummyComplaints = [
-  {
-    id: 1,
-    complaintsGivenBy: { name: "Ashika", avatar: "/client/src/assets/pfp.jpeg" }, // Using a placeholder avatar path
-    complaintsAgainst: "Web Designing",
-    description: "software application functions correctly and meet specified requirements",
-    status: "Resolved", // Assuming status for button text
-  },
-  {
-    id: 2,
-    complaintsGivenBy: { name: "Ashika", avatar: "/client/src/assets/pfp.jpeg" },
-    complaintsAgainst: "Web Designing",
-    description: "software application functions correctly and meet specified requirements",
-    status: "Resolved",
-  },
-  {
-    id: 3,
-    complaintsGivenBy: { name: "Ashika", avatar: "/client/src/assets/pfp.jpeg" },
-    complaintsAgainst: "Web Designing",
-    description: "software application functions correctly and meet specified requirements",
-    status: "Resolved",
-  },
-  {
-    id: 4,
-    complaintsGivenBy: { name: "Ashika", avatar: "/client/src/assets/pfp.jpeg" },
-    complaintsAgainst: "Web Designing",
-    description: "software application functions correctly and meet specified requirements",
-    status: "Resolved",
-  },
-  // Add more dummy data as needed
-];
-
 const columns = [
   {
-    accessorKey: "id",
+    accessorKey: "_id", // Use _id from server response
     header: "Sl No",
     cell: ({ row }) => row.index + 1, // Use row index for serial number
   },
   {
-    accessorKey: "complaintsGivenBy",
+    accessorKey: "userId", // Use userId from server response
     header: "Complaints Given By",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <img src={row.original.complaintsGivenBy.avatar} alt={row.original.complaintsGivenBy.name} className="w-8 h-8 rounded-full" />
-        <span>{row.original.complaintsGivenBy.name}</span>
+        {/* Use profilePicture from userId */}
+        {row.original.userId?.profilePicture && (
+          <img
+            src={`${import.meta.env.VITE_API_URL}/${row.original.userId.profilePicture}`}
+            alt={row.original.userId.name}
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        )}
+        {/* Use name from userId */}
+        <span>{row.original.userId?.name || 'N/A'}</span>
       </div>
     ),
   },
   {
-    accessorKey: "complaintsAgainst",
+    accessorKey: "complaintAgainst",
     header: "Complaints Against",
   },
   {
@@ -81,30 +58,54 @@ const columns = [
     header: "Description",
   },
   {
-    accessorKey: "action",
-    header: "Action",
+    accessorKey: "status", // Use status from server response
+    header: "Status",
     cell: ({ row }) => (
-      <Button variant="outline" className="bg-primary text-white hover:bg-primary">
-        {row.original.status}
-      </Button>
+      // Display status directly
+      <span>{row.original.status}</span>
     ),
   },
 ];
 
 function Complaints() {
-  const [data, setData] = React.useState(dummyComplaints);
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      try {
+        const response = await axios.get('/api/organizations/complaints');
+        setComplaints(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchComplaints();
+  }, []);
 
   const table = useReactTable({
-    data,
+    data: complaints, // Use fetched complaints data
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 4, // Set initial page size to 4 based on the image
+        pageSize: 10, // Set a default page size, can be adjusted
       },
     },
   });
+
+  if (loading) {
+    return <div>Loading complaints...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="p-6">
@@ -120,9 +121,9 @@ function Complaints() {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}
@@ -133,7 +134,7 @@ function Complaints() {
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  key={row.id}
+                  key={row.original._id} // Use _id for key
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -170,36 +171,36 @@ function Complaints() {
             Next
           </Button>
         </div>
-         {/* Manual pagination display based on image */}
-         <div className="flex items-center justify-center space-x-2 py-4">
+        {/* Manual pagination display based on image */}
+        <div className="flex items-center justify-center space-x-2 py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+          </Button>
+          {/* Render page numbers - simplified for now */}
+          {Array.from({ length: table.getPageCount() }, (_, index) => (
             <Button
-              variant="outline"
+              key={index}
+              variant={table.getState().pagination.pageIndex === index ? "default" : "outline"}
               size="sm"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
+              onClick={() => table.setPageIndex(index)}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+              {index + 1}
             </Button>
-            {/* Render page numbers - simplified for now */}
-            {Array.from({ length: table.getPageCount() }, (_, index) => (
-              <Button
-                key={index}
-                variant={table.getState().pagination.pageIndex === index ? "default" : "outline"}
-                size="sm"
-                onClick={() => table.setPageIndex(index)}
-              >
-                {index + 1}
-              </Button>
-            ))}
-             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </Button>
-         </div>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+          </Button>
+        </div>
       </div>
     </div>
   );
