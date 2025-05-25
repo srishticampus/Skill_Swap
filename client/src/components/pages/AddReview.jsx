@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router'; // Import useNavigate
+import { useNavigate, useParams } from 'react-router'; // Import useNavigate and useParams
 import { Textarea } from '../ui/textarea'; // Assuming textarea component
+import axios from '../../api/axios'; // Import axios instance
 import { Button } from '../ui/button'; // Assuming button component
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'; // Assuming avatar component
 
 const AddSwapReview = () => {
   const navigate = useNavigate(); // Initialize useNavigate
+  const { userId } = useParams(); // Get userId from URL parameters
 
   const [reviewText, setReviewText] = useState('');
   const [rating, setRating] = useState(0);
@@ -14,10 +16,20 @@ const AddSwapReview = () => {
     setRating(starIndex + 1);
   };
 
-  const handleSubmitReview = () => {
-    // Handle review submission logic here
-    console.log('Review Text:', reviewText);
-    console.log('Rating:', rating);
+  const handleSubmitReview = async () => {
+    try {
+      const response = await axios.post('/api/reviews', {
+        ratedUser: userId,
+        rating: rating,
+        reviewText: reviewText,
+      });
+      console.log('Review submitted successfully:', response.data);
+      // Optionally navigate the user after successful submission
+      navigate(`/profile/${userId}`); // Navigate back to the rated user's profile or a confirmation page
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      // Handle error (e.g., show an error message to the user)
+    }
   };
 
   return (

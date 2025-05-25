@@ -50,7 +50,7 @@ import AdminComplaints from "./components/pages/admin/complaints";
 import SentSwapRequests from "./components/pages/SentSwapRequests";
 import ReceivedSwapRequests from "./components/pages/ReceivedSwapRequests";
 import ApprovedSwapRequests from "./components/pages/ApprovedSwapRequests";
-import AddSwapReview from "./components/pages/AddReview"; // Import the new component
+import AddReview from "./components/pages/AddReview"; // Import the new component
 
 import SwapRequestDetailsPage from "./components/pages/SwapRequestDetailsPage";
 
@@ -90,7 +90,7 @@ function App() {
           <Route path="/exchange-skills/:id" element={<SwapRequestDetails />} /> {/* Add the route for details page */}
           <Route path="/approved-swap-requests" element={<ApprovedSwapRequests />} />
           <Route path="/swap-requests/:id" element={<SwapRequestDetailsPage />} />
-          <Route path="/add-review" element={<AddSwapReview />} /> {/* Add the route for add swap review page */}
+          <Route path="/add-review" element={<AddReview />} /> {/* Add the route for add swap review page */}
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
