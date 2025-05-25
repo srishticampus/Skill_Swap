@@ -307,7 +307,23 @@ const ProfilePage = () => {
                   </div>
                   <p>{profileData.city}</p>
                 </div>
+                {profileData.organization && ( // Conditionally render organization
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Organization</p>
+                    </div>
+                    <p>{profileData.organization.name}</p>
+                  </div>
+                )}
               </div>
+              {profileData.organization && ( // Add Complaint button for organization members
+                <div className="flex justify-end mt-4">
+                  <Button variant="outline" onClick={() => console.log("Add Complaint clicked")}>
+                    Add Complaint
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

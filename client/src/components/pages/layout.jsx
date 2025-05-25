@@ -144,19 +144,30 @@ function Navbar() {
                   </NavigationMenuLink>
 
                   <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
-                      <Link to="/sent-swap-requests">Sent Swap Requests</Link>
-                    </NavigationMenuLink>
+                    <Link to="/sent-swap-requests">Sent Swap Requests</Link>
+                  </NavigationMenuLink>
 
-                    <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
-                      <Link to="/received-swap-requests">Received Swap Requests</Link>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
-                      <Link to="/approved-swap-requests">Approved Swap Requests</Link>
-                    </NavigationMenuLink>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
+                    <Link to="/received-swap-requests">Received Swap Requests</Link>
+                  </NavigationMenuLink>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
+                    <Link to="/approved-swap-requests">Approved Swap Requests</Link>
+                  </NavigationMenuLink>
 
                 </NavigationMenuContent>
               </NavigationMenuItem>
             )}
+            {
+              user && (
+                <NavigationMenuItem>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    <Link to={`/add-complaint/`}>
+                      Add Complaint
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              )
+            }
             {user?.isAdmin && (
               <NavigationMenuItem>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>

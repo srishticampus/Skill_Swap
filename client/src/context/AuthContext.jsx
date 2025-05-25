@@ -47,6 +47,18 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+/**
+ * Custom hook to access the authentication context.
+ *
+ * @returns {{
+ *   user: { id: string, isAdmin: boolean },
+ *   token: string,
+ *   login: (userData: { id: string, isAdmin: boolean }, token: string) => void,
+ *   logout: () => void,
+ *   loading: boolean
+ * }}
+ */
+
 export const useAuth = () => {
   return useContext(AuthContext);
 };

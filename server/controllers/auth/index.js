@@ -345,7 +345,7 @@ router.post(
 // @access  Private
 router.get("/profile", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select("-password").populate('organization', 'name'); // Populate organization and select only the name field
     const profilePictureUrl = user.profilePicture ? `${user.profilePicture}` : null;
     res.json({...user.toObject(), profilePictureUrl});
   } catch (err) {

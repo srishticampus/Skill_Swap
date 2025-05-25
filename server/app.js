@@ -16,6 +16,7 @@ import notificationRoutes from "./controllers/notifications.js";
 import { submitContactForm, getAllContactForms, getContactFormById, deleteContactForm } from './controllers/contact.js';
 import categoryRoutes from './controllers/category.js'; // Import category routes
 import organizationRoutes from './controllers/organization/index.js'; // Import organization routes
+import complaintRoutes from './controllers/complaint.js'; // Import complaint routes
 import path from "path";
 
 export const app = express();
@@ -60,6 +61,7 @@ app.use("/api/notifications", notificationRoutes);//I have also removed prefix o
  
 // Use category routes
 app.use("/api/categories", categoryRoutes); // Route category routes
+app.use("/api/complaints", complaintRoutes); // Use complaint routes
 
 // New Swap Request routes
 app.get('/api/swap-requests/approved', verifyToken, getApprovedSwapRequests);

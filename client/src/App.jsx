@@ -51,7 +51,7 @@ import SentSwapRequests from "./components/pages/SentSwapRequests";
 import ReceivedSwapRequests from "./components/pages/ReceivedSwapRequests";
 import ApprovedSwapRequests from "./components/pages/ApprovedSwapRequests";
 import AddReview from "./components/pages/AddReview"; // Import the new component
-
+import AddComplaint from "./components/pages/AddComplaint"; // Import the new component
 import SwapRequestDetailsPage from "./components/pages/SwapRequestDetailsPage";
 
 // Helper component to determine root page based on auth state
@@ -91,6 +91,7 @@ function App() {
           <Route path="/approved-swap-requests" element={<ApprovedSwapRequests />} />
           <Route path="/swap-requests/:id" element={<SwapRequestDetailsPage />} />
           <Route path="/add-review/:userId" element={<AddReview />} /> {/* Add the route for add swap review page */}
+          <Route path="/add-complaint" element={<AddComplaint />} /> {/* Add the route for add complaint page */}
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
