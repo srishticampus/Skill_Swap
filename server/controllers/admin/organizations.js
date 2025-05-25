@@ -1,7 +1,9 @@
 import express from "express";
+import SwapRequest from "../../models/swap_request.js";
 import Organization from "../../models/organization.js"; // Assuming Organization model path
 import { adminCheck } from "./middleware.js"; // Import adminCheck middleware
 import { auth } from "../auth/index.js"; // Assuming this path is correct
+import user from "../../models/user.js";
 
 export const router = express.Router();
 
@@ -156,6 +158,33 @@ router.get("/:id", auth, adminCheck, async (req, res) => {
     if (err.kind === 'ObjectId') {
         return res.status(404).json({ msg: 'Organization not found' });
     }
+    res.status(500).send("Server Error");
+  }
+});
+
+// @route   GET api/admin/organizations/:organizationId/swaps
+// @desc    Get all swaps for a specific organization
+// @access  Private (Admin only)
+router.get("/:organizationId/swaps", auth, adminCheck, async (req, res) => {
+  try {
+    const organizationId = req.params.organizationId;
+
+    // Find all swaps related to users within the specified organization
+    // This assumes there's a field in the SwapRequest model that links it to a user,
+    // and that the User model has a field linking it to an organization.
+    const swaps = await SwapRequest.find({
+      createdBy: {
+        $in: await user.find({ organization: organizationId }).distinct('_id')
+      }
+    })
+      .populate('serviceCategory')
+      .populate('createdBy')
+      .exec();
+
+    res.json(swaps);
+  } catch (err) {
+    console.log(err)
+    console.error(err.message);
     res.status(500).send("Server Error");
   }
 });

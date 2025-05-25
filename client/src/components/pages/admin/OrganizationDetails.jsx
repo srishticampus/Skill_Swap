@@ -35,7 +35,7 @@ function OrganizationDetails() {
       console.log("Activate response:", res.data);
       // Update the local state to reflect the status change if needed
       if (organization) {
-        setOrganization({...organization, active: true});
+        setOrganization({ ...organization, active: true });
       }
       // Optionally show a success message to the user
     } catch (err) {
@@ -51,7 +51,7 @@ function OrganizationDetails() {
       console.log("Deactivate response:", res.data);
       // Update the local state to reflect the status change if needed
       if (organization) {
-        setOrganization({...organization, active: false});
+        setOrganization({ ...organization, active: false });
       }
       // Optionally show a success message to the user
     } catch (err) {
@@ -69,7 +69,7 @@ function OrganizationDetails() {
   }
 
   if (!organization) {
-      return <div className="p-6 text-center">Organization not found.</div>;
+    return <div className="p-6 text-center">Organization not found.</div>;
   }
 
 
@@ -93,8 +93,8 @@ function OrganizationDetails() {
             <p className="text-base font-medium mb-4">{organization.address}</p>
             {/* Active */}
             <p className="text-sm text-gray-500 mb-1">Active</p>
-            <p className={`text-base font-medium mb-4 ${organization.active ? 'text-green-600' :'text-red-600'}`}>
-                {organization.active ? "Active" : 'Not Active'}
+            <p className={`text-base font-medium mb-4 ${organization.active ? 'text-green-600' : 'text-red-600'}`}>
+              {organization.active ? "Active" : 'Not Active'}
             </p>
             <p className="text-sm text-gray-500 mb-1">Certificate</p>
             <Button
@@ -127,7 +127,7 @@ function OrganizationDetails() {
             {/* Status */}
             <p className="text-sm text-gray-500 mb-1">Status</p>
             <p className={`text-base font-medium mb-4 ${organization.status === 'active' ? 'text-green-600' : organization.status === 'inactive' ? 'text-red-600' : 'text-yellow-600'}`}>
-                {organization.status ? organization.status.toUpperCase() : 'N/A'}
+              {organization.status ? organization.status.toUpperCase() : 'N/A'}
             </p>
 
 
@@ -140,6 +140,16 @@ function OrganizationDetails() {
                 className="p-0 h-auto text-blue-600 hover:underline text-base font-medium"
               >
                 View Reviews
+              </Button>
+            </Link>
+            {/* Organization Swaps Button */}
+            <p className="text-sm text-gray-500 mb-1">Organization Swaps</p>
+            <Link to={`/admin/organization-swaps/${id}`}>
+              <Button
+                variant="link"
+                className="p-0 h-auto text-blue-600 hover:underline text-base font-medium"
+              >
+                View Organization Swaps
               </Button>
             </Link>
           </div>
