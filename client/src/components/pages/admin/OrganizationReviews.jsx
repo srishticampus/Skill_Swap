@@ -1,48 +1,23 @@
-import React from 'react';
-// Assuming a Card component might be useful, but I'll build the structure directly for now
-// import { Card } from "@/components/ui/card"; // If a suitable Card component exists
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router';
+import axiosInstance from '@/api/axios';
 
 function OrganizationReviews() {
-  // Placeholder review data based on the image
-  const reviews = [
-    {
-      id: 1,
-      reviewerName: "Nikitha",
-      reviewerSkills: "Python, Java",
-      reviewedFor: "Web Development",
-      reviewText: "Awesome Experience, Great Class Session",
-      rating: 4, // Out of 5
-      avatarUrl: "/placeholder-avatar.jpg", // Replace with actual avatar path/logic
-    },
-    {
-      id: 2,
-      reviewerName: "Akshay",
-      reviewerSkills: "Python, Java",
-      reviewedFor: "Web Development",
-      reviewText: "Awesome Experience, Great Class Session",
-      rating: 3, // Out of 5
-      avatarUrl: "/placeholder-avatar.jpg", // Replace with actual avatar path/logic
-    },
-    {
-      id: 3,
-      reviewerName: "Nikitha",
-      reviewerSkills: "Python, Java",
-      reviewedFor: "Web Development",
-      reviewText: "Awesome Experience, Great Class Session",
-      rating: 4, // Out of 5
-      avatarUrl: "/placeholder-avatar.jpg", // Replace with actual avatar path/logic
-    },
-    {
-      id: 4,
-      reviewerName: "Akshay",
-      reviewerSkills: "Python, Java",
-      reviewedFor: "Web Development",
-      reviewText: "Awesome Experience, Great Class Session",
-      rating: 3, // Out of 5
-      avatarUrl: "/placeholder-avatar.jpg", // Replace with actual avatar path/logic
-    },
-    // Add more placeholder reviews if needed to fill the layout
-  ];
+  const { organizationId } = useParams();
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/organization/${organizationId}/reviews`);
+        setReviews(response.data);
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error);
+      }
+    };
+
+    fetchReviews();
+  }, [organizationId]);
 
   // Helper to render stars
   const renderStars = (rating) => {
@@ -72,7 +47,7 @@ function OrganizationReviews() {
       {/* Using grid as seen in the image layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {reviews.map(review => (
-          <div key={review.id} className="bg-white rounded-lg p-6 shadow-md">
+          <div key={review._id} className="bg-white rounded-lg p-6 shadow-md">
             {/* Reviewer Info */}
             <div className="flex items-center mb-4">
               {/* Avatar Placeholder */}
@@ -82,7 +57,7 @@ function OrganizationReviews() {
                 {/* <img src={review.avatarUrl} alt={review.reviewerName} className="w-full h-full rounded-full object-cover" /> */}
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-primary">{review.reviewerName}</h3>
+                <h3 className="text-lg font-semibold text-primary">{review.reviewer.firstName} {review.reviewer.lastName}</h3>
                 <p className="text-sm text-gray-600">{review.reviewerSkills}</p>
               </div>
             </div>
