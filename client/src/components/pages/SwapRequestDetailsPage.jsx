@@ -75,12 +75,12 @@ const SwapRequestDetailsPage = () => {
         <h2 className="text-2xl font-bold mb-4 text-primary">My Profile</h2>
         <div className="flex items-center mb-4">
           <img
-            src={`${import.meta.env.VITE_API_URL}/${swapRequest.createdBy.profilePicture}`}
+            src={`${import.meta.env.VITE_API_URL}/${swapRequest?.createdBy?.profilePicture}`}
             alt="Profile"
             className="w-16 h-16 rounded-full mr-4"
           />
           <div>
-            <h3 className="text-xl font-semibold">{swapRequest.createdBy.name || "N/A"}</h3>
+            <h3 className="text-xl font-semibold">{swapRequest.createdBy?.name || "N/A"}</h3>
             <p className="text-gray-600">25% Completed</p>
           </div>
         </div>
