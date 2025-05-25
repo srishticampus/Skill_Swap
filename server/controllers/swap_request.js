@@ -187,12 +187,16 @@ export const getSwapRequestById = async (req, res) => {
       console.log(`Found interaction for swap request: ${req.params.id}. Populating updates.`);
       // Populate the updates array in the swapRequestInteraction
       await swapRequestInteraction.populate('updates.user');
+      await swapRequestInteraction.populate('user'); // Populate the user who placed the interaction
+      // Ensure updates are populated
       console.log(`Updates populated for interaction: ${swapRequestInteraction._id}.`);
     }
 
     const swapRequestData = {
       ...swapRequest.toObject(),
-      updates: swapRequestInteraction.updates || []
+      updates: swapRequestInteraction.updates || [],
+      interactionStatus: swapRequestInteraction.status || 'pending', // Default to 'pending' if no interaction
+      interactionUser: swapRequestInteraction.user || null // User who placed the interaction
     };
 
     console.log(`Successfully fetched swap request data for ID: ${req.params.id}`);
@@ -572,7 +576,15 @@ export const getApprovedSwapRequests = async (req, res) => {
       ]);
 
     // Extract the swap requests from the interactions
-    const swapRequests = approvedInteractions.map(interaction => interaction.swapRequest).filter(swapRequest => swapRequest !== null);
+    const swapRequests = approvedInteractions.map(interaction => {
+      if (!interaction.swapRequest) {
+        console.warn(`Swap request not found for interaction ID: ${interaction._id}`);
+        return null; // Skip this interaction if swapRequest is null
+      }
+      interaction.swapRequest.interactionUser = interaction.user; // Add interaction user to swapRequest
+      interaction.swapRequest.interactionStatus = interaction.status; // Add interaction status to swapRequest
+      return interaction.swapRequest
+    }).filter(swapRequest => swapRequest !== null);
 
       res.status(200).json(swapRequests);
     });
