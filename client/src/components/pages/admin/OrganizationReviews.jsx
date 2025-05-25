@@ -9,7 +9,7 @@ function OrganizationReviews() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axiosInstance.get(`/api/organization/${organizationId}/reviews`);
+        const response = await axiosInstance.get(`/api/organizations/${organizationId}/reviews`);
         setReviews(response.data);
       } catch (error) {
         console.error('Failed to fetch reviews:', error);

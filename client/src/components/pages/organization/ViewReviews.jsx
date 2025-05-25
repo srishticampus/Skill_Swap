@@ -2,61 +2,44 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
-
-// Updated review structure based on the design
-// {
-//   id: string;
-//   reviewerName: string;
-//   reviewerSkills: string; // e.g., "Python, Java"
-//   reviewerAvatarUrl?: string;
-//   rating: number; // 1-5
-//   comment: string;
-//   swapTitle: string; // The skill/topic reviewed
-// }
-
-const dummyReviews = [
-  {
-    id: '1',
-    reviewerName: 'Nikitha',
-    reviewerSkills: 'Python, Java',
-    reviewerAvatarUrl: 'https://github.com/shadcn.png', // Replace with actual avatar URL
-    rating: 4,
-    comment: 'Awesome Experience, Great Class Session',
-    swapTitle: 'Web Development',
-  },
-  {
-    id: '2',
-    reviewerName: 'Akshay',
-    reviewerSkills: 'Python, Java',
-    reviewerAvatarUrl: 'https://github.com/shadcn.png', // Replace with actual avatar URL
-    rating: 4,
-    comment: 'Awesome Experience, Great Class Session',
-    swapTitle: 'Web Development',
-  },
-    {
-    id: '3',
-    reviewerName: 'Nikitha',
-    reviewerSkills: 'Python, Java',
-    reviewerAvatarUrl: 'https://github.com/shadcn.png', // Replace with actual avatar URL
-    rating: 4,
-    comment: 'Awesome Experience, Great Class Session',
-    swapTitle: 'Web Development',
-  },
-  {
-    id: '4',
-    reviewerName: 'Akshay',
-    reviewerSkills: 'Python, Java',
-    reviewerAvatarUrl: 'https://github.com/shadcn.png', // Replace with actual avatar URL
-    rating: 4,
-    comment: 'Awesome Experience, Great Class Session',
-    swapTitle: 'Web Development',
-  },
-  // Add more dummy data as needed to match the grid layout in the design
-];
+import { useEffect, useState, useContext } from 'react';
+import AuthContext from '@/context/AuthContext';
+import api from '@/api/axios';
 
 export default function ViewReviews() {
-  // In a real application, you would fetch reviews from an API
-  const reviews = dummyReviews; // Replace with fetched data
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { user } = useContext(AuthContext);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+
+        const response = await api.get(`/api/organizations/${user.id}/reviews`);
+        setReviews(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchReviews();
+    } else {
+      setLoading(false);
+      setError("Organization not found. Please login.");
+    }
+  }, [user]);
+
+  if (loading) {
+    return <p className="text-center text-gray-500">Loading reviews...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500">Error: {error.message}</p>;
+  }
 
   return (
     <div className="p-6 bg-[#F6F7F9] min-h-screen">
@@ -83,9 +66,8 @@ export default function ViewReviews() {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${
-                        i < review.rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
-                      }`}
+                      className={`w-5 h-5 ${i < review.rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'
+                        }`}
                     />
                   ))}
                 </div>

@@ -102,7 +102,7 @@ function App() {
           <Route path="/admin/organization-requests" element={<OrganizationRequests />} />
           <Route path="/admin/organizations" element={<Organizations />} />
           <Route path="/admin/organizations/details/:id" element={<OrganizationDetails />} />
-          <Route path="/admin/organizations/details/:id/reviews" element={<OrganizationReviews />} />
+          <Route path="/admin/organizations/details/:organizationId/reviews" element={<OrganizationReviews />} />
           <Route path="/admin/skill-swappers" element={<SkillSwappersPage />} />
           <Route path="/admin/skill-swappers/:id" element={<SkillSwapperDetailsPage />} /> {/* Add the new route for details */}
           <Route path="/admin/complaints" element={<AdminComplaints />} />
