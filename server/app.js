@@ -10,6 +10,7 @@ import { router as organizationAuthRoutes } from "./controllers/auth/organizatio
 import { router as adminRoutes } from "./controllers/admin/index.js";
 import { router as marketplaceRoutes } from "./controllers/marketplace/index.js";
 import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById, placeRequest,getSentSwapRequests,getReceivedSwapRequests, getApprovedSwapRequests, addStatusUpdate, markAsCompleted } from "./controllers/swap_request.js";
+import { createReview, getReviewsForUser } from "./controllers/user_review.js"; // Import user review controller functions
 import { verifyToken } from "./controllers/auth/index.js";
 import notificationRoutes from "./controllers/notifications.js";
 import { submitContactForm, getAllContactForms, getContactFormById, deleteContactForm } from './controllers/contact.js';
@@ -76,6 +77,10 @@ app.get('/api/sent-swap-requests', verifyToken, getSentSwapRequests);
 app.get('/api/received-swap-requests', verifyToken, getReceivedSwapRequests);
 app.put('/api/swap-request-interactions/:id/approve', verifyToken, approveSwapRequestInteraction);
 app.put('/api/swap-request-interactions/:id/reject', verifyToken, rejectSwapRequestInteraction);
+
+// User Review routes
+app.post('/api/user-reviews', verifyToken, createReview); // Added verifyToken assuming reviews require authentication
+app.get('/api/user-reviews/:userId', getReviewsForUser);
 
 // Add profile update routes (already added above)
 // app.post("/api/auth/update-profile", authRoutes);

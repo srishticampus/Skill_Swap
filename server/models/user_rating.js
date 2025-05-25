@@ -18,6 +18,9 @@ const UserRatingSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
+    reviewText: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

@@ -1,6 +1,7 @@
 import SwapRequest from '../models/swap_request.js';
 import SwapRequestInteraction from '../models/swap_request_interaction.js'; // Import the SwapRequestInteraction model
 import Category from '../models/category.js'; // Import Category model
+import UserRating from '../models/user_rating.js'; // Import UserRating model
 import jwt from 'jsonwebtoken';
 import { match } from 'assert';
 import mongoose from 'mongoose';
