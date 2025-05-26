@@ -18,6 +18,7 @@ import categoryRoutes from './controllers/category.js'; // Import category route
 import organizationRoutes from './controllers/organization/index.js'; // Import organization routes
 import complaintRoutes from './controllers/complaint.js'; // Import complaint routes
 import path from "path";
+import { router as chatRoutes } from "./controllers/chat.js";
 
 export const app = express();
 
@@ -83,6 +84,9 @@ app.put('/api/swap-request-interactions/:id/reject', verifyToken, rejectSwapRequ
 // User Review routes
 app.post('/api/user-reviews', verifyToken, createReview); // Added verifyToken assuming reviews require authentication
 app.get('/api/user-reviews/:userId', getReviewsForUser);
+
+// Use chat routes
+app.use("/api/chat", chatRoutes);
 
 // Add profile update routes (already added above)
 // app.post("/api/auth/update-profile", authRoutes);
