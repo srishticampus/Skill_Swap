@@ -12,6 +12,7 @@ import {
 import { cn } from '@/lib/utils';
 import axiosInstance from '@/api/axios';
 import { toast } from 'sonner';
+import { MultiSelect } from '@/components/multi-select';
 
 export default function EditTechnicalInfo({ className, setIsTechModalOpen, onProfileUpdate }) {
   const [formData, setFormData] = useState({
@@ -23,21 +24,32 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
     serviceDescription: '',
     responseTime: '',
     availability: '',
+    categories: [], // Add categories field
   });
 
+  const [errors, setErrors] = useState({});
+  const [categories, setCategories] = useState([]); // State for categories
+
   useEffect(() => {
-    // Simulate fetching user data. Replace with your actual data fetching logic.
-    const fetchUserData = async () => {
+    const fetchUserDataAndCategories = async () => {
       try {
-        const response = await axiosInstance.get('/api/auth/profile');
-        const userData = response.data;
+        // Fetch user data
+        const userResponse = await axiosInstance.get('/api/auth/profile');
+        const userData = userResponse.data;
         setFormData(userData);
+
+        // Fetch categories
+        const categoryResponse = await axiosInstance.get('/api/categories');
+        setCategories(categoryResponse.data.map(category => ({
+          value: category._id,
+          label: category.name,
+        })));
       } catch (error) {
-        console.error('Error fetching profile data:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchUserData();
+    fetchUserDataAndCategories();
   }, []);
 
   const handleChange = (e) => {
@@ -48,28 +60,51 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
     });
   };
 
+  const handleCategoryChange = (selectedOptions) => {
+    setFormData({ ...formData, categories: selectedOptions });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const formDataToSend = new FormData();
-      for (const key in formData) {
-          formDataToSend.append(key, formData[key]);
+    const validationErrors = validateForm(formData);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length === 0) {
+      try {
+        const formDataToSend = new FormData();
+        for (const key in formData) {
+          if (key === 'categories') {
+            formData[key].forEach(category => {
+              formDataToSend.append(key, category);
+            });
+          } else {
+            formDataToSend.append(key, formData[key]);
+          }
+        }
+        const response = await axiosInstance.post('/api/auth/update-technical', formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        console.log('Technical information updated successfully:', response.data);
+        toast.success("Success",{description:"Technical information updated successfully"});
+        if (onProfileUpdate) {
+          onProfileUpdate(); // Call the callback function
+        }
+        setIsTechModalOpen(false)
+        // Optionally, update the profile data in the parent component or context
+      } catch (error) {
+        console.error('Error updating technical information:', error);
       }
-      const response = await axiosInstance.post('/api/auth/update-technical', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Technical information updated successfully:', response.data);
-      toast.success("Success",{description:"Technical information updated successfully"});
-      if (onProfileUpdate) {
-        onProfileUpdate(); // Call the callback function
-      }
-      setIsTechModalOpen(false)
-      // Optionally, update the profile data in the parent component or context
-    } catch (error) {
-      console.error('Error updating technical information:', error);
     }
+  };
+
+  const validateForm = (data) => {
+    const errors = {};
+    if (!data.categories || data.categories.length === 0) {
+      errors.categories = 'Categories are required';
+    }
+    return errors;
   };
 
   return (
@@ -115,6 +150,25 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
               <Input type="text" name="availability" id="availability" value={formData.availability} onChange={handleChange} />
             </label>
 
+            <div className="flex flex-col col-span-2" style={{ zIndex: 50 }}>
+              <span>Categories</span>
+              {categories.length > 0 ? (
+                <MultiSelect
+                  options={categories}
+                  onValueChange={handleCategoryChange}
+                  placeholder="Select categories"
+                  variant="inverted"
+                  maxSelected={-1}
+                  maxCount={1}
+                  search={false}
+                  defaultValue={formData.categories}
+                  modalPopover={true}
+                />
+              ) : (
+                <div>Loading categories...</div>
+              )}
+              {errors.categories && <span className="text-red-500">{errors.categories}</span>}
+            </div>
 
             <label htmlFor="serviceDescription" className="flex flex-col col-span-2">
               <span>Service Description</span>

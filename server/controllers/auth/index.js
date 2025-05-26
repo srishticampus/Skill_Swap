@@ -473,7 +473,31 @@ router.post(
   "/update-technical",
   auth,
   upload.any(),
+  [
+    check("categories", "Categories are required")
+      .custom(value => {
+        if (Array.isArray(value) && value.length > 0) {
+          return true;
+        }
+        if (typeof value === 'string' && value.trim() !== '') {
+          return true;
+        }
+        return false;
+      })
+      .withMessage("Categories are required and must be a non-empty array or a non-empty string"),
+  ],
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    let { categories } = req.body;
+
+    if (categories && !Array.isArray(categories)) {
+      categories = [categories];
+    }
+
     try {
       const user = await User.findById(req.user.id);
 
@@ -518,7 +542,7 @@ router.post(
       if (req.body.availability) {
         user.availability = req.body.availability;
       }
-
+      user.categories = categories;
 
       await user.save();
 
