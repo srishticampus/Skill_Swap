@@ -2,13 +2,82 @@ import express from 'express';
 import ChatMessage from '../models/chat_message.js';
 import User from '../models/user.js';
 import { verifyToken } from './auth/index.js';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 
 // GET /api/chat/users: Get list of users for chat
 router.get('/users', verifyToken, async (req, res) => {
   try {
-    const users = await User.find({ _id: { $ne: req.user.id } }).select('name profilePicture skills email');
+    const currentUserId = req.user.id;
+
+    const users = await User.aggregate([
+      {
+        $match: { _id: { $ne: new mongoose.Types.ObjectId(currentUserId) } }
+      },
+      {
+        $lookup: {
+          from: 'chatmessages',
+          let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $and: [{ $eq: ['$sender', '$$userId'] }, { $eq: ['$receiver', new mongoose.Types.ObjectId(currentUserId)] }] },
+                    { $and: [{ $eq: ['$receiver', '$$userId'] }, { $eq: ['$sender', new mongoose.Types.ObjectId(currentUserId)] }] }
+                  ]
+                }
+              }
+            },
+            { $sort: { timestamp: -1 } },
+            { $limit: 1 }
+          ],
+          as: 'latestMessage'
+        }
+      },
+      {
+        $lookup: {
+          from: 'chatmessages',
+          let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$sender', '$$userId'] },
+                    { $eq: ['$receiver', new mongoose.Types.ObjectId(currentUserId)] },
+                    { $eq: ['$read', false] }
+                  ]
+                }
+              }
+            },
+            { $count: 'unreadCount' }
+          ],
+          as: 'unreadMessages'
+        }
+      },
+      {
+        $addFields: {
+          lastMessageTimestamp: { $ifNull: [{ $arrayElemAt: ['$latestMessage.timestamp', 0] }, new Date(0)] },
+          unreadCount: { $ifNull: [{ $arrayElemAt: ['$unreadMessages.unreadCount', 0] }, 0] }
+        }
+      },
+      {
+        $sort: { lastMessageTimestamp: -1 }
+      },
+      {
+        $project: {
+          name: 1,
+          profilePicture: 1,
+          skills: 1,
+          email: 1,
+          lastMessageTimestamp: 1,
+          unreadCount: 1
+        }
+      }
+    ]);
+
     res.status(200).json(users);
   } catch (error) {
     console.error(error);
@@ -50,6 +119,28 @@ router.post('/message', verifyToken, async (req, res) => {
 
     await newMessage.save();
     res.status(201).json({ message: 'Message sent successfully', newMessage });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PUT /api/chat/messages/read/:otherUserId: Mark messages as read
+router.put('/messages/read/:otherUserId', verifyToken, async (req, res) => {
+  try {
+    const { otherUserId } = req.params;
+    const currentUserId = req.user.id;
+
+    await ChatMessage.updateMany(
+      {
+        sender: otherUserId,
+        receiver: currentUserId,
+        read: false,
+      },
+      { $set: { read: true } }
+    );
+
+    res.status(200).json({ message: 'Messages marked as read' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

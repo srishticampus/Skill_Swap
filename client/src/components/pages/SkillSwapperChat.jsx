@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import axiosInstance from '../../api/axios'; // Import the axios instance
@@ -13,6 +12,19 @@ const SkillSwapperChat = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const messagesEndRef = useRef(null); // Ref for the messages container
+
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      requestAnimationFrame(() => {
+        messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+      });
+    }
+  }, []);
+
+  const handleNewMessageTextChange = useCallback((e) => {
+    setNewMessageText(e.target.value);
+  }, []);
 
   // Fetch chat users on component mount
   useEffect(() => {
@@ -20,8 +32,8 @@ const SkillSwapperChat = () => {
       try {
         const response = await axiosInstance.get('/api/chat/users');
         setUsers(response.data);
-        if (response.data.length > 0) {
-          // Optionally select the first user by default
+        if (response.data.length > 0 && !selectedChatUser) {
+          // Optionally select the first user by default if no user is already selected
           setSelectedChatUser(response.data[0]);
         }
       } catch (err) {
@@ -32,33 +44,44 @@ const SkillSwapperChat = () => {
       }
     };
     fetchUsers();
-  }, []);
+  }, [selectedChatUser]); // Re-fetch users when selectedChatUser changes to update unread counts
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.skills?.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredUsers = useMemo(() => {
+    return users.filter(user =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.skills?.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [users, searchTerm]);
 
-  // Fetch messages when selectedChatUser changes
+  // Fetch messages and mark as read when selectedChatUser changes
   useEffect(() => {
-    const fetchMessages = async () => {
+    const fetchMessagesAndMarkRead = async () => {
       if (selectedChatUser) {
         try {
           setLoading(true);
-          const response = await axiosInstance.get(`/api/chat/messages/${selectedChatUser._id}`);
-          setMessages(response.data);
+          // Fetch messages
+          const messagesResponse = await axiosInstance.get(`/api/chat/messages/${selectedChatUser._id}`);
+          setMessages(messagesResponse.data);
+
+          // Mark messages as read
+          await axiosInstance.put(`/api/chat/messages/read/${selectedChatUser._id}`);
+
+          // Re-fetch users to update unread counts in the sidebar
+          const usersResponse = await axiosInstance.get('/api/chat/users');
+          setUsers(usersResponse.data);
+
         } catch (err) {
-          setError('Failed to fetch messages.');
-          console.error('Error fetching messages:', err);
+          setError('Failed to fetch messages or mark as read.');
+          console.error('Error fetching messages or marking as read:', err);
         } finally {
           setLoading(false);
         }
       }
     };
-    fetchMessages();
+    fetchMessagesAndMarkRead();
   }, [selectedChatUser]);
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!newMessageText.trim() || !selectedChatUser) return;
 
     try {
@@ -74,12 +97,17 @@ const SkillSwapperChat = () => {
       setError('Failed to send message.');
       console.error('Error sending message:', err);
     }
-  };
+  }, [newMessageText, selectedChatUser, setMessages, setNewMessageText, setError]); // Include state setters for clarity, though React guarantees their stability
 
-  const handleUserClick = (user) => {
+  // Scroll to bottom whenever messages or selectedChatUser changes
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, selectedChatUser, scrollToBottom]);
+
+  const handleUserClick = useCallback((user) => {
     setSelectedChatUser(user);
-  };
-
+  }, [setSelectedChatUser]);
+  console.log("render")
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
 
@@ -90,12 +118,12 @@ const SkillSwapperChat = () => {
         {/* Search Bar */}
         <div className="mb-8 flex justify-center">
           <div className="relative w-full max-w-3xl">
-            <Input
+            <input
               type="text"
               placeholder="Search a chat here..."
               className="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={useCallback((e) => setSearchTerm(e.target.value), [setSearchTerm])}
             />
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -129,12 +157,19 @@ const SkillSwapperChat = () => {
                   <AvatarImage src={user.profilePicture ? `${import.meta.env.VITE_API_URL}/${user.profilePicture}` : '/src/assets/profile-pic.png'} alt={user.name} />
                   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="ml-3">
+                <div className="ml-3 flex-grow">
                   <p className="font-medium">
                     {user.name} {user.email === 'admin@admin.com' && <span className="text-xs text-blue-600">(Admin)</span>}
                   </p>
-                  <p className="text-sm text-gray-500">{user.skills?.join(', ') || 'No skills'}</p>
+                  {user.email !== 'admin@admin.com' && (
+                    <p className="text-sm text-gray-500">{user.skills?.join(', ') || 'No skills'}</p>
+                  )}
                 </div>
+                {user.unreadCount > 0 && (
+                  <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    {user.unreadCount}
+                  </span>
+                )}
               </div>
             ))}
           </Card>
@@ -146,7 +181,7 @@ const SkillSwapperChat = () => {
                 {/* Current Chat User Info */}
                 <div className="flex items-center pb-4 border-b border-gray-200 mb-4">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={selectedChatUser.profilePicture || '/src/assets/pfp.jpeg'} alt={selectedChatUser.name} />
+                    <AvatarImage src={selectedChatUser.profilePicture ? `${import.meta.env.VITE_API_URL}/${selectedChatUser.profilePicture}` : '/src/assets/profile-pic.png'} alt={selectedChatUser.name} />
                     <AvatarFallback>{selectedChatUser.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="ml-4">
@@ -182,7 +217,7 @@ const SkillSwapperChat = () => {
                 </div>
 
                 {/* Chat Messages */}
-                <div className="flex-grow overflow-y-auto p-4 space-y-4">
+                <div className="flex-grow overflow-y-auto p-4 space-y-4" ref={messagesEndRef}>
                   {loading && <p>Loading messages...</p>}
                   {error && <p className="text-red-500">{error}</p>}
                   {!loading && messages.length === 0 && <p>No messages yet. Start a conversation!</p>}
@@ -195,33 +230,35 @@ const SkillSwapperChat = () => {
                     >
                       {message.sender === selectedChatUser._id && (
                         <Avatar className="h-8 w-8 mr-2">
-                          <AvatarImage src={selectedChatUser.profilePicture || '/src/assets/pfp.jpeg'} alt={selectedChatUser.name} />
+                          <AvatarImage src={selectedChatUser.profilePicture ? `${import.meta.env.VITE_API_URL}/${selectedChatUser.profilePicture}` : '/src/assets/profile-pic.png'} alt={selectedChatUser.name} />
                           <AvatarFallback>{selectedChatUser.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                       )}
-                      <div
-                        className={`p-3 rounded-lg max-w-xs ${
+                      <p
+                        className={`p-3 rounded-lg max-w-xs break-words ${
                           message.sender === selectedChatUser._id
                             ? 'bg-purple-200 text-gray-800'
                             : 'bg-gray-600 text-white'
                         }`}
                       >
                         {message.message_text}
-                      </div>
+                      </p>
                     </div>
                   ))}
                 </div>
 
                 {/* Message Input */}
                 <div className="flex items-center pt-4 border-t border-gray-200">
-                  <Input
+                  <input
+                    key={selectedChatUser?._id || 'no-user'} // Add a key to force re-mount on user change
                     type="text"
                     placeholder="Message"
                     className="flex-grow mr-4 py-2 px-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     value={newMessageText}
-                    onChange={(e) => setNewMessageText(e.target.value)}
-                    onKeyPress={(e) => {
+                    onChange={handleNewMessageTextChange}
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter') {
+                        e.preventDefault(); // Prevent default form submission
                         handleSendMessage();
                       }
                     }}
