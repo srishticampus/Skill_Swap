@@ -81,7 +81,7 @@ const SwapRequestDetailsPage = () => {
             <h2 className="text-2xl font-bold mb-4 text-primary">My Profile</h2>
             <div className="flex items-center mb-4">
               <img
-                src={`${import.meta.env.VITE_API_URL}/${swapRequest.createdBy?._id === currentUser._id
+                src={`${import.meta.env.VITE_API_URL}/${swapRequest.createdBy?._id === currentUser.id
                   ? swapRequest.createdBy?.profilePicture
                   : swapRequest.interactionUser?.profilePicture
                   }`}
@@ -90,11 +90,18 @@ const SwapRequestDetailsPage = () => {
               />
               <div>
                 <h3 className="text-xl font-semibold">
-                  {swapRequest.createdBy?._id === currentUser._id
+                  {swapRequest.createdBy?._id === currentUser.id
                     ? swapRequest.createdBy?.name || "N/A"
                     : swapRequest.interactionUser?.name || "N/A"}
                 </h3>
-                <p className="text-gray-600">25% Completed</p> {/* This needs to be dynamic */}
+                {/* Display dynamic percentage for current user */}
+                {(() => {
+                  const currentUserUpdates = swapRequest.updates
+                    .filter(update => update.user?._id === currentUser.id)
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                  const latestPercentage = currentUserUpdates.length > 0 ? currentUserUpdates[0].percentage : 0;
+                  return <p className="text-gray-600">{latestPercentage}% Completed</p>;
+                })()}
               </div>
             </div>
             <div>
@@ -102,12 +109,13 @@ const SwapRequestDetailsPage = () => {
                 Performance Updates of 1 Month (shown in weekly format)
               </h3>
               <Timeline
-                updates={[
-                  { title: 'Theory Session Completed', date: '26 March 2025', description: 'Completed the initial theory session' },
-                  { title: 'Introduction Completed', date: '2 April 2025', description: 'Introduction to the project' },
-                  { title: 'Tools Completed', date: '9 April 2025', description: 'Setup required tools' },
-                  { title: 'Designing Started', date: '16 April 2025', description: 'Started designing the UI' },
-                ]}
+                updates={swapRequest.updates
+                  .filter(update => update.user?._id === currentUser.id)
+                  .map(update => ({
+                    title: `${update.title} (${update.percentage}%)`, // Use update.title and percentage
+                    date: new Date(update.createdAt).toLocaleDateString(),
+                    description: update.message,
+                  }))}
               />
             </div>
           </div>
@@ -117,7 +125,7 @@ const SwapRequestDetailsPage = () => {
             <h2 className="text-2xl font-bold mb-4 text-primary">Skill Swap Partner</h2>
             <div className="flex items-center mb-4">
               <img
-                src={`${import.meta.env.VITE_API_URL}/${swapRequest.createdBy?._id === currentUser._id
+                src={`${import.meta.env.VITE_API_URL}/${swapRequest.createdBy?._id === currentUser.id
                   ? swapRequest.interactionUser?.profilePicture
                   : swapRequest.createdBy?.profilePicture
                   }`}
@@ -126,11 +134,11 @@ const SwapRequestDetailsPage = () => {
               />
               <div>
                 <h3 className="text-xl font-semibold">
-                  {swapRequest.createdBy?._id === currentUser._id
+                  {swapRequest.createdBy?._id === currentUser.id
                     ? swapRequest.interactionUser?.name || "N/A"
                     : swapRequest.createdBy?.name || "N/A"}
                   <Button asChild variant="outline" className="ml-2">
-                    <Link to={`/add-review/${swapRequest.createdBy?._id === currentUser._id
+                    <Link to={`/add-review/${swapRequest.createdBy?._id === currentUser.id
                       ? swapRequest.interactionUser?._id
                       : swapRequest.createdBy?._id}`}>
                       Add Review
@@ -138,7 +146,18 @@ const SwapRequestDetailsPage = () => {
                   </Button>
                 </h3>
 
-                <p className="text-gray-600">25% Completed</p> {/* This needs to be dynamic */}
+                {/* Display dynamic percentage for skill swap partner */}
+                {(() => {
+                  const partnerUpdates = swapRequest.updates
+                    .filter(update =>
+                      swapRequest.createdBy?._id === currentUser.id
+                        ? update.user?._id === swapRequest.interactionUser?._id
+                        : update.user?._id === swapRequest.createdBy?._id
+                    )
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                  const latestPercentage = partnerUpdates.length > 0 ? partnerUpdates[0].percentage : 0;
+                  return <p className="text-gray-600">{latestPercentage}% Completed</p>;
+                })()}
               </div>
             </div>
             <div>
@@ -146,12 +165,17 @@ const SwapRequestDetailsPage = () => {
                 Performance Updates of 1 Month (shown in weekly format)
               </h3>
               <Timeline
-                updates={[
-                  { title: 'Theory Session Completed', date: '26 March 2025', description: 'Completed the initial theory session' },
-                  { title: 'Introduction Completed', date: '2 April 2025', description: 'Introduction to the project' },
-                  { title: 'Tools Completed', date: '9 April 2025', description: 'Setup required tools' },
-                  { title: 'Designing Started', date: '16 April 2025', description: 'Started designing the UI' },
-                ]}
+                updates={swapRequest.updates
+                  .filter(update =>
+                    swapRequest.createdBy?._id === currentUser.id
+                      ? update.user?._id === swapRequest.interactionUser?._id
+                      : update.user?._id === swapRequest.createdBy?._id
+                  )
+                  .map(update => ({
+                    title: `${update.title} (${update.percentage}%)`, // Use update.title and percentage
+                    date: new Date(update.createdAt).toLocaleDateString(),
+                    description: update.message,
+                  }))}
               />
             </div>
           </div>

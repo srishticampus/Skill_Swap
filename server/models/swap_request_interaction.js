@@ -17,7 +17,7 @@ const swapRequestInteractionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'accepted', 'rejected'],
+    enum: ['pending', 'accepted', 'rejected', 'completed'],
     default: 'pending'
   },
   createdAt: {
@@ -31,6 +31,14 @@ const swapRequestInteractionSchema = new mongoose.Schema({
     },
     message: {
       type: String
+    },
+    title: {
+      type: String
+    },
+    percentage: {
+      type: Number,
+      min: 0,
+      max: 100
     },
     createdAt: {
       type: Date,

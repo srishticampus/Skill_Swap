@@ -621,11 +621,26 @@ export const addStatusUpdate = async (req, res) => {
         return res.status(404).json({ message: 'Swap request interaction not found' });
       }
 
+      const { title, updateContent, percentage } = req.body;
+
       // Add the status update to the swap request interaction
       swapRequestInteraction.updates.push({
         user: userId,
-        content: req.body.updateContent
+        title: title,
+        message: updateContent,
+        percentage: percentage
       });
+
+      // Conditionally set the interaction status based on percentage
+      if (percentage === 100) {
+        swapRequestInteraction.status = 'completed';
+      } else if (percentage < 100) {
+        // If an update is added with less than 100%, set status to 'pending'
+        // This implies that if a project was completed and a new update is added
+        // that brings the percentage below 100%, it reverts to pending.
+        swapRequestInteraction.status = 'pending';
+      }
+      // If percentage is not provided or is null, status remains unchanged.
 
       await swapRequestInteraction.save();
 
@@ -661,6 +676,14 @@ export const markAsCompleted = async (req, res) => {
       if (!swapRequestInteraction) {
         return res.status(404).json({ message: 'Swap request interaction not found' });
       }
+
+      // Add an automatic update for completion
+      swapRequestInteraction.updates.push({
+        user: userId, // The user marking it as completed
+        title: 'Completed Project',
+        message: 'The project has been marked as 100% completed.',
+        percentage: 100
+      });
 
       swapRequestInteraction.status = 'completed';
       await swapRequestInteraction.save();

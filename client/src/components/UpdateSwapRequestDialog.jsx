@@ -14,13 +14,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
 import axiosInstance from "@/api/axios";
 
+import { Input } from "@/components/ui/input"; // Import Input component
+import { Label } from "@/components/ui/label"; // Import Label component
+
 const UpdateSwapRequestDialog = ({ swapRequestId, onClose }) => {
   const [updateContent, setUpdateContent] = useState('');
+  const [title, setTitle] = useState(''); // New state for title
+  const [percentage, setPercentage] = useState(0); // New state for percentage
   const [isCompleted, setIsCompleted] = useState(false);
 
   const handleAddUpdate = async () => {
     try {
-      await axiosInstance.post(`/api/swap-requests/${swapRequestId}/update`, { updateContent });
+      await axiosInstance.post(`/api/swap-requests/${swapRequestId}/update`, { title, updateContent, percentage });
       onClose(); // Close the dialog after successful update
     } catch (error) {
       console.error('Error adding status update:', error);
@@ -49,6 +54,18 @@ const UpdateSwapRequestDialog = ({ swapRequestId, onClose }) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="title" className="text-right">
+              Title
+            </Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="percentage" className="text-right">
+              Percentage
+            </Label>
+            <Input id="percentage" type="number" value={percentage} onChange={(e) => setPercentage(Number(e.target.value))} className="col-span-3" min="0" max="100" />
+          </div>
           <Textarea value={updateContent} onChange={(e) => setUpdateContent(e.target.value)} placeholder="Add a status update..." />
         </div>
         <AlertDialogFooter>

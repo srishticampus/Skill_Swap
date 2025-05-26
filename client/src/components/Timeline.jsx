@@ -11,6 +11,7 @@ const Timeline = ({ updates }) => {
           <div className="text-center mt-2">
             <h3 className="font-semibold text-sm">{update.title}</h3>
             <p className="text-gray-600 text-xs">{update.date}</p>
+            <p className='text-sm'>{update.description}</p>
           </div>
           {index < updates.length - 1 && (
             <div className="absolute top-4 w-full h-0.5 bg-gray-300 left-1/2 transform -translate-x-1/2"></div>
