@@ -9,6 +9,7 @@ import {
   LogOut,
   Dog,
   Building2,
+  MessageSquare, // Import MessageSquare icon
 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -69,6 +70,11 @@ const items = [
     title: "Contact Submissions",
     url: "/admin/contact-submissions",
     icon: FileText // You can choose a more appropriate icon
+  },
+  {
+    title: "Chat", // New chat item
+    url: "/admin/chat",
+    icon: MessageSquare // Chat icon
   },
 ];
 

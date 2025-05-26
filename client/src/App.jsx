@@ -110,6 +110,7 @@ function App() {
           <Route path="/admin/skill-swappers/:id" element={<SkillSwapperDetailsPage />} /> {/* Add the new route for details */}
           <Route path="/admin/complaints" element={<AdminComplaints />} />
           <Route path="/admin/organization-swaps/:organizationId" element={<OrganizationSwaps />} />
+          <Route path="/admin/chat" element={<SkillSwapperChat />} /> {/* New Admin Chat Route */}
         </Route>
         <Route path="/organization" element={<Organization />}>
           <Route index element={<OrganizationDashboard />} />
