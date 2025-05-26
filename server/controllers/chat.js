@@ -47,7 +47,7 @@ router.get('/users', verifyToken, async (req, res) => {
                   $and: [
                     { $eq: ['$sender', '$$userId'] },
                     { $eq: ['$receiver', new mongoose.Types.ObjectId(currentUserId)] },
-                    { $eq: ['$read', false] }
+                    { $eq: ['$read_status', false] }
                   ]
                 }
               }
@@ -135,9 +135,9 @@ router.put('/messages/read/:otherUserId', verifyToken, async (req, res) => {
       {
         sender: otherUserId,
         receiver: currentUserId,
-        read: false,
+        read_status: false,
       },
-      { $set: { read: true } }
+      { $set: { read_status: true } }
     );
 
     res.status(200).json({ message: 'Messages marked as read' });

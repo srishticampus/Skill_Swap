@@ -68,6 +68,7 @@ function Navbar() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [unreadChats, setUnreadChats] = useState(0);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -80,13 +81,28 @@ function Navbar() {
       }
     };
 
+    const fetchUnreadChats = async () => {
+      try {
+        const response = await axiosInstance.get('/api/chat/users');
+        const totalUnread = response.data.reduce((sum, user) => sum + user.unreadCount, 0);
+        setUnreadChats(totalUnread);
+      } catch (error) {
+        console.error('Error fetching unread chats:', error);
+      }
+    };
+
     if (user) {
       fetchNotifications();
+      fetchUnreadChats();
     }
   }, [user]);
 
   const handleNotificationRead = () => {
     setUnreadNotifications(prevCount => Math.max(0, prevCount - 1));
+  };
+
+  const handleChatClick = () => {
+    setUnreadChats(0); // Mark all chats as read when navigating to chat
   };
 
   return (
@@ -134,7 +150,7 @@ function Navbar() {
                 <NavigationMenuTrigger>
                   Swap Requests
                 </NavigationMenuTrigger>
-                <NavigationMenuContent>
+                <NavigationMenuContent className="z-10">
                   <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                     <Link to="/swap-request-form">Request Swap</Link>
                   </NavigationMenuLink>
@@ -183,8 +199,13 @@ function Navbar() {
           {user ? (
             <>
               <Button asChild variant="outline" className="rounded-full">
-                <Link to="/chat">
+                <Link to="/chat" onClick={handleChatClick}>
                   <MessageSquare />
+                  {unreadChats > 0 && (
+                    <Badge className="ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+                      {unreadChats}
+                    </Badge>
+                  )}
                 </Link>
               </Button>
               <DropdownMenu>

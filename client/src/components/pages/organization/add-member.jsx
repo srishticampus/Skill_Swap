@@ -9,7 +9,7 @@ import { Plus } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import countries from '@/constants/countries';
 import axios from '@/api/axios'; // Import axios
-import { Toaster, toast } from 'sonner'; // Import toast notifications
+import { toast } from 'sonner'; // Import toast notifications
 import { MultiSelect } from '@/components/multi-select'; // Import MultiSelect
 
 const AddMember = () => {
@@ -149,7 +149,6 @@ const AddMember = () => {
 
   return (
     <div className="container mx-auto p-6 text-white min-h-screen">
-      <Toaster position="top-right" /> {/* Add Toaster component */}
       <Card className="max-w-3xl mx-auto bg-white border-gray-200 rounded-lg">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center text-primary">Add Member</CardTitle>
