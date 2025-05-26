@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Star } from "lucide-react";
+import { Bell, Star, MessageSquare } from "lucide-react";
 import { useLocation, Link, Outlet } from 'react-router';
 import { useAuth } from "@/context/AuthContext";
 import skillswap from "@/assets/skillswap.svg";
@@ -182,6 +182,11 @@ function Navbar() {
         <div className="flex items-center gap-2">
           {user ? (
             <>
+              <Button asChild variant="outline" className="rounded-full">
+                <Link to="/chat">
+                  <MessageSquare />
+                </Link>
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="rounded-full">

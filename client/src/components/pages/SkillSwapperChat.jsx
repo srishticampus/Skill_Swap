@@ -122,15 +122,17 @@ const SkillSwapperChat = () => {
                 key={user._id}
                 className={`flex items-center p-3 rounded-lg cursor-pointer mb-2 ${
                   selectedChatUser?._id === user._id ? 'bg-purple-100' : 'hover:bg-gray-50'
-                }`}
+                } ${user.email === 'admin@admin.com' ? 'bg-blue-100 border-blue-300 border' : ''}`}
                 onClick={() => handleUserClick(user)}
               >
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={user.profilePicture || '/src/assets/pfp.jpeg'} alt={user.name} />
+                  <AvatarImage src={user.profilePicture ? `${import.meta.env.VITE_API_URL}/${user.profilePicture}` : '/src/assets/profile-pic.png'} alt={user.name} />
                   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="ml-3">
-                  <p className="font-medium">{user.name}</p>
+                  <p className="font-medium">
+                    {user.name} {user.email === 'admin@admin.com' && <span className="text-xs text-blue-600">(Admin)</span>}
+                  </p>
                   <p className="text-sm text-gray-500">{user.skills?.join(', ') || 'No skills'}</p>
                 </div>
               </div>
@@ -149,21 +151,25 @@ const SkillSwapperChat = () => {
                   </Avatar>
                   <div className="ml-4">
                     <p className="font-bold text-lg">{selectedChatUser.name}</p>
-                    <p className="text-sm text-gray-600">{selectedChatUser.skills?.join(', ') || 'No skills'}</p>
-                    {/* You can add more user details here if available in the user object */}
-                    <div className="flex items-center text-gray-500 text-xs mt-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <span>{selectedChatUser.city || 'N/A'}, {selectedChatUser.country || 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center text-gray-500 text-xs mt-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15.711c-2.791 0-5.48-.568-7.923-1.646a.865.865 0 00-.477.049C3.933 14.5 3 15.248 3 16.358V19a2 2 0 002 2h14a2 2 0 002-2v-2.642c0-1.111-.933-1.86-2.202-2.145zM12 6a3 3 0 110 6 3 3 0 010-6z" />
-                      </svg>
-                      <span>{selectedChatUser.yearsOfExperience || 0}+ years Experience</span>
-                    </div>
+                    {selectedChatUser.email !== 'admin@admin.com' && (
+                      <>
+                        <p className="text-sm text-gray-600">{selectedChatUser.skills?.join(', ') || 'No skills'}</p>
+                        {/* You can add more user details here if available in the user object */}
+                        <div className="flex items-center text-gray-500 text-xs mt-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span>{selectedChatUser.city || 'N/A'}, {selectedChatUser.country || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center text-gray-500 text-xs mt-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15.711c-2.791 0-5.48-.568-7.923-1.646a.865.865 0 00-.477.049C3.933 14.5 3 15.248 3 16.358V19a2 2 0 002 2h14a2 2 0 002-2v-2.642c0-1.111-.933-1.86-2.202-2.145zM12 6a3 3 0 110 6 3 3 0 010-6z" />
+                          </svg>
+                          <span>{selectedChatUser.yearsOfExperience || 0}+ years Experience</span>
+                        </div>
+                      </>
+                    )}
                     {/* Assuming user_rating model exists and can be fetched for average rating */}
                     {/* <div className="flex items-center mt-1">
                       {[...Array(5)].map((_, i) => (

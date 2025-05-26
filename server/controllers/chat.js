@@ -8,7 +8,7 @@ const router = express.Router();
 // GET /api/chat/users: Get list of users for chat
 router.get('/users', verifyToken, async (req, res) => {
   try {
-    const users = await User.find({ _id: { $ne: req.user.id } }).select('name profilePicture skills');
+    const users = await User.find({ _id: { $ne: req.user.id } }).select('name profilePicture skills email');
     res.status(200).json(users);
   } catch (error) {
     console.error(error);
