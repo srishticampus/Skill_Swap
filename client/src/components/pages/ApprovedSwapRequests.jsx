@@ -17,8 +17,10 @@ import {
 import { Button } from "@/components/ui/button";
 import UpdateSwapRequestDialog from "@/components/UpdateSwapRequestDialog";
 import axiosInstance from "@/api/axios";
+import { useNavigate } from 'react-router';
 const ApprovedSwapRequests = () => {
   const [swapRequests, setSwapRequests] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchApprovedSwapRequests = async () => {
@@ -77,7 +79,7 @@ const ApprovedSwapRequests = () => {
 
   const handleTrackClick = (swapRequestId) => {
     // Implement navigation to the swap request details page
-    window.location.href = `/swap-requests/${swapRequestId}`;
+    navigate(`/swap-requests/${swapRequestId}`);
   };
 
   const [selectedSwapRequestId, setSelectedSwapRequestId] = useState(null);
