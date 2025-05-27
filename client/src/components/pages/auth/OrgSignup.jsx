@@ -23,8 +23,9 @@ export default function OrgSignup() {
   });
 
   const [errors, setErrors] = useState({});
-  const [passwordVisible, setPasswordVisible] = useState(false); // Changed from newPasswordVisible to passwordVisible
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(''); // New state for success message
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -37,11 +38,11 @@ export default function OrgSignup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSuccessMessage(''); // Clear previous success messages
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      // Form is valid, submit data
       try {
         const response = await axiosInstance.post('/api/organizations/register', formData, {
           headers: {
@@ -50,27 +51,42 @@ export default function OrgSignup() {
         });
 
         if (response.status === 200) {
-          const orgData = response.data.organization; // Assuming the response contains organization data
-          const token = response.data.token;
-          // Need to update AuthContext to handle organization login
-          // For now, assuming login function can handle both user and org data
-          login(orgData, token, true); // Pass true to indicate organization login
-          setTimeout(() => {
-            navigate('/organization'); // Redirect to organization dashboard or home page after successful signup
-          }, 1000);
-        } else {
-          // Check if the error response has the expected format
-          if (response.data && response.data.errors && response.data.errors.length > 0) {
-            setErrors({ api: response.data.errors[0].msg }); // Display the first error message from the API
+          if (response.data.msg) { // Check for the success message from the backend
+            setSuccessMessage(response.data.msg);
+            setFormData({ // Clear form data on successful submission
+              name: '',
+              email: '',
+              phone: '',
+              country: '',
+              city: '',
+              password: '',
+              confirmPassword: '',
+              registrationNumber: '',
+              address: '',
+              pincode: '',
+            });
           } else {
-            setErrors({ api: 'An unexpected error occurred.' }); // Fallback generic error message
+            // This block should ideally not be reached if backend always returns msg for pending
+            // However, keeping it for robustness in case of future changes or unexpected responses
+            const orgData = response.data.organization;
+            const token = response.data.token;
+            login(orgData, token, true);
+            setTimeout(() => {
+              navigate('/organization');
+            }, 1000);
+          }
+        } else {
+          if (response.data && response.data.errors && response.data.errors.length > 0) {
+            setErrors({ api: response.data.errors[0].msg });
+          } else {
+            setErrors({ api: 'An unexpected error occurred.' });
           }
         }
       } catch (error) {
         if (error.response && error.response.data && error.response.data.errors && error.response.data.errors.length > 0) {
-          setErrors({ api: error.response.data.errors[0].msg }); // Display the first error message from the API
+          setErrors({ api: error.response.data.errors[0].msg });
         } else {
-          setErrors({ api: 'An error occurred during organization signup.' }); // Fallback generic error message
+          setErrors({ api: 'An error occurred during organization signup.' });
         }
       }
     }
@@ -79,8 +95,8 @@ export default function OrgSignup() {
   const validateForm = (data) => {
     const errors = {};
 
-    if (!data.name) { // Changed from organizationName to name
-      errors.name = 'Organization Name is required'; // Updated error message key
+    if (!data.name) {
+      errors.name = 'Organization Name is required';
     }
     if (!data.email) {
       errors.email = 'Please include a valid email';
@@ -102,18 +118,18 @@ export default function OrgSignup() {
     } else if (/\d/.test(data.city)) {
       errors.city = 'City name cannot contain digits';
     }
-    if (!data.password) { // Changed from newPassword to password
-      errors.password = 'Please enter a password with 6 or more characters'; // Updated error message key
+    if (!data.password) {
+      errors.password = 'Please enter a password with 6 or more characters';
     } else if (data.password.length < 6) {
-      errors.password = "Password must be at least 6 characters long"; // Updated error message key
+      errors.password = "Password must be at least 6 characters long";
     }
-    if (data.password !== data.confirmPassword) { // Changed from newPassword to password
+    if (data.password !== data.confirmPassword) {
       errors.confirmPassword = 'Passwords do not match';
     }
-    if (!data.address) { // Added validation for address
+    if (!data.address) {
       errors.address = 'Address is required';
     }
-    if (!data.pincode) { // Added validation for pincode
+    if (!data.pincode) {
       errors.pincode = 'Pincode is required';
     }
 
@@ -124,11 +140,12 @@ export default function OrgSignup() {
   return (
     <main className="container mx-3 md:mx-auto flex flex-col items-center gap-4 my-16">
       <h1 className="text-center text-primary text-3xl">Organization Sign Up!</h1>
+      {successMessage && <p className="text-green-500 text-center sm:col-span-2">{successMessage}</p>} {/* Display success message */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-[80%] max-w-[600px]">
-        <label htmlFor="name" className="flex flex-col sm:col-span-2"> {/* Changed htmlFor and name */}
+        <label htmlFor="name" className="flex flex-col sm:col-span-2">
           <span>Organization Name</span>
-          <Input type="text" name="name" id="name" value={formData.name} onChange={handleChange} /> {/* Changed name and value */}
-          {errors.name && <span className="text-red-500">{errors.name}</span>} {/* Updated error key */}
+          <Input type="text" name="name" id="name" value={formData.name} onChange={handleChange} />
+          {errors.name && <span className="text-red-500">{errors.name}</span>}
         </label>
         <label htmlFor="email" className="flex flex-col">
           <span>Email</span>
@@ -157,17 +174,17 @@ export default function OrgSignup() {
           <Input type="text" name="city" id="city" value={formData.city} onChange={handleChange} />
           {errors.city && <span className="text-red-500">{errors.city}</span>}
         </label>
-        <label htmlFor="password" className="flex flex-col relative"> {/* Changed htmlFor and name */}
-          <span>Password</span> {/* Changed label text */}
-          <Input type={passwordVisible ? "text" : "password"} name="password" id="password" value={formData.password} onChange={handleChange} /> {/* Changed name and value, and type toggle state */}
+        <label htmlFor="password" className="flex flex-col relative">
+          <span>Password</span>
+          <Input type={passwordVisible ? "text" : "password"} name="password" id="password" value={formData.password} onChange={handleChange} />
           <button
             type="button"
             onClick={() => setPasswordVisible(!passwordVisible)}
             className="absolute right-3 top-[2.7rem] -translate-y-1/2"
           >
-            {passwordVisible ? <EyeIcon className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />} {/* Changed icon toggle state */}
+            {passwordVisible ? <EyeIcon className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </button>
-          {errors.password && <span className="text-red-500">{errors.password}</span>} {/* Updated error key */}
+          {errors.password && <span className="text-red-500">{errors.password}</span>}
         </label>
         <label htmlFor="confirmPassword" className="flex flex-col relative">
           <span>Confirm Password</span>
@@ -181,7 +198,6 @@ export default function OrgSignup() {
           </button>
           {errors.confirmPassword && <span className="text-red-500">{errors.confirmPassword}</span>}
         </label>
-        {/* Added new fields for organization registration */}
         <label htmlFor="registrationNumber" className="flex flex-col">
           <span>Registration Number</span>
           <Input type="text" name="registrationNumber" id="registrationNumber" value={formData.registrationNumber} onChange={handleChange} />
@@ -197,7 +213,7 @@ export default function OrgSignup() {
           <Input type="text" name="pincode" id="pincode" value={formData.pincode} onChange={handleChange} />
           {errors.pincode && <span className="text-red-500">{errors.pincode}</span>}
         </label>
-        {errors.api && <span className="text-red-500 sm:col-span-2">{errors.api}</span>} {/* Display API error */}
+        {errors.api && <span className="text-red-500 sm:col-span-2">{errors.api}</span>}
         <Button type="submit" className="sm:col-span-2">Sign Up</Button>
       </form>
       <p>Already have an organization account? <Link to="/organization/login" className="underline">Login</Link></p>

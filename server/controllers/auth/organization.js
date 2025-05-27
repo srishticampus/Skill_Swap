@@ -60,6 +60,11 @@ router.post(
         },
       };
 
+      // If the organization status is 'pending', do not log them in immediately
+      if (organization.status === 'pending') {
+        return res.status(200).json({ msg: "Organization registration successful. Your request has been sent to the admin for approval." });
+      }
+
       jwt.sign(
         payload,
         import.meta.env.VITE_JWT_SECRET, // Use import.meta.env for environment variables
