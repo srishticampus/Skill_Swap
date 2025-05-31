@@ -61,11 +61,11 @@ const items = [
   //   url: "/admin/user-management",
   //   icon: Users // You can choose a more appropriate icon
   // },
-  {
-    title: "Mentor Requests",
-    url: "/admin/mentor-requests",
-    icon: Users // You can choose a more appropriate icon
-  },
+  // {
+  //   title: "Mentor Requests",
+  //   url: "/admin/mentor-requests",
+  //   icon: Users // You can choose a more appropriate icon
+  // },
   {
     title: "Contact Submissions",
     url: "/admin/contact-submissions",

@@ -231,7 +231,7 @@ const ProfilePage = () => {
                   </DialogContent>
                 </Dialog>
 
-                {profileData.mentor ?
+                {/* {profileData.mentor ?
                   <Badge variant="outline" className='text-sm'>Mentor</Badge>
                   :
                   <Dialog>
@@ -261,7 +261,7 @@ const ProfilePage = () => {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                }
+                } */}
               </div>
               {/* Profile Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
