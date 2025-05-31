@@ -1,27 +1,13 @@
 
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, Briefcase, Star } from "lucide-react";
+import { ArrowRight, MapPin, Briefcase, Star, Handshake, Users, User, ChartNoAxesCombined } from "lucide-react";
 import { Link } from 'react-router';
 import heroimg from '../landing/heroimg.jpeg';
-
-// Placeholder data - replace with actual data fetching later
-const pickExchangeData = [
-  { id: 1, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 3, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-  { id: 2, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 4, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-  { id: 3, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 5, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-  { id: 4, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 4, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-  { id: 5, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 3, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-  { id: 6, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 4, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-];
-
-const relatedExchangeData = [
-    { id: 7, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 5, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-    { id: 8, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 4, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-    { id: 9, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 3, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-    { id: 10, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 5, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-    { id: 11, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 4, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-    { id: 12, name: "Abilash A", skills: "Python, Java", location: "123 city, trivandrum", experience: "3+ years Experience", rating: 3, required: "Web Designing", offered: "Testing", image: "/placeholder-avatar.png" },
-  ];
+import landing1 from '../landing/landing-1.png';
+import landing2 from '../landing/landing-2.png';
+import landing3 from '../landing/landing-3.png';
+import axios from '@/api/axios';
 
 
 // Reusable Star Rating Component
@@ -37,31 +23,31 @@ const StarRating = ({ rating }) => (
 const ExchangeCard = ({ exchange, actionType }) => (
     <div className="bg-card rounded-xl shadow-sm border p-4 flex flex-col space-y-3 hover:shadow-md transition-shadow">
       <div className="flex items-center gap-3">
-        <img src={exchange.image} alt={exchange.name} className="w-16 h-16 rounded-full object-cover border" />
+        <img src={exchange.createdBy?.profilePicture || "/placeholder-avatar.png"} alt={exchange.createdBy?.name} className="w-16 h-16 rounded-full object-cover border" />
         <div className="flex-1">
-          <h3 className="font-semibold text-foreground">{exchange.name}</h3>
-          <p className="text-sm text-muted-foreground">{exchange.skills}</p>
+          <h3 className="font-semibold text-foreground">{exchange.createdBy?.name || 'N/A'}</h3>
+          <p className="text-sm text-muted-foreground">{exchange.createdBy?.skills?.join(', ') || 'N/A'}</p>
         </div>
       </div>
        <div className="border-t pt-3 space-y-1.5">
          <div className="flex items-center text-sm text-muted-foreground gap-1.5">
             <MapPin className="w-4 h-4" />
-            <span>{exchange.location}</span>
+            <span>{exchange.createdBy?.city || 'N/A'}</span>
           </div>
           <div className="flex items-center text-sm text-muted-foreground gap-1.5">
             <Briefcase className="w-4 h-4" />
-            <span>{exchange.experience}</span>
+            <span>{exchange.createdBy?.yearsOfExperience ? `${exchange.createdBy.yearsOfExperience}+ years Experience` : 'N/A'}</span>
           </div>
-          <StarRating rating={exchange.rating} />
+          <StarRating rating={exchange.rating || 0} /> {/* Rating is still placeholder */}
         </div>
        <div className="border-t pt-3 grid grid-cols-2 gap-2 text-sm">
          <div>
            <p className="text-muted-foreground mb-1">Service required</p>
-           <p className="font-medium text-primary">{exchange.required}</p>
+           <p className="font-medium text-primary">{exchange.serviceRequired || 'N/A'}</p>
          </div>
          <div>
            <p className="text-muted-foreground mb-1">Service Offered</p>
-           <p className="font-medium text-primary">{exchange.offered}</p>
+           <p className="font-medium text-primary">{exchange.serviceTitle || 'N/A'}</p>
          </div>
        </div>
        <div className="pt-2 flex gap-2">
@@ -73,8 +59,109 @@ const ExchangeCard = ({ exchange, actionType }) => (
     </div>
   );
 
+// No Data Section Component (similar to landing page features/testimonials)
+const NoDataSection = () => (
+  <>
+    <section className=" px-4 mx-auto py-16 my-16 bg-[#F6F7F9]">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto">
+        {[
+          { icon: User, title: "Create Profile", description: "Set up your profile and list the skills you want to share and learn" },
+          { icon: Users, title: "Match Partners", description: "AI-powered connect you with the perfect skill exchange partner." },
+          { icon: Handshake, title: "Connect & Exchange", description: "Send exchange requests, chat with users, and finalize details." },
+          { icon: ChartNoAxesCombined , title: "Track Progress", description: "Monitor your learning journey and celebrate milestones" },
+        ].map((feature, index) => (
+          <div key={index} className="p-6 bg-card rounded-xl shadow-sm border hover:shadow-md transition-shadow">
+            <div className="mb-4 bg-gradient-to-b from-primary/60 to-primary w-min  p-3 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
+            <feature.icon className="w-8 h-8 text-white " />
+            </div>
+            <h3 className="text-lg text-primary mb-2">{feature.title}</h3>
+            <p className="text-muted-foreground">{feature.description}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section className="bg-muted/50 py-16">
+      <div className="container px-4 mx-auto">
+        <div className="space-y-16">
+          {[{
+            id: 1,
+            title: "AI-Powered Skill Matching",
+            description: "Upload your resume, and our AI automatically extracts and categorizes your skills. This ensures you get precise matches, saving time and effort in finding the right skill exchange partner.",
+            image: landing1
+          }, {
+            id: 2,
+            title: "Real-time Chat",
+            description: "Connect with experienced mChat with users in real-time to finalize exchange details and agreements. Keep track of completed and pending swaps with a structured system for smooth transactions. This helps you connect with the most relevant individuals for an efficient exchange.entors",
+            image: landing2
+          }, {
+            id: 3,
+            title: "Progress Tracking",
+            description: "Chat with users in real-time to finalize exchange details and agreements. Keep track of completed and pending swaps with a structured system for smooth transactions.",
+            image: landing3
+          }].map((item) => (
+            <div key={item.id} className={`flex flex-col md:flex-row gap-8 items-center ${item.id % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
+              <img
+                src={item.image}
+                alt="Testimonial"
+                width={400}
+                height={400}
+                className="rounded-xl w-full md:w-1/2"
+              />
+              <div className="md:w-1/2 space-y-4">
+                <h3 className="text-2xl text-primary">{item.title}</h3>
+                <p className="text-xl">
+                  {item.description}
+                </p>
+                <div className="font-medium">
+                  <Button asChild variant="link" className="text-primary p-0! m-0"><Link to="/login">Learn More <ArrowRight/></Link></Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </>
+);
+
 
 export default function Home(){
+  const [pickExchangeData, setPickExchangeData] = useState([]);
+  const [relatedExchangeData, setRelatedExchangeData] = useState([]);
+  const [loadingPickExchanges, setLoadingPickExchanges] = useState(true);
+  const [loadingRelatedExchanges, setLoadingRelatedExchanges] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPickExchanges = async () => {
+      try {
+        const response = await axios.get('/marketplace/pick-exchanges');
+        setPickExchangeData(response.data);
+      } catch (err) {
+        console.error("Error fetching pick exchanges:", err);
+        setError(err);
+      } finally {
+        setLoadingPickExchanges(false);
+      }
+    };
+
+    const fetchRelatedExchanges = async () => {
+      try {
+        const response = await axios.get('/marketplace/related-exchanges');
+        setRelatedExchangeData(response.data);
+      } catch (err) {
+        console.error("Error fetching related exchanges:", err);
+        setError(err);
+      } finally {
+        setLoadingRelatedExchanges(false);
+      }
+    };
+
+    fetchPickExchanges();
+    fetchRelatedExchanges();
+  }, []);
+
 
   return (
     <>
@@ -104,32 +191,48 @@ export default function Home(){
     {/* Pick an Exchange Section */}
     <section className="container px-4 mx-auto py-16">
         <h2 className="text-3xl font-semibold mb-6 text-foreground">Pick an Exchange</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pickExchangeData.map(exchange => (
-                <ExchangeCard key={exchange.id} exchange={exchange} actionType="request" />
-            ))}
-        </div>
-        <div className="text-center mt-8">
-            <Button variant="link" className="text-primary" asChild>
-                <Link to="/exchange-skills">View More <ArrowRight className="ml-1 w-4 h-4" /></Link>
-            </Button>
-        </div>
+        {loadingPickExchanges ? (
+          <p>Loading exchanges...</p>
+        ) : pickExchangeData.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pickExchangeData.map(exchange => (
+                  <ExchangeCard key={exchange._id} exchange={exchange} actionType="request" />
+              ))}
+          </div>
+        ) : (
+          <NoDataSection />
+        )}
+        {pickExchangeData.length > 0 && (
+          <div className="text-center mt-8">
+              <Button variant="link" className="text-primary" asChild>
+                  <Link to="/exchange-skills">View More <ArrowRight className="ml-1 w-4 h-4" /></Link>
+              </Button>
+          </div>
+        )}
     </section>
 
 
      {/* Exchanges related to your skills Section */}
      <section className="container px-4 mx-auto py-16 bg-muted/30 rounded-lg">
         <h2 className="text-3xl font-semibold mb-6 text-foreground">Exchanges related to your skills...</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {relatedExchangeData.map(exchange => (
-                <ExchangeCard key={exchange.id} exchange={exchange} actionType="swap" />
-            ))}
-        </div>
-        <div className="text-center mt-8">
-            <Button variant="link" className="text-primary" asChild>
-                <Link to="/exchange-skills/related">View More <ArrowRight className="ml-1 w-4 h-4" /></Link>
-            </Button>
-        </div>
+        {loadingRelatedExchanges ? (
+          <p>Loading related exchanges...</p>
+        ) : relatedExchangeData.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedExchangeData.map(exchange => (
+                  <ExchangeCard key={exchange._id} exchange={exchange} actionType="swap" />
+              ))}
+          </div>
+        ) : (
+          <NoDataSection />
+        )}
+        {relatedExchangeData.length > 0 && (
+          <div className="text-center mt-8">
+              <Button variant="link" className="text-primary" asChild>
+                  <Link to="/exchange-skills/related">View More <ArrowRight className="ml-1 w-4 h-4" /></Link>
+              </Button>
+          </div>
+        )}
     </section>
     </>
   )
