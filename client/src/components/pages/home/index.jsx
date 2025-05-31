@@ -200,7 +200,8 @@ export default function Home(){
               ))}
           </div>
         ) : (
-          <NoDataSection />
+          <></>
+          // <NoDataSection />
         )}
         {pickExchangeData.length > 0 && (
           <div className="text-center mt-8">
@@ -224,7 +225,8 @@ export default function Home(){
               ))}
           </div>
         ) : (
-          <NoDataSection />
+          <></>
+          // <NoDataSection />
         )}
         {relatedExchangeData.length > 0 && (
           <div className="text-center mt-8">
