@@ -116,23 +116,23 @@ const ReceivedSwapRequests = () => {
               <CardContent className="p-4">
                 <div className="flex items-center justify-evenly">
                   <Avatar className="w-1/2 aspect-square h-auto rounded-3xl flex items-center justify-center">
-                    <AvatarImage className="rounded-3xl" src={`${import.meta.env.VITE_API_URL}/${request.swapRequest.createdBy.profilePicture}`} alt={request.swapRequest.createdBy?.name || 'N/A'} />
-                    <AvatarFallback className="w-32 h-32 rounded-full">{request.swapRequest.createdBy?.name ? request.swapRequest.createdBy.name[0] : 'U'}</AvatarFallback>
+                    <AvatarImage className="rounded-3xl" src={`${import.meta.env.VITE_API_URL}/${request.user.profilePicture}`} alt={request.user?.name || 'N/A'} />
+                    <AvatarFallback className="w-32 h-32 rounded-full">{request.user?.name ? request.user.name[0] : 'U'}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <h2 className="text-lg font-semibold text-primary">{request.swapRequest.createdBy?.name || 'N/A'}</h2>
-                    <p className="text-sm text-gray-500">{request.swapRequest.createdBy?.skills?.join(', ') || 'N/A'}</p>
+                    <h2 className="text-lg font-semibold text-primary">{request.user?.name || 'N/A'}</h2>
+                    <p className="text-sm text-gray-500">{request.user?.skills?.join(', ') || 'N/A'}</p>
                     <p className="text-sm text-gray-500">
                       <span className="mr-1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-map-pin inline-block"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg></span>
-                      {request.swapRequest.preferredLocation || 'N/A'}
+                      {request.user.preferredLocation || 'N/A'}
                     </p>
                     <p className="text-sm text-gray-500">
                       <span className="mr-1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-briefcase inline-block"><rect width="20" height="12" x="2" y="7" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16" /></svg></span>
-                      {request.swapRequest.yearsOfExperience ? `${request.swapRequest.yearsOfExperience} years` : 'N/A'}
+                      {request.user.yearsOfExperience ? `${request.user.yearsOfExperience} years` : 'N/A'}
                     </p>
                     <div className="flex items-center">
                       {Array.from({ length: 5 }, (_, i) => (
-                        <Star key={i} className={`w-4 h-4 ${i < (request.swapRequest.rating || 0) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} />
+                        <Star key={i} className={`w-4 h-4 ${i < (request.user.rating || 0) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} />
                       ))}
                     </div>
                   </div>
