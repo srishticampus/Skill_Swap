@@ -1,6 +1,8 @@
 import express from "express";
 import User from "../../models/user.js"; // Assuming skill swappers are users
 import UserRating from '../../models/user_rating.js';
+import SwapRequestInteraction from '../../models/swap_request_interaction.js';
+import SwapRequest from '../../models/swap_request.js';
 import { auth } from "../auth/index.js"; // Authentication middleware
 import { adminCheck } from "./middleware.js"; // Admin check middleware
 
@@ -57,15 +59,12 @@ router.get("/", auth, adminCheck, async (req, res) => {
 // @access  Private (Admin only)
 router.get("/:id", auth, adminCheck, async (req, res) => {
   try {
-    const swapper = await User.findById(req.params.id).select('-password').populate('categories'); // Fetch user by ID and exclude password
+    const swapper = await User.findById(req.params.id).select('-password').populate('categories');
 
-    if (!swapper ) {
-      // Return 404 if user not found, not a mentor, or is an admin
+    if (!swapper) {
       return res.status(404).json({ msg: "Skill swapper not found" });
     }
 
-    // Map the fetched user data to the structure expected by the frontend details page
-    // Fetch average rating for the swapper
     const ratingResult = await UserRating.aggregate([
       { $match: { ratedUser: swapper._id } },
       { $group: { _id: null, averageRating: { $avg: '$rating' } } }
@@ -73,26 +72,50 @@ router.get("/:id", auth, adminCheck, async (req, res) => {
 
     const averageRating = ratingResult.length > 0 ? ratingResult[0].averageRating : 0;
 
+    // Fetch the most recent swap request interaction for this swapper
+    const latestInteraction = await SwapRequestInteraction.findOne({ user: swapper._id })
+      .sort({ createdAt: -1 }) // Sort by most recent
+      .populate({
+        path: 'swapRequest',
+        populate: {
+          path: 'createdBy',
+          select: 'name' // Only select the name of the creator
+        }
+      });
+
+    let senderName = 'N/A';
+    let serviceOffered = 'N/A';
+    let serviceRequired = 'N/A';
+    let deadline = 'N/A';
+    let serviceDescriptionFromSwap = 'No description available';
+
+    if (latestInteraction && latestInteraction.swapRequest) {
+      senderName = latestInteraction.swapRequest.createdBy ? latestInteraction.swapRequest.createdBy.name : 'N/A';
+      serviceOffered = latestInteraction.swapRequest.serviceTitle || 'N/A';
+      serviceRequired = latestInteraction.swapRequest.serviceRequired || 'N/A';
+      deadline = latestInteraction.swapRequest.deadline ? new Date(latestInteraction.swapRequest.deadline).toLocaleDateString() : 'N/A';
+      serviceDescriptionFromSwap = latestInteraction.swapRequest.serviceDescription || 'No description available';
+    }
+
     const formattedSwapperDetails = {
       id: swapper._id,
-      name: swapper.name, // Using name for both name and fullName for now
+      name: swapper.name,
       fullName: swapper.name,
       email: swapper.email,
       phone: swapper.phone || 'N/A',
       gender: swapper.gender || 'N/A',
       country: swapper.country || 'N/A',
-      location: [swapper.city || '', swapper.country || ''].filter(Boolean).join(', ') || 'N/A', // Combine city and country
-      imageUrl: swapper.profilePicture || 'https://picsum.photos/200/300', // Use profilePicture if available
-      category: swapper.skills && swapper.skills.length > 0 ? swapper.skills.join(', ') : 'No skills listed', // Using skills for category
-      skills: (swapper.skills && swapper.skills.length > 0) ? swapper.skills : (swapper.categories ? swapper.categories.map(category => category.name) : []), // Use skills or category if available
-      serviceDescription: swapper.serviceDescription || 'No description available',
+      location: [swapper.city || '', swapper.country || ''].filter(Boolean).join(', ') || 'N/A',
+      imageUrl: swapper.profilePicture || 'https://picsum.photos/200/300',
+      category: swapper.skills && swapper.skills.length > 0 ? swapper.skills.join(', ') : 'No skills listed',
+      skills: (swapper.skills && swapper.skills.length > 0) ? swapper.skills : (swapper.categories ? swapper.categories.map(category => category.name) : []),
+      serviceDescription: swapper.serviceDescription || serviceDescriptionFromSwap, // Prioritize user's own description, fallback to swap request
       yearsOfExperience: swapper.yearsOfExperience > 0 ? `${swapper.yearsOfExperience} Years` : 'N/A',
-      // Placeholder data for fields not directly available in User model
-      senderName: 'N/A', // This likely comes from a swap request
-      serviceOffered: 'N/A', // This likely comes from a swap request or user's detailed profile
-      serviceRequired: 'N/A', // This likely comes from a swap request
-      deadline: 'N/A', // This likely comes from a swap request
-      rating: averageRating, // Use fetched average rating
+      senderName: senderName,
+      serviceOffered: serviceOffered,
+      serviceRequired: serviceRequired,
+      deadline: deadline,
+      rating: averageRating,
     };
 
 
