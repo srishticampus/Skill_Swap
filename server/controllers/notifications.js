@@ -1,7 +1,7 @@
 import express from "express";
 import MentorRequest from "../models/mentor_request.js";
 import Notification from "../models/notification.js";
-import { auth } from "./auth/index.js";
+import { verifyToken as auth } from "./auth/index.js";
 
 const router = express.Router();
 

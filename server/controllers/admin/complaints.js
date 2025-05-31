@@ -1,7 +1,7 @@
 import express from "express";
 import Complaint from '../../models/complaint.js';
 import Notification from '../../models/notification.js'; // Import Notification model
-import { auth } from '../auth/index.js';
+import { verifyToken as auth } from '../auth/index.js';
 import { adminCheck } from './middleware.js'; // Import adminCheck middleware
 
 const router = express.Router();

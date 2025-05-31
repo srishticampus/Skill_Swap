@@ -122,6 +122,7 @@ function App() {
           <Route path="/organization/reviews" element={<ViewReviews />} />
           <Route path="/organization/complaints" element={<Complaints />} />
           <Route path="/organization/categories" element={<OrganizationCategoryManagement />} /> {/* Add the new route */}
+          <Route path="/organization/chat" element={<SkillSwapperChat />} /> {/* New Organization Chat Route */}
         </Route>
       </Routes>
     </AuthProvider>

@@ -1,256 +1,387 @@
 import express from 'express';
 import ChatMessage from '../models/chat_message.js';
 import User from '../models/user.js';
-import SwapRequestInteraction from '../models/swap_request_interaction.js'; // Import SwapRequestInteraction
-import SwapRequest from '../models/swap_request.js'; // Import SwapRequest
+import Organization from '../models/organization.js'; // Import Organization model
+import SwapRequestInteraction from '../models/swap_request_interaction.js';
+import SwapRequest from '../models/swap_request.js';
 import { verifyToken } from './auth/index.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();
 
-// GET /api/chat/users: Get list of users for chat
-router.get('/users', verifyToken, async (req, res) => {
-  try {
-    const currentUserId = req.user.id;
-    const currentUser = await User.findById(currentUserId);
-
-    let users;
-
-    if (currentUser && currentUser.email === 'admin@admin.com') {
-      // If current user is admin, fetch all users except themselves
-      users = await User.aggregate([
-        {
-          $match: { _id: { $ne: new mongoose.Types.ObjectId(currentUserId) } }
-        },
-        {
-          $lookup: {
-            from: 'chatmessages',
-            let: { userId: '$_id' },
-            pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $or: [
-                    { $and: [{ $eq: ['$sender', '$$userId'] }, { $eq: ['$receiver', new mongoose.Types.ObjectId(currentUserId)] }] },
-                    { $and: [{ $eq: ['$receiver', '$$userId'] }, { $eq: ['$sender', new mongoose.Types.ObjectId(currentUserId)] }] }
-                  ]
-                }
-              }
-            },
-            { $sort: { timestamp: -1 } },
-            { $limit: 1 }
-            ],
-            as: 'latestMessage'
-          }
-        },
-        {
-          $lookup: {
-            from: 'chatmessages',
-            let: { userId: '$_id' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ['$sender', '$$userId'] },
-                      { $eq: ['$receiver', new mongoose.Types.ObjectId(currentUserId)] },
-                      { $eq: ['$read_status', false] }
-                    ]
-                  }
-                }
-              },
-            { $count: 'unreadCount' }
-            ],
-            as: 'unreadMessages'
-          }
-        },
-        {
-          $addFields: {
-            lastMessageTimestamp: { $ifNull: [{ $arrayElemAt: ['$latestMessage.timestamp', 0] }, new Date(0)] },
-            unreadCount: { $ifNull: [{ $arrayElemAt: ['$unreadMessages.unreadCount', 0] }, 0] }
-          }
-        },
-        {
-          $sort: { lastMessageTimestamp: -1 }
-        },
-        {
-          $project: {
-            name: 1,
-            profilePicture: 1,
-            skills: 1,
-            email: 1,
-            lastMessageTimestamp: 1,
-            unreadCount: 1
-          }
-        }
-      ]);
-    } else {
-      // Existing logic for non-admin users
-      users = await User.aggregate([
-        {
-          $match: { _id: { $ne: new mongoose.Types.ObjectId(currentUserId) } }
-        },
-        // Lookup accepted swap request interactions where current user is involved
-        {
-          $lookup: {
-            from: 'swaprequestinteractions',
-            let: { userId: '$_id' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ['$status', 'accepted'] },
-                      {
-                        $or: [
-                          { $eq: ['$user', '$$userId'] }, // User accepted current user's request
-                          { $eq: ['$swapRequest.requester', '$$userId'] } // Current user accepted user's request
-                        ]
-                      }
-                    ]
-                  }
-                }
-              },
-              {
-                $lookup: {
-                  from: 'swaprequests',
-                  localField: 'swapRequest',
-                  foreignField: '_id',
-                  as: 'swapRequestDetails'
-                }
-              },
-              {
-                $unwind: '$swapRequestDetails'
-              },
-              {
-                $match: {
-                  $expr: {
-                    $or: [
-                      { $eq: ['$user', new mongoose.Types.ObjectId(currentUserId)] },
-                      { $eq: ['$swapRequestDetails.requester', new mongoose.Types.ObjectId(currentUserId)] }
-                    ]
-                  }
-                }
-              }
-            ],
-            as: 'acceptedSwapInteractions'
-          }
-        },
-        // Lookup chat messages to find users with chat history
-        {
-          $lookup: {
-            from: 'chatmessages',
-            let: { userId: '$_id' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $or: [
-                      { $and: [{ $eq: ['$sender', '$$userId'] }, { $eq: ['$receiver', new mongoose.Types.ObjectId(currentUserId)] }] },
-                      { $and: [{ $eq: ['$receiver', '$$userId'] }, { $eq: ['$sender', new mongoose.Types.ObjectId(currentUserId)] }] }
-                    ]
-                  }
-                }
-              },
-              { $limit: 1 } // Just need to know if any message exists
-            ],
-            as: 'chatHistory'
-          }
-        },
-        // Filter users based on conditions
+// Helper function to get latest message and unread count for a given entity
+const getChatMetadata = (currentEntityId, currentEntityType) => ([
+  {
+    $lookup: {
+      from: 'chatmessages',
+      let: { entityId: '$_id', entityType: '$type' },
+      pipeline: [
         {
           $match: {
-            $or: [
-              { 'acceptedSwapInteractions': { $ne: [] } }, // Has accepted swap interactions
-              { 'chatHistory': { $ne: [] } }, // Has chat history
-              { 'email': 'admin@admin.com' } // Is an admin
-            ]
+            $expr: {
+              $or: [
+                { $and: [{ $eq: ['$sender', '$$entityId'] }, { $eq: ['$senderType', '$$entityType'] }, { $eq: ['$receiver', new mongoose.Types.ObjectId(currentEntityId)] }, { $eq: ['$receiverType', currentEntityType] }] },
+                { $and: [{ $eq: ['$receiver', '$$entityId'] }, { $eq: ['$receiverType', '$$entityType'] }, { $eq: ['$sender', new mongoose.Types.ObjectId(currentEntityId)] }, { $eq: ['$senderType', currentEntityType] }] }
+              ]
+            }
           }
         },
-        // Re-add latest message and unread count lookups for filtered users
+        { $sort: { timestamp: -1 } },
+        { $limit: 1 },
+        // Add nested lookups to populate sender and receiver within the latestMessage
         {
           $lookup: {
-            from: 'chatmessages',
-            let: { userId: '$_id' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $or: [
-                      { $and: [{ $eq: ['$sender', '$$userId'] }, { $eq: ['$receiver', new mongoose.Types.ObjectId(currentUserId)] }] },
-                      { $and: [{ $eq: ['$receiver', '$$userId'] }, { $eq: ['$sender', new mongoose.Types.ObjectId(currentUserId)] }] }
-                    ]
-                  }
-                }
-            },
-            { $sort: { timestamp: -1 } },
-            { $limit: 1 }
-            ],
-            as: 'latestMessage'
+            from: 'users', // Collection name for User model
+            localField: 'sender',
+            foreignField: '_id',
+            as: 'senderUser'
           }
         },
         {
           $lookup: {
-            from: 'chatmessages',
-            let: { userId: '$_id' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ['$sender', '$$userId'] },
-                      { $eq: ['$receiver', new mongoose.Types.ObjectId(currentUserId)] },
-                      { $eq: ['$read_status', false] }
-                    ]
-                  }
-                }
-            },
-            { $count: 'unreadCount' }
-            ],
-            as: 'unreadMessages'
+            from: 'organizations', // Collection name for Organization model
+            localField: 'sender',
+            foreignField: '_id',
+            as: 'senderOrganization'
+          }
+        },
+        {
+          $lookup: {
+            from: 'users', // Collection name for User model
+            localField: 'receiver',
+            foreignField: '_id',
+            as: 'receiverUser'
+          }
+        },
+        {
+          $lookup: {
+            from: 'organizations', // Collection name for Organization model
+            localField: 'receiver',
+            foreignField: '_id',
+            as: 'receiverOrganization'
           }
         },
         {
           $addFields: {
-            lastMessageTimestamp: { $ifNull: [{ $arrayElemAt: ['$latestMessage.timestamp', 0] }, new Date(0)] },
-            unreadCount: { $ifNull: [{ $arrayElemAt: ['$unreadMessages.unreadCount', 0] }, 0] }
+            sender: {
+              $cond: {
+                if: { $eq: ['$senderType', 'User'] },
+                then: { $arrayElemAt: ['$senderUser', 0] },
+                else: { $arrayElemAt: ['$senderOrganization', 0] }
+              }
+            },
+            receiver: {
+              $cond: {
+                if: { $eq: ['$receiverType', 'User'] },
+                then: { $arrayElemAt: ['$receiverUser', 0] },
+                else: { $arrayElemAt: ['$receiverOrganization', 0] }
+              }
+            }
           }
         },
         {
-          $sort: { lastMessageTimestamp: -1 }
+          $project: {
+            sender: { name: '$sender.name', email: '$sender.email', profilePicture: '$sender.profilePicture', logo: '$sender.files.0' },
+            receiver: { name: '$receiver.name', email: '$receiver.email', profilePicture: '$receiver.profilePicture', logo: '$receiver.files.0' },
+            message_text: 1,
+            timestamp: 1,
+            read_status: 1,
+            senderType: 1,
+            receiverType: 1
+          }
+        }
+      ],
+      as: 'latestMessage'
+    }
+  },
+  {
+    $lookup: {
+      from: 'chatmessages',
+      let: { entityId: '$_id', entityType: '$type' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ['$sender', '$$entityId'] },
+                { $eq: ['$senderType', '$$entityType'] },
+                { $eq: ['$receiver', new mongoose.Types.ObjectId(currentEntityId)] },
+                { $eq: ['$receiverType', currentEntityType] },
+                { $eq: ['$read_status', false] }
+              ]
+            }
+          }
         },
+        { $count: 'unreadCount' }
+      ],
+      as: 'unreadMessages'
+    }
+  },
+  {
+    $addFields: {
+      lastMessageTimestamp: { $ifNull: [{ $arrayElemAt: ['$latestMessage.timestamp', 0] }, new Date(0)] },
+      unreadCount: { $ifNull: [{ $arrayElemAt: ['$unreadMessages.unreadCount', 0] }, 0] }
+    }
+  },
+  {
+    $sort: { lastMessageTimestamp: -1 }
+  }
+]);
+
+// GET /api/chat/conversations: Get list of chat entities (users/organizations)
+router.get('/conversations', verifyToken, async (req, res) => {
+  try {
+    const currentEntityId = req.user.id;
+    const currentEntityType = req.user.type;
+
+    let chatEntities = [];
+
+    if (currentEntityType === 'User') {
+      const currentUser = await User.findById(currentEntityId);
+
+      if (!currentUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // If current user is admin, fetch all users and organizations
+      if (currentUser.email === 'admin@admin.com') {
+        const allUsers = await User.aggregate([
+          { $match: { _id: { $ne: new mongoose.Types.ObjectId(currentEntityId) } } },
+          { $addFields: { type: 'User' } },
+          ...getChatMetadata(currentEntityId, currentEntityType),
+          {
+            $project: {
+              name: 1,
+              profilePicture: 1,
+              skills: 1,
+              email: 1,
+              type: 1,
+              lastMessageTimestamp: 1,
+              unreadCount: 1
+            }
+          }
+        ]);
+
+        const allOrganizations = await Organization.aggregate([
+          { $addFields: { type: 'Organization' } },
+          ...getChatMetadata(currentEntityId, currentEntityType),
+          {
+            $project: {
+              name: 1,
+              email: 1,
+              type: 1,
+              lastMessageTimestamp: 1,
+              unreadCount: 1,
+              logo: "$files.0" // Assuming the first file in 'files' array is the logo
+            }
+          }
+        ]);
+        chatEntities = [...allUsers, ...allOrganizations];
+
+      } else {
+        // For regular users, fetch users they have accepted swap interactions with or chat history with
+        const usersWithInteractionsOrChat = await User.aggregate([
+          {
+            $match: { _id: { $ne: new mongoose.Types.ObjectId(currentEntityId) } }
+          },
+          {
+            $lookup: {
+              from: 'swaprequestinteractions',
+              let: { userId: '$_id' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ['$status', 'accepted'] },
+                        {
+                          $or: [
+                            { $eq: ['$user', '$$userId'] },
+                            { $eq: ['$swapRequest.requester', '$$userId'] }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $lookup: {
+                    from: 'swaprequests',
+                    localField: 'swapRequest',
+                    foreignField: '_id',
+                    as: 'swapRequestDetails'
+                  }
+                },
+                { $unwind: '$swapRequestDetails' },
+                {
+                  $match: {
+                    $expr: {
+                      $or: [
+                        { $eq: ['$user', new mongoose.Types.ObjectId(currentEntityId)] },
+                        { $eq: ['$swapRequestDetails.requester', new mongoose.Types.ObjectId(currentEntityId)] }
+                      ]
+                    }
+                  }
+                }
+              ],
+              as: 'acceptedSwapInteractions'
+            }
+          },
+          {
+            $lookup: {
+              from: 'chatmessages',
+              let: { userId: '$_id' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $or: [
+                        { $and: [{ $eq: ['$sender', '$$userId'] }, { $eq: ['$senderType', 'User'] }, { $eq: ['$receiver', new mongoose.Types.ObjectId(currentEntityId)] }, { $eq: ['$receiverType', 'User'] }] },
+                        { $and: [{ $eq: ['$receiver', '$$userId'] }, { $eq: ['$receiverType', 'User'] }, { $eq: ['$sender', new mongoose.Types.ObjectId(currentEntityId)] }, { $eq: ['$senderType', 'User'] }] }
+                      ]
+                    }
+                  }
+                },
+                { $limit: 1 }
+              ],
+              as: 'chatHistory'
+            }
+          },
+          {
+            $match: {
+              $or: [
+                { 'acceptedSwapInteractions': { $ne: [] } },
+                { 'chatHistory': { $ne: [] } },
+                { 'email': 'admin@admin.com' }
+              ]
+            }
+          },
+          { $addFields: { type: 'User' } },
+          ...getChatMetadata(currentEntityId, currentEntityType),
+          {
+            $project: {
+              name: 1,
+              profilePicture: 1,
+              skills: 1,
+              email: 1,
+              type: 1,
+              lastMessageTimestamp: 1,
+              unreadCount: 1
+            }
+          }
+        ]);
+          chatEntities = [...usersWithInteractionsOrChat];
+
+          // If the user belongs to an organization, add the organization to the chat list
+          if (currentUser.organization) {
+            const userOrganization = await Organization.aggregate([
+              { $match: { _id: new mongoose.Types.ObjectId(currentUser.organization) } },
+              { $addFields: { type: 'Organization' } },
+              ...getChatMetadata(currentEntityId, currentEntityType),
+              {
+                $project: {
+                  name: 1,
+                  email: 1,
+                  type: 1,
+                  lastMessageTimestamp: 1,
+                  unreadCount: 1,
+                  logo: "$files.0"
+                }
+              }
+            ]);
+            chatEntities = [...chatEntities, ...userOrganization];
+
+            // Fetch other members of the same organization
+            const otherOrganizationMembers = await User.aggregate([
+              {
+                $match: {
+                  organization: new mongoose.Types.ObjectId(currentUser.organization),
+                  _id: { $ne: new mongoose.Types.ObjectId(currentEntityId) } // Exclude current user
+                }
+              },
+              { $addFields: { type: 'User' } },
+              ...getChatMetadata(currentEntityId, currentEntityType),
+              {
+                $project: {
+                  name: 1,
+                  profilePicture: 1,
+                  skills: 1,
+                  email: 1,
+                  type: 1,
+                  lastMessageTimestamp: 1,
+                  unreadCount: 1
+                }
+              }
+            ]);
+            chatEntities = [...chatEntities, ...otherOrganizationMembers];
+          }
+        }
+      } else if (currentEntityType === 'Organization') {
+        const currentOrganization = await Organization.findById(currentEntityId);
+
+      if (!currentOrganization) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+
+      // Fetch all members of the organization
+      const organizationMembers = await User.aggregate([
+        { $match: { organization: new mongoose.Types.ObjectId(currentEntityId) } },
+        { $addFields: { type: 'User' } },
+        ...getChatMetadata(currentEntityId, currentEntityType),
         {
           $project: {
             name: 1,
             profilePicture: 1,
             skills: 1,
             email: 1,
+            type: 1,
             lastMessageTimestamp: 1,
             unreadCount: 1
           }
         }
       ]);
+      chatEntities = organizationMembers;
     }
 
-    res.status(200).json(users);
+    // Sort all chat entities by last message timestamp
+    chatEntities.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+
+    res.status(200).json(chatEntities);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// GET /api/chat/messages/:otherUserId: Get messages between two users
-router.get('/messages/:otherUserId', verifyToken, async (req, res) => {
+// GET /api/chat/messages/:otherEntityId: Get messages between two entities
+router.get('/messages/:otherEntityId', verifyToken, async (req, res) => {
   try {
-    const { otherUserId } = req.params;
-    const currentUserId = req.user.id;
+    const { otherEntityId } = req.params;
+    const { otherEntityType } = req.query; // Expect otherEntityType as a query parameter
+    const currentEntityId = req.user.id;
+    const currentEntityType = req.user.type;
+
+    if (!otherEntityType || !['User', 'Organization'].includes(otherEntityType)) {
+      return res.status(400).json({ message: 'Invalid or missing otherEntityType' });
+    }
 
     const messages = await ChatMessage.find({
       $or: [
-        { sender: currentUserId, receiver: otherUserId },
-        { sender: otherUserId, receiver: currentUserId },
+        { sender: currentEntityId, senderType: currentEntityType, receiver: otherEntityId, receiverType: otherEntityType },
+        { sender: otherEntityId, senderType: otherEntityType, receiver: currentEntityId, receiverType: currentEntityType },
       ],
-    }).sort('timestamp');
+    })
+    .populate({
+      path: 'sender',
+      refPath: 'senderType',
+      select: 'name email profilePicture files'
+    })
+    .populate({
+      path: 'receiver',
+      refPath: 'receiverType',
+      select: 'name email profilePicture files'
+    })
+    .sort('timestamp');
 
     res.status(200).json(messages);
   } catch (error) {
@@ -262,12 +393,19 @@ router.get('/messages/:otherUserId', verifyToken, async (req, res) => {
 // POST /api/chat/message: Send a new message
 router.post('/message', verifyToken, async (req, res) => {
   try {
-    const { receiverId, messageText } = req.body;
+    const { receiverId, receiverType, messageText } = req.body;
     const senderId = req.user.id;
+    const senderType = req.user.type;
+
+    if (!receiverType || !['User', 'Organization'].includes(receiverType)) {
+      return res.status(400).json({ message: 'Invalid or missing receiverType' });
+    }
 
     const newMessage = new ChatMessage({
       sender: senderId,
+      senderType: senderType,
       receiver: receiverId,
+      receiverType: receiverType,
       message_text: messageText,
     });
 
@@ -279,16 +417,24 @@ router.post('/message', verifyToken, async (req, res) => {
   }
 });
 
-// PUT /api/chat/messages/read/:otherUserId: Mark messages as read
-router.put('/messages/read/:otherUserId', verifyToken, async (req, res) => {
+// PUT /api/chat/messages/read/:otherEntityId: Mark messages as read
+router.put('/messages/read/:otherEntityId', verifyToken, async (req, res) => {
   try {
-    const { otherUserId } = req.params;
-    const currentUserId = req.user.id;
+    const { otherEntityId } = req.params;
+    const { otherEntityType } = req.body; // Expect otherEntityType in body for PUT
+    const currentEntityId = req.user.id;
+    const currentEntityType = req.user.type;
+
+    if (!otherEntityType || !['User', 'Organization'].includes(otherEntityType)) {
+      return res.status(400).json({ message: 'Invalid or missing otherEntityType' });
+    }
 
     await ChatMessage.updateMany(
       {
-        sender: otherUserId,
-        receiver: currentUserId,
+        sender: otherEntityId,
+        senderType: otherEntityType,
+        receiver: currentEntityId,
+        receiverType: currentEntityType,
         read_status: false,
       },
       { $set: { read_status: true } }

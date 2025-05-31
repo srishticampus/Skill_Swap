@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { check, validationResult } from "express-validator";
 import User from "../../models/user.js";
-import { auth } from "../auth/index.js";
+import { verifyToken } from "../auth/index.js";
 import { adminCheck } from "./middleware.js";
 
 const router = express.Router();
@@ -14,7 +14,7 @@ const router = express.Router();
 router.post(
   "/users",
   [
-    auth,
+    verifyToken,
     adminCheck,
     [
       check("name", "Name is required").not().isEmpty(),
@@ -67,7 +67,7 @@ router.post(
 // @route   GET api/admin/users
 // @desc    Get all users (Admin only)
 // @access  Private (Requires authentication and admin role)
-router.get("/users", auth, adminCheck, async (req, res) => {
+router.get("/users", verifyToken, adminCheck, async (req, res) => {
   try {
     const users = await User.find().select("-password");
     res.json(users);
@@ -80,7 +80,7 @@ router.get("/users", auth, adminCheck, async (req, res) => {
 // @route   GET api/admin/users/:id
 // @desc    Get user by ID (Admin only)
 // @access  Private (Requires authentication and admin role)
-router.get("/users/:id", auth, adminCheck, async (req, res) => {
+router.get("/users/:id", verifyToken, adminCheck, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
 
@@ -101,7 +101,7 @@ router.get("/users/:id", auth, adminCheck, async (req, res) => {
 // @route   PUT api/admin/users/:id
 // @desc    Update user by ID (Admin only)
 // @access  Private (Requires authentication and admin role)
-router.put("/users/:id", auth, adminCheck, async (req, res) => {
+router.put("/users/:id", verifyToken, adminCheck, async (req, res) => {
   const { name, email, role, skills } = req.body;
 
   try {
@@ -128,7 +128,7 @@ router.put("/users/:id", auth, adminCheck, async (req, res) => {
 // @route   DELETE api/admin/users/:id
 // @desc    Delete user by ID (Admin only)
 // @access  Private (Requires authentication and admin role)
-router.delete("/users/:id", auth, adminCheck, async (req, res) => {
+router.delete("/users/:id", verifyToken, adminCheck, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
@@ -148,7 +148,7 @@ router.delete("/users/:id", auth, adminCheck, async (req, res) => {
 // @route   PUT api/admin/users/:id/mentor
 // @desc    Update user mentor status by ID (Admin only)
 // @access  Private (Requires authentication and admin role)
-router.put("/users/:id/mentor", auth, adminCheck, async (req, res) => {
+router.put("/users/:id/mentor", verifyToken, adminCheck, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 

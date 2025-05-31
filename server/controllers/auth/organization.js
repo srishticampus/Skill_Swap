@@ -71,7 +71,7 @@ router.post(
         { expiresIn: 360000 },
         (err, token) => {
           if (err) throw err;
-          res.json({ organization: { id: organization.id }, token });
+          res.json({ organization: { id: organization.id, type: 'Organization' }, token });
         }
       );
     } catch (err) {
@@ -121,6 +121,7 @@ router.post(
       const payload = {
         organization: {
           id: organization.id,
+          type: 'Organization',
         },
       };
 
@@ -133,7 +134,7 @@ router.post(
           if (!organization.active) {
             return res.status(400).json({ errors: [{ msg: "Your organization is not active. Please contact the administrator." }] });
           }
-          res.json({ token, organization: { id: organization.id } });
+          res.json({ token, organization: { id: organization.id, type: 'Organization' } });
         }
       );
     } catch (err) {

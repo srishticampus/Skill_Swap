@@ -14,23 +14,27 @@ const storage = multer.memoryStorage(); // Store the file in memory
 const upload = multer({ storage: storage });
 
 // Middleware function to verify JWT token
-export const auth = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
   const token = req.header("x-auth-token");
-  console.log("auth: token:", token);
   if (!token) {
     return res.status(401).json({ msg: "No token, authorization denied" });
   }
 
   try {
+    // Try to verify as a user token
     const decoded = jwt.verify(token, import.meta.env.VITE_JWT_SECRET);
-    req.user = decoded.user;
+    if (decoded.user) {
+      req.user = { ...decoded.user, type: 'User' };
+    } else if (decoded.organization) {
+      req.user = { ...decoded.organization, type: 'Organization' }; // Using req.user for consistency, but with a 'type' field
+    } else {
+      return res.status(401).json({ msg: "Token is not valid or payload is malformed" });
+    }
     next();
   } catch (err) {
     res.status(401).json({ msg: "Token is not valid" });
   }
 };
-
-export const verifyToken = auth;
 
 // @route   POST api/auth/signup
 // @desc    Register user
@@ -122,7 +126,7 @@ router.post(
         { expiresIn: 360000 },
         (err, token) => {
           if (err) throw err;
-          res.json({ user: { id: user.id, isAdmin: user.isAdmin || false },token });
+          res.json({ user: { id: user.id, isAdmin: user.isAdmin || false, type: 'User' },token });
         }
       );
     } catch (err) {
@@ -173,6 +177,7 @@ router.post(
               user: {
                 id: user.id,
                 isAdmin: true,
+                type: 'User',
               },
             };
 
@@ -182,7 +187,7 @@ router.post(
               { expiresIn: 604800 }, // Set expiration to 7 days (in seconds)
               (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, isAdmin: true } });
+                res.json({ token, user: { id: user.id, isAdmin: true, type: 'User' } });
               }
             );
             return;
@@ -213,6 +218,7 @@ router.post(
         user: {
           id: user.id,
           isAdmin: user.isAdmin || false,
+          type: 'User',
         },
       };
 
@@ -236,7 +242,7 @@ router.post(
             }
           }
 
-          res.json({ token, user: { id: user.id, isAdmin: user.isAdmin || false } });
+          res.json({ token, user: { id: user.id, isAdmin: user.isAdmin || false, type: 'User' } });
         }
       );
     } catch (err) {
@@ -358,7 +364,7 @@ router.post(
 // @route   GET api/auth/profile
 // @desc    Get user profile
 // @access  Private
-router.get("/profile", auth, async (req, res) => {
+router.get("/profile", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password").populate('organization', 'name'); // Populate organization and select only the name field
     const profilePictureUrl = user.profilePicture ? `${user.profilePicture}` : null;
@@ -372,7 +378,7 @@ router.get("/profile", auth, async (req, res) => {
 // @route   GET api/auth/users/:id
 // @desc    Get user by ID (Authenticated users)
 // @access  Private
-router.get("/users/:id", auth, async (req, res) => {
+router.get("/users/:id", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password").populate('categories');
 
@@ -397,7 +403,7 @@ router.get("/users/:id", auth, async (req, res) => {
 // @access  Private
 router.post(
   "/update-profile",
-  auth,
+  verifyToken,
   upload.single('profilePic'),
   [
     check("name", "Name is required").not().isEmpty(),
@@ -471,7 +477,7 @@ router.post(
 // @access  Private
 router.post(
   "/update-technical",
-  auth,
+  verifyToken,
   upload.any(),
   [
     check("categories", "Categories are required")
@@ -559,7 +565,7 @@ router.post(
 // @access  Private
 router.post(
   "/add-certification",
-  auth,
+  verifyToken,
   upload.single('certificationFile'),
   async (req, res) => {
     try {
@@ -611,7 +617,7 @@ router.post(
 // @access  Private
 router.delete(
   "/delete-certification",
-  auth,
+  verifyToken,
   async (req, res) => {
     try {
       const user = await User.findById(req.user.id);

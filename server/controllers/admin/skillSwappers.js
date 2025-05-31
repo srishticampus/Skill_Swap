@@ -3,7 +3,7 @@ import User from "../../models/user.js"; // Assuming skill swappers are users
 import UserRating from '../../models/user_rating.js';
 import SwapRequestInteraction from '../../models/swap_request_interaction.js';
 import SwapRequest from '../../models/swap_request.js';
-import { auth } from "../auth/index.js"; // Authentication middleware
+import { verifyToken as auth } from "../auth/index.js"; // Authentication middleware
 import { adminCheck } from "./middleware.js"; // Admin check middleware
 
 const router = express.Router();

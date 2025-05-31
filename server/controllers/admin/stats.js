@@ -4,7 +4,7 @@ import User from "../../models/user.js"; // Assuming this path is correct
 import SwapModel from "../../models/swap_request.js"; // Assuming this path is correct
 import MentorRequest from "../../models/mentor_request.js"; // Assuming this path is correct
 import Organization from "../../models/organization.js"; // Assuming this path is correct
-import { auth } from "../auth/index.js"; // Assuming this path is correct
+import { verifyToken as auth } from "../auth/index.js"; // Authentication middleware
 import { adminCheck } from "./middleware.js"; // Assuming this path is correct
 
 const router = express.Router();

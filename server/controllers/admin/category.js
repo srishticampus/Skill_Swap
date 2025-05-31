@@ -1,6 +1,6 @@
 import Category from '../../models/category.js';
 import { adminCheck } from './middleware.js';
-import { auth } from '../auth/index.js';
+import { verifyToken as auth } from '../auth/index.js';
 import express from "express";
 
 const router = express.Router();

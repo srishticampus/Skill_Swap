@@ -8,6 +8,7 @@ import landing1 from '../landing/landing-1.png';
 import landing2 from '../landing/landing-2.png';
 import landing3 from '../landing/landing-3.png';
 import axios from '@/api/axios';
+import { toast } from "sonner";
 
 
 // Reusable Star Rating Component
@@ -20,10 +21,10 @@ const StarRating = ({ rating }) => (
 );
 
 // Reusable Exchange Card Component
-const ExchangeCard = ({ exchange, actionType }) => (
+const ExchangeCard = ({ exchange, actionType, handlePlaceRequest, placingRequest }) => (
     <div className="bg-card rounded-xl shadow-sm border p-4 flex flex-col space-y-3 hover:shadow-md transition-shadow">
       <div className="flex items-center gap-3">
-        <img src={exchange.createdBy?.profilePicture || "/placeholder-avatar.png"} alt={exchange.createdBy?.name} className="w-16 h-16 rounded-full object-cover border" />
+        <img src={exchange.createdBy?.profilePicture ? `${import.meta.env.VITE_API_URL}/${exchange.createdBy.profilePicture}` : "/placeholder-avatar.png"} alt={exchange.createdBy?.name} className="w-16 h-16 rounded-full object-cover border" />
         <div className="flex-1">
           <h3 className="font-semibold text-foreground">{exchange.createdBy?.name || 'N/A'}</h3>
           <p className="text-sm text-muted-foreground">{exchange.createdBy?.skills?.join(', ') || 'N/A'}</p>
@@ -51,9 +52,26 @@ const ExchangeCard = ({ exchange, actionType }) => (
          </div>
        </div>
        <div className="pt-2 flex gap-2">
-        <Button variant="outline" size="sm" className="flex-1">View Details</Button>
-        <Button size="sm" className="flex-1">
-          {actionType === 'request' ? 'Place a Request' : 'Swap Now'}
+        <Button variant="outline" size="sm" className="flex-1" asChild><Link to={`/exchange-skills/${exchange._id}`}>View Details</Link></Button>
+        <Button
+          size="sm"
+          className="flex-1"
+          onClick={() => handlePlaceRequest(exchange._id)}
+          disabled={exchange.hasPlacedRequest || placingRequest}
+        >
+          {exchange.hasPlacedRequest ? (
+            "Request Placed"
+          ) : placingRequest ? (
+            <>
+              <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Placing...
+            </>
+          ) : (
+            "Place a Request"
+          )}
         </Button>
        </div>
     </div>
@@ -132,11 +150,51 @@ export default function Home(){
   const [loadingPickExchanges, setLoadingPickExchanges] = useState(true);
   const [loadingRelatedExchanges, setLoadingRelatedExchanges] = useState(true);
   const [error, setError] = useState(null);
+  const [placingRequest, setPlacingRequest] = useState(false); // Track if a request is being placed
+
+  const handlePlaceRequest = async (swapRequestId) => {
+    setPlacingRequest(true);
+    console.log('swapRequestId:', swapRequestId);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Token:', token);
+      if (!token) {
+        console.error('No token provided');
+        toast("Error", {
+          variant: "destructive",
+          description: "No token provided. Please log in.",
+        })
+        return;
+      }
+
+      const response = await axios.post(`/api/swap-requests/${swapRequestId}/place-request`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log('Request placed:', response.data);
+      toast("Success", {
+        description: "Request placed successfully!",
+      })
+      // Optionally, update the UI to reflect that the request has been placed
+      // For example,
+    } catch (error) {
+      console.error('Error placing request:', error);
+      toast("Error", {
+        variant: "destructive",
+        description: String(error.response?.data?.message || "Failed to place request."),
+      })
+      // Handle error, e.g., show an error message to the user
+    } finally {
+      setPlacingRequest(false);
+    }
+  };
 
   useEffect(() => {
     const fetchPickExchanges = async () => {
       try {
-        const response = await axios.get('/marketplace/pick-exchanges');
+        const response = await axios.get('/api/marketplace/pick-exchanges');
         setPickExchangeData(response.data);
       } catch (err) {
         console.error("Error fetching pick exchanges:", err);
@@ -148,7 +206,7 @@ export default function Home(){
 
     const fetchRelatedExchanges = async () => {
       try {
-        const response = await axios.get('/marketplace/related-exchanges');
+        const response = await axios.get('/api/marketplace/related-exchanges');
         setRelatedExchangeData(response.data);
       } catch (err) {
         console.error("Error fetching related exchanges:", err);
@@ -196,7 +254,7 @@ export default function Home(){
         ) : pickExchangeData.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {pickExchangeData.map(exchange => (
-                  <ExchangeCard key={exchange._id} exchange={exchange} actionType="request" />
+                  <ExchangeCard key={exchange._id} exchange={exchange} actionType="request" handlePlaceRequest={handlePlaceRequest} placingRequest={placingRequest} />
               ))}
           </div>
         ) : (
@@ -221,7 +279,7 @@ export default function Home(){
         ) : relatedExchangeData.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedExchangeData.map(exchange => (
-                  <ExchangeCard key={exchange._id} exchange={exchange} actionType="swap" />
+                  <ExchangeCard key={exchange._id} exchange={exchange} actionType="swap" handlePlaceRequest={handlePlaceRequest} placingRequest={placingRequest} />
               ))}
           </div>
         ) : (

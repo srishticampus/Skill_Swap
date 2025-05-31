@@ -2,7 +2,7 @@ import express from "express";
 import { check, validationResult } from "express-validator";
 import MentorRequest from "../../models/mentor_request.js";
 import User from "../../models/user.js";
-import { auth } from "../auth/index.js";
+import { verifyToken as auth } from "../auth/index.js";
 import { adminCheck } from "./middleware.js";
 import {createNotification} from "../notifications.js";
 

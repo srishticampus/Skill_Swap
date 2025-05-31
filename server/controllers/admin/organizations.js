@@ -2,7 +2,7 @@ import express from "express";
 import SwapRequest from "../../models/swap_request.js";
 import Organization from "../../models/organization.js"; // Assuming Organization model path
 import { adminCheck } from "./middleware.js"; // Import adminCheck middleware
-import { auth } from "../auth/index.js"; // Assuming this path is correct
+import { verifyToken as auth } from "../auth/index.js"; // Authentication middleware
 import user from "../../models/user.js";
 
 export const router = express.Router();
