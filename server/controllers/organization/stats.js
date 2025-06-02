@@ -28,29 +28,13 @@ router.get("/members/total", auth, organizationAuth, async (req, res) => {
 router.get("/complaints/total", auth, organizationAuth, async (req, res) => {
   try {
     const organizationId = req.organization.id;
-    const totalComplaints = await Complaint.aggregate([
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userId',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      {
-        $unwind: '$user'
-      },
-      {
-        $match: {
-          'user.organization': organizationId
-        }
-      },
-      {
-        $count: 'totalComplaints'
+    const totalComplaints = await Complaint.countDocuments({
+      'userId': {
+        $in: await User.find({ organization: organizationId }).distinct('_id')
       }
-    ]);
+    });
 
-    res.json({ totalComplaints: totalComplaints.length > 0 ? totalComplaints[0].totalComplaints : 0 });
+    res.json({ totalComplaints });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
