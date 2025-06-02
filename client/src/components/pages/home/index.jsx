@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MapPin, Briefcase, Star, Handshake, Users, User, ChartNoAxesCombined } from "lucide-react";
 import { Link } from 'react-router';
@@ -9,6 +9,7 @@ import landing2 from '../landing/landing-2.png';
 import landing3 from '../landing/landing-3.png';
 import axios from '@/api/axios';
 import { toast } from "sonner";
+import { AuthContext } from '@/context/AuthContext';
 
 
 // Reusable Star Rating Component
@@ -144,7 +145,8 @@ const NoDataSection = () => (
 );
 
 
-export default function Home(){
+export default function Home() {
+  const { user } = useContext(AuthContext);
   const [pickExchangeData, setPickExchangeData] = useState([]);
   const [relatedExchangeData, setRelatedExchangeData] = useState([]);
   const [loadingPickExchanges, setLoadingPickExchanges] = useState(true);
@@ -194,7 +196,8 @@ export default function Home(){
   useEffect(() => {
     const fetchPickExchanges = async () => {
       try {
-        const response = await axios.get('/api/marketplace/pick-exchanges');
+        const url = user ? `/api/marketplace/pick-exchanges?excludeUserId=${user._id}` : '/api/marketplace/pick-exchanges';
+        const response = await axios.get(url);
         setPickExchangeData(response.data);
       } catch (err) {
         console.error("Error fetching pick exchanges:", err);
@@ -206,7 +209,8 @@ export default function Home(){
 
     const fetchRelatedExchanges = async () => {
       try {
-        const response = await axios.get('/api/marketplace/related-exchanges');
+        const url = user ? `/api/marketplace/related-exchanges?excludeUserId=${user._id}` : '/api/marketplace/related-exchanges';
+        const response = await axios.get(url);
         setRelatedExchangeData(response.data);
       } catch (err) {
         console.error("Error fetching related exchanges:", err);
@@ -218,7 +222,7 @@ export default function Home(){
 
     fetchPickExchanges();
     fetchRelatedExchanges();
-  }, []);
+  }, [user]); // Add user to dependency array to refetch when user data changes
 
 
   return (
