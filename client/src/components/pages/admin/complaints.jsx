@@ -19,6 +19,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ManageComplaints = () => {
   const [complaints, setComplaints] = useState([]);
@@ -50,15 +57,14 @@ const ManageComplaints = () => {
   // Handle page change
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const handleResolve = async (complaintId) => {
+  const handleChangeStatus = async (complaintId, newStatus) => {
     try {
-      await axios.put(`/api/admin/complaints/${complaintId}/resolve`);
-      // Update the status in the local state
+      await axios.put(`/api/admin/complaints/${complaintId}/status`, { status: newStatus });
       setComplaints(complaints.map(complaint =>
-        complaint._id === complaintId ? { ...complaint, status: 'resolved' } : complaint
+        complaint._id === complaintId ? { ...complaint, status: newStatus } : complaint
       ));
     } catch (err) {
-      console.error('Error resolving complaint:', err);
+      console.error('Error updating complaint status:', err);
       // Optionally show an error message to the user
     }
   };
@@ -85,15 +91,13 @@ const ManageComplaints = () => {
                 <TableHead className="text-white">Complaints Against</TableHead>
                 <TableHead className="text-white">Description</TableHead>
                 <TableHead className="text-white">Status</TableHead>
-                <TableHead className="text-white">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {currentComplaints.map((complaint, index) => (
-                <TableRow key={complaint._id}> {/* Use _id for key */}
+                <TableRow key={complaint._id}>
                   <TableCell className="font-medium">{indexOfFirstItem + index + 1}.</TableCell>
                   <TableCell className="flex items-center gap-2">
-                    {/* Assuming userId is populated and has name and profilePicture */}
                     {complaint.userId?.profilePicture && (
                       <img
                         src={`${import.meta.env.VITE_API_URL}/${complaint.userId.profilePicture}`}
@@ -101,21 +105,25 @@ const ManageComplaints = () => {
                         className="w-8 h-8 rounded-full object-cover"
                       />
                     )}
-                    {complaint.userId?.name || 'N/A'} {/* Display user name or N/A */}
+                    {complaint.userId?.name || 'N/A'}
                   </TableCell>
-                  <TableCell>{complaint.complaintAgainst}</TableCell> {/* Use complaintAgainst */}
+                  <TableCell>{complaint.complaintAgainst}</TableCell>
                   <TableCell>{complaint.description}</TableCell>
-                  <TableCell>{complaint.status}</TableCell>
                   <TableCell>
-                    {complaint.status === 'pending' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleResolve(complaint._id)}
-                      >
-                        Resolve
-                      </Button>
-                    )}
+                    <Select
+                      value={complaint.status}
+                      onValueChange={(newStatus) => handleChangeStatus(complaint._id, newStatus)}
+                    >
+                      <SelectTrigger className="w-[120px]">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                 </TableRow>
               ))}
