@@ -3,54 +3,94 @@ import SwapRequestInteraction from '../models/swap_request_interaction.js'; // I
 import Category from '../models/category.js'; // Import Category model
 import UserRating from '../models/user_rating.js'; // Import UserRating model
 import jwt from 'jsonwebtoken';
+import { validationResult, body } from 'express-validator';
 import { match } from 'assert';
 import mongoose from 'mongoose';
  
 // Create a new swap request
-export const createSwapRequest = async (req, res) => {
-  try {
-    // Extract user ID from token
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ message: 'No token provided' });
+export const createSwapRequest = [
+  body('serviceTitle')
+    .trim()
+    .isLength({ min: 2 }).withMessage('Service title must be at least 2 characters long')
+    .matches(/^[a-zA-Z\s]+$/).withMessage('Service title can only contain alphabetic characters and spaces'),
+  body('serviceRequired')
+    .trim()
+    .isLength({ min: 2 }).withMessage('Service required must be at least 2 characters long')
+    .matches(/^[a-zA-Z\s]+$/).withMessage('Service required can only contain alphabetic characters and spaces'),
+  body('serviceDescription')
+    .optional()
+    .matches(/^(?=.*[a-zA-Z0-9]).+$/).withMessage('Service description must contain at least one letter or number if provided.'),
+  body('yearsOfExperience')
+    .optional()
+    .isNumeric().withMessage('Years of experience must be a number')
+    .isInt({ min: 0 }).withMessage('Years of experience cannot be negative'),
+  body('preferredLocation')
+    .optional()
+    .matches(/^[a-zA-Z0-9\s.,'-]+$/).withMessage('Preferred location can only contain alphanumeric characters, spaces, and common punctuation.'),
+  body('deadline')
+    .optional()
+    .isISO8601().toDate().withMessage('Invalid deadline date'),
+  body('contactName')
+    .trim()
+    .isLength({ min: 2 }).withMessage('Contact name must be at least 2 characters long')
+    .matches(/^[a-zA-Z\s]+$/).withMessage('Contact name can only contain alphabetic characters and spaces'),
+  body('contactEmail')
+    .trim()
+    .isEmail().withMessage('Invalid contact email address'),
+  body('contactPhoneNumber')
+    .trim()
+    .isLength({ min: 10 }).withMessage('Phone number must be at least 10 digits long')
+    .matches(/^\d+$/).withMessage('Phone number must contain only digits'),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
- 
-    jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => { // Use import.meta.env
-      if (err) {
-        return res.status(403).json({ message: 'Failed to authenticate token' });
-      }
- 
-      const userId = decoded.user.id; // Correctly access user ID from decoded token
 
-      let categoryObjectIds = [];
-      // Handle serviceCategory strings to ObjectIds conversion
-      if (req.body.serviceCategory && Array.isArray(req.body.serviceCategory)) {
-        try {
-          const categoryIds = req.body.serviceCategory; // Assuming frontend sends array of category _ids
-          // Find categories by their _id instead of value
-          const categories = await Category.find({ _id: { $in: categoryIds } });
-          categoryObjectIds = categories.map(category => category._id);
-        } catch (categoryError) {
-          console.error('Error converting serviceCategory strings to ObjectIds:', categoryError);
-          // If there's an error, categoryObjectIds remains an empty array
+    try {
+      // Extract user ID from token
+      const token = req.headers.authorization?.split(' ')[1];
+      if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+      }
+  
+      jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => { // Use import.meta.env
+        if (err) {
+          return res.status(403).json({ message: 'Failed to authenticate token' });
         }
-      }
-
-      // Construct the data object explicitly to ensure correct types
-      const swapRequestData = {
-        ...req.body, // Copy other fields from req.body
-        serviceCategory: categoryObjectIds, // Use the converted ObjectIds array
-        createdBy: userId // Use the correctly extracted user ID
-      };
-
-      const newSwapRequest = new SwapRequest(swapRequestData);
-      const savedSwapRequest = await newSwapRequest.save();
-      res.status(201).json(savedSwapRequest);
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  
+        const userId = decoded.user.id; // Correctly access user ID from decoded token
+  
+        let categoryObjectIds = [];
+        // Handle serviceCategory strings to ObjectIds conversion
+        if (req.body.serviceCategory && Array.isArray(req.body.serviceCategory)) {
+          try {
+            const categoryIds = req.body.serviceCategory; // Assuming frontend sends array of category _ids
+            // Find categories by their _id instead of value
+            const categories = await Category.find({ _id: { $in: categoryIds } });
+            categoryObjectIds = categories.map(category => category._id);
+          } catch (categoryError) {
+            console.error('Error converting serviceCategory strings to ObjectIds:', categoryError);
+            // If there's an error, categoryObjectIds remains an empty array
+          }
+        }
+  
+        // Construct the data object explicitly to ensure correct types
+        const swapRequestData = {
+          ...req.body, // Copy other fields from req.body
+          serviceCategory: categoryObjectIds, // Use the converted ObjectIds array
+          createdBy: userId // Use the correctly extracted user ID
+        };
+  
+        const newSwapRequest = new SwapRequest(swapRequestData);
+        const savedSwapRequest = await newSwapRequest.save();
+        res.status(201).json(savedSwapRequest);
+      });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   }
-};
+];
 
 /** Get all swap requests with filtering and searching
  * @param {import('express').Request} req - Express request object

@@ -28,25 +28,35 @@ import axiosInstance from '../../api/axios';
 import { toast } from 'sonner';
 
 const FormSchema = z.object({
-  serviceTitle: z.string().min(2, {
-    message: "Service title must be at least 2 characters.",
-  }),
-  serviceCategory: z.array(z.string()).optional(), // Revert to array of strings
-  serviceRequired: z.string().min(2, {
-    message: "Service required must be at least 2 characters.",
-  }),
-  serviceDescription: z.string().optional(),
+  serviceTitle: z.string()
+    .min(2, { message: "Service title must be at least 2 characters." })
+    .regex(/^[a-zA-Z\s]+$/, { message: "Service title can only contain alphabetic characters and spaces." }),
+  serviceCategory: z.array(z.string()).optional(),
+  serviceRequired: z.string()
+    .min(2, { message: "Service required must be at least 2 characters." })
+    .regex(/^[a-zA-Z\s]+$/, { message: "Service required can only contain alphabetic characters and spaces." }),
+  serviceDescription: z.string()
+    .optional()
+    .refine(val => !val || /^(?=.*[a-zA-Z0-9]).+$/.test(val), {
+      message: "Service description must contain at least one letter or number if provided."
+    }),
   yearsOfExperience: z.number().min(0).optional(),
-  preferredLocation: z.string().optional(),
+  preferredLocation: z.string()
+    .optional()
+    .refine(val => !val || /^[a-zA-Z0-9\s.,'-]+$/.test(val), {
+      message: "Preferred location can only contain alphanumeric characters, spaces, and common punctuation."
+    }),
   deadline: z.date().optional(),
-  contactName: z.string().min(2, {
-    message: "Contact name must be at least 2 characters.",
-  }),
+  contactName: z.string()
+    .min(2, { message: "Contact name must be at least 2 characters." })
+    .regex(/^[a-zA-Z\s]+$/, { message: "Contact name can only contain alphabetic characters and spaces." }),
   contactEmail: z.string().email({
     message: "Please enter a valid email.",
   }),
   contactPhoneNumber: z.string().min(10, {
     message: "Phone number must be at least 10 characters.",
+  }).regex(/^\d+$/, {
+    message: "Phone number must contain only digits.",
   }),
 });
 

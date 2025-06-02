@@ -3,9 +3,15 @@ import { validationResult, body } from 'express-validator';
 
 // Submit a contact form
 export const submitContactForm = [
-  body('name').trim().isLength({ min: 2 }).withMessage('Name must be at least 2 characters long'),
+  body('name')
+    .trim()
+    .isLength({ min: 2 }).withMessage('Name must be at least 2 characters long')
+    .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain alphabetic characters and spaces'),
   body('email').trim().isEmail().withMessage('Invalid email address'),
-  body('message').trim().isLength({ min: 10 }).withMessage('Message must be at least 10 characters long'),
+  body('message')
+    .trim()
+    .isLength({ min: 10 }).withMessage('Message must be at least 10 characters long')
+    .matches(/^(?=.*[a-zA-Z0-9]).{10,}$/).withMessage('Message must contain at least one letter or number and be at least 10 characters long'),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
