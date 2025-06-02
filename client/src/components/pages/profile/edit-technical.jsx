@@ -101,6 +101,20 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
 
   const validateForm = (data) => {
     const errors = {};
+    const textRegex = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s,.'-]*$/; // Requires at least one letter, allows alphanumeric, spaces, commas, periods, hyphens
+
+    if (!data.qualifications.trim()) {
+      errors.qualifications = 'Qualifications are required.';
+    } else if (!textRegex.test(data.qualifications)) {
+      errors.qualifications = 'Qualifications should contain descriptive text, not just numbers or special characters.';
+    }
+
+    if (!data.skills.trim()) {
+      errors.skills = 'Skills are required.';
+    } else if (!textRegex.test(data.skills)) {
+      errors.skills = 'Skills should contain descriptive text, not just numbers or special characters.';
+    }
+
     if (!data.categories || data.categories.length === 0) {
       errors.categories = 'Categories are required';
     }
@@ -120,12 +134,14 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
             <label htmlFor="qualifications" className="flex flex-col">
               <span>Qualifications</span>
               <Input type="text" name="qualifications" id="qualifications" value={formData.qualifications} onChange={handleChange} />
+              {errors.qualifications && <span className="text-red-500 text-sm">{errors.qualifications}</span>}
             </label>
 
 
             <label htmlFor="skills" className="flex flex-col col-span-2">
               <span>Skills</span>
               <Input type="text" name="skills" id="skills" value={formData.skills} onChange={handleChange} />
+              {errors.skills && <span className="text-red-500 text-sm">{errors.skills}</span>}
             </label>
 
 

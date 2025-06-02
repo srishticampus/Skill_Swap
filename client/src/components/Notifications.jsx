@@ -50,7 +50,7 @@ const Notifications = ({ onNotificationRead }) => {
           {notifications?.map(notification => (
             <React.Fragment key={notification._id}>
               <DropdownMenuItem>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col justify-between items-start">
                   <div>
                     <p className="text-sm">{notification.message}</p>
                     <Badge variant={notification.status === 'approved' ? 'success' : notification.status === 'rejected' ? 'destructive' : 'secondary'}>{notification.status}</Badge>
