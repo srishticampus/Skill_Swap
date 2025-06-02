@@ -20,7 +20,7 @@ const ComplaintSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'resolved'],
+    enum: ['pending', 'in_progress', 'resolved', 'rejected'],
     default: 'pending',
   },
 });

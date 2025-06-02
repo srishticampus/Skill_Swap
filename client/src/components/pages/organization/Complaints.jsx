@@ -23,59 +23,20 @@ import {
   useReactTable,
   getPaginationRowModel,
 } from "@tanstack/react-table";
-
-// Dummy data for complaints
-const columns = [
-  {
-    accessorKey: "_id", // Use _id from server response
-    header: "Sl No",
-    cell: ({ row }) => row.index + 1, // Use row index for serial number
-  },
-  {
-    accessorKey: "userId", // Use userId from server response
-    header: "Complaints Given By",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        {/* Use profilePicture from userId */}
-        {row.original.userId?.profilePicture && (
-          <img
-            src={`${import.meta.env.VITE_API_URL}/${row.original.userId.profilePicture}`}
-            alt={row.original.userId.name}
-            className="w-8 h-8 rounded-full object-cover"
-          />
-        )}
-        {/* Use name from userId */}
-        <span>{row.original.userId?.name || 'N/A'}</span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "complaintAgainst",
-    header: "Complaints Against",
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-  },
-  {
-    accessorKey: "status", // Use status from server response
-    header: "Status",
-    cell: ({ row }) => (
-      // Display status directly
-      <span>{row.original.status}</span>
-    ),
-  },
-];
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from '@/context/AuthContext';
 
 function Complaints() {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get('/api/organizations/complaints');
+        const response = await axios.get('/api/admin/complaints'); // Changed to admin endpoint
         setComplaints(response.data);
         setLoading(false);
       } catch (err) {
@@ -86,6 +47,77 @@ function Complaints() {
 
     fetchComplaints();
   }, []);
+
+  const handleStatusChange = async (complaintId, newStatus) => {
+    try {
+      await axios.put(`/api/admin/complaints/${complaintId}/status`, { status: newStatus });
+      setComplaints(prevComplaints =>
+        prevComplaints.map(complaint =>
+          complaint._id === complaintId ? { ...complaint, status: newStatus } : complaint
+        )
+      );
+      // Optionally show a success toast/notification
+    } catch (error) {
+      console.error('Error updating complaint status:', error);
+      // Optionally show an error toast/notification
+    }
+  };
+
+  const columns = [
+    {
+      accessorKey: "_id",
+      header: "Sl No",
+      cell: ({ row }) => row.index + 1,
+    },
+    {
+      accessorKey: "userId",
+      header: "Complaints Given By",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          {row.original.userId?.profilePicture && (
+            <img
+              src={`${import.meta.env.VITE_API_URL}/${row.original.userId.profilePicture}`}
+              alt={row.original.userId.name}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          )}
+          <span>{row.original.userId?.name || 'N/A'}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "complaintAgainst",
+      header: "Complaints Against",
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        isAdmin ? (
+          <Select
+            value={row.original.status}
+            onValueChange={(newStatus) => handleStatusChange(row.original._id, newStatus)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Change Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="resolved">Resolved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        ) : (
+          <span>{row.original.status}</span>
+        )
+      ),
+    },
+  ];
 
   const table = useReactTable({
     data: complaints, // Use fetched complaints data
