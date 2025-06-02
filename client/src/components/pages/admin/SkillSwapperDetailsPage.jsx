@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react'; // Import useState and useEffect
-import { useParams } from 'react-router'; // Import useParams
+import { useParams, useNavigate } from 'react-router';
 import { MapPin, Briefcase, Star, ArrowRight, User, Mail, Phone, Globe, Venus } from 'lucide-react';
 import axiosInstance from '@/api/axios'; // Import axiosInstance
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const renderStars = (rating) => {
   const fullStars = Math.floor(rating);
@@ -23,9 +36,27 @@ const renderStars = (rating) => {
 
 export default function SkillSwapperDetailsPage() {
   const { id } = useParams(); // Get ID from URL
+  const navigate = useNavigate();
   const [swapperDetails, setSwapperDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const handleDelete = async () => {
+    try {
+      await axiosInstance.delete(`/api/admin/skill-swappers/${id}`);
+      toast("Success!",{
+        description: 'Skill swapper deleted successfully.',
+        variant: 'success',
+      });
+      navigate('/admin/skill-swappers');
+    } catch (error) {
+      toast("Error",{
+        description: error.response?.data?.message || 'Failed to delete skill swapper.',
+        variant: 'destructive',
+      });
+      console.error('Error deleting skill swapper:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchSwapperDetails = async () => {
@@ -139,6 +170,25 @@ export default function SkillSwapperDetailsPage() {
               <p className="text-gray-500 font-semibold text-sm mb-1">Deadline</p>
               <p className="text-gray-800 font-medium">{swapperDetails.deadline}</p>
             </div>
+          </div>
+          <div className="mt-8 flex justify-end">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">Delete Skill Swapper</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the skill swapper account and remove their data from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>

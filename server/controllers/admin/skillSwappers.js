@@ -130,5 +130,27 @@ router.get("/:id", auth, adminCheck, async (req, res) => {
   }
 });
 
+// @route   DELETE /api/admin/skill-swappers/:id
+// @desc    Delete a skill swapper by ID
+// @access  Private (Admin only)
+router.delete("/:id", auth, adminCheck, async (req, res) => {
+  try {
+    const swapper = await User.findById(req.params.id);
+
+    if (!swapper) {
+      return res.status(404).json({ msg: "Skill swapper not found" });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.json({ msg: "Skill swapper removed" });
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Skill swapper not found' });
+    }
+    res.status(500).send("Server Error");
+  }
+});
 
 export default router;
