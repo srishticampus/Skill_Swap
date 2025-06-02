@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { User, Mail, Globe, Smartphone, Building, CircleUser } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import axiosInstance from '@/api/axios';
@@ -39,6 +40,12 @@ const SwapRequestDetails = () => {
     return <div>Swap request not found</div>;
   }
 
+  const displayUser = swapRequestData?.createdBy || swapRequestData?.interactionUser;
+
+  if (!displayUser) {
+    return <div>User information not available for this swap request.</div>;
+  }
+
   return (
     <div className="container mx-auto py-8 max-w-4xl">
       {/* Top Section: User Basic Info */}
@@ -46,49 +53,36 @@ const SwapRequestDetails = () => {
         <CardContent className="p-6 flex flex-col md:flex-row items-center md:items-start justify-between">
           <div className="flex items-center mb-6 md:mb-0">
             <img
-              src={`${import.meta.env.VITE_API_URL}/${swapRequestData?.createdBy?.profilePicture}`}
-              alt={swapRequestData?.createdBy?.name}
+              src={`${import.meta.env.VITE_API_URL}/${displayUser?.profilePicture}`}
+              alt={displayUser?.name}
               className="w-24 h-24 rounded-full object-cover mr-6"
             />
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-primary mb-4">{swapRequestData?.createdBy?.name}</h1> {/* Use primary text like in the image */}
+            <h1 className="text-3xl font-bold text-primary mb-4">{displayUser?.name}</h1> {/* Use primary text like in the image */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-gray-700">
               <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-                {swapRequestData?.createdBy?.name}
+                <User className="h-5 w-5 mr-2 text-gray-500" />
+                {displayUser?.name}
               </div>
               <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4zM9 9a1 1 0 100 2 1 1 0 000-2zm2-1a1 1 0 11-2 0 1 1 0 012 0z" clipRule="evenodd" />
-                </svg> {/* Placeholder gender icon */}
-                {swapRequestData?.createdBy?.gender}
+                <CircleUser className="h-5 w-5 mr-2 text-gray-500" /> {/* Placeholder gender icon */}
+                {displayUser?.gender}
               </div>
                <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
-                {swapRequestData?.createdBy?.email}
+                <Mail className="h-5 w-5 mr-2 text-gray-500" />
+                {displayUser?.email}
               </div>
                <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 8a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                </svg> {/* Placeholder globe icon */}
-                {swapRequestData?.createdBy?.location}
+                <Globe className="h-5 w-5 mr-2 text-gray-500" /> {/* Placeholder globe icon */}
+                {displayUser?.country}
               </div>
               <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zM7 4h6v12H7V4z" clipRule="evenodd" />
-                </svg>
-                {swapRequestData?.createdBy?.phone}
+                <Smartphone className="h-5 w-5 mr-2 text-gray-500" />
+                {displayUser?.phone}
               </div>
                <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5 3a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V4a1 1 0 00-1-1H5zM4 4h10v10H4V4z" clipRule="evenodd" />
-                </svg> {/* Placeholder building icon */}
-                {swapRequestData?.createdBy?.city}
+                <Building className="h-5 w-5 mr-2 text-gray-500" /> {/* Placeholder building icon */}
+                {displayUser?.city}
               </div>
             </div>
           </div>
@@ -105,11 +99,11 @@ const SwapRequestDetails = () => {
 
           <div>
             <p className="text-gray-500 mb-1">Resume</p>
-            <a href="#" className="text-blue-600 hover:underline">{swapRequestData?.resume}</a> {/* Link placeholder */}
+            <a href={`${import.meta.env.VITE_API_URL}/${displayUser?.resume}`} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">View Resume</a> {/* Link placeholder */}
           </div>
           <div>
             <p className="text-gray-500 mb-1">Years of Experience</p>
-            <p>{swapRequestData?.createdBy?.yearsOfExperience} Years</p>
+            <p>{displayUser?.yearsOfExperience} Years</p>
           </div>
           <div>
             <p className="text-gray-500 mb-1">Category</p>
@@ -126,7 +120,7 @@ const SwapRequestDetails = () => {
            <div>
             <p className="text-gray-500 mb-1">Skills</p>
              <div className="flex flex-wrap gap-2">
-               {swapRequestData?.skills?.map((skill, index) => (
+               {displayUser?.skills?.map((skill, index) => (
                  <Badge key={index} variant="outline" className="text-primary border-primary">{skill}</Badge>
                ))}
             </div>
