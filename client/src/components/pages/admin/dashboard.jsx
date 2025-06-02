@@ -13,11 +13,26 @@ import {
 export default function Dashboard() {
   const [totalSwaps, setTotalSwaps] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [totalExchanges, setTotalExchanges] = useState(0); // New state for total exchanges
   const [requestsOverview, setRequestsOverview] = useState({
     totalRequests: 0,
     approvedRequests: 0,
     pendingRequests: 0,
   });
+  const [exchangeRequestsOverview, setExchangeRequestsOverview] = useState({
+    totalExchanges: 0,
+    ongoingExchanges: 0,
+    completedExchanges: 0,
+    pendingExchanges: 0,
+    rejectedExchanges: 0,
+  });
+  const [complaintsOverview, setComplaintsOverview] = useState({
+    totalComplaints: 0,
+    openComplaints: 0,
+    resolvedComplaints: 0,
+    pendingComplaints: 0,
+  });
+  const [swapTrends, setSwapTrends] = useState([]);
 
   // Derived data for the chart based on fetched requestsOverview
   const organizationStatusData = [
@@ -26,42 +41,69 @@ export default function Dashboard() {
     { name: "pending-requests", value: requestsOverview.pendingRequests, label: "Pending Requests", color: "#ffbb28" }, // Yellow
   ];
 
+  // Derived data for the complaints chart
+  const complaintStatusData = [
+    { name: "total-complaints", value: complaintsOverview.totalComplaints, label: "Total Complaints", color: "#00c49f" },
+    { name: "open-complaints", value: complaintsOverview.openComplaints, label: "Open Complaints", color: "#ADD8E6" },
+    { name: "resolved-complaints", value: complaintsOverview.resolvedComplaints, label: "Resolved Complaints", color: "#ffbb28" },
+    { name: "pending-complaints", value: complaintsOverview.pendingComplaints, label: "Pending Complaints", color: "#FF6347" }, // Tomato
+  ];
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
         // Fetch Total Swaps
-        const swapsResponse = await axiosInstance.get('/api/admin/stats/swaps/total'); // Replace with your actual API endpoint
-
-          const swapsData = swapsResponse.data;
-          setTotalSwaps(swapsData.totalSwaps); // Assuming the response has a \'totalSwaps\' field
-
+        const swapsResponse = await axiosInstance.get('/api/admin/stats/swaps/total');
+        const swapsData = swapsResponse.data;
+        setTotalSwaps(swapsData.totalSwaps);
 
         // Fetch Total Skill Swappers (Users)
-        const usersResponse = await axiosInstance.get('/api/admin/stats/users/total'); // Replace with your actual API endpoint
+        const usersResponse = await axiosInstance.get('/api/admin/stats/users/total');
+        const usersData = usersResponse.data;
+        setTotalUsers(usersData.totalUsers);
 
-          const usersData = usersResponse.data;
-          setTotalUsers(usersData.totalUsers); // Assuming the response has a \'totalUsers\' field
+        // Fetch Total Exchanges
+        const exchangesResponse = await axiosInstance.get('/api/admin/stats/exchanges/total');
+        const exchangesData = exchangesResponse.data;
+        setTotalExchanges(exchangesData.totalExchanges);
 
         // Fetch Organization Status Overview
-        const requestsResponse = await axiosInstance.get('/api/admin/stats/requests/overview'); // Replace with your actual API endpoint
+        const requestsResponse = await axiosInstance.get('/api/admin/stats/requests/overview');
+        const requestsData = requestsResponse.data;
+        setRequestsOverview(requestsData);
 
-          const requestsData = requestsResponse.data;
-          setRequestsOverview(requestsData); // Assuming the response matches the state shape
+        // Fetch Exchange Requests Overview
+        const exchangeRequestsResponse = await axiosInstance.get('/api/admin/stats/exchanges/overview');
+        const exchangeRequestsData = exchangeRequestsResponse.data;
+        setExchangeRequestsOverview(exchangeRequestsData);
 
+        // Fetch Complaints Overview
+        const complaintsResponse = await axiosInstance.get('/api/admin/stats/complaints/overview');
+        const complaintsData = complaintsResponse.data;
+        setComplaintsOverview(complaintsData);
+
+        // Fetch Swap Trends
+        const swapTrendsResponse = await axiosInstance.get('/api/admin/stats/swaps/trends');
+        const swapTrendsData = swapTrendsResponse.data.map(item => ({
+          date: new Date(item.date).toLocaleDateString(), // Format date for display
+          count: item.count,
+        }));
+        setSwapTrends(swapTrendsData);
 
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);
-        // Handle errors, potentially set state to indicate error
         setTotalSwaps(0);
         setTotalUsers(0);
+        setTotalExchanges(0); // Reset total exchanges on error
         setRequestsOverview({ totalRequests: 0, approvedRequests: 0, pendingRequests: 0 });
+        setExchangeRequestsOverview({ totalExchanges: 0, ongoingExchanges: 0, completedExchanges: 0, pendingExchanges: 0, rejectedExchanges: 0 }); // Reset exchange requests overview on error
+        setComplaintsOverview({ totalComplaints: 0, openComplaints: 0, resolvedComplaints: 0, pendingComplaints: 0 });
+        setSwapTrends([]);
       }
     };
 
     fetchStats();
-  }, []); // Empty dependency array means this effect runs once on mount
-
-  // Placeholder data - replace with actual data fetching logic
+  }, []);
 
   const organizationStatusConfig = {
     "total-requests": { label: "Total Requests", color: "#00c49f" }, // Green
@@ -69,16 +111,32 @@ export default function Dashboard() {
     "pending-requests": { label: "Pending Requests", color: "#ffbb28" }, // Yellow
   };
 
+  const complaintStatusConfig = {
+    "total-complaints": { label: "Total Complaints", color: "#00c49f" },
+    "open-complaints": { label: "Open Complaints", color: "#ADD8E6" },
+    "resolved-complaints": { label: "Resolved Complaints", color: "#ffbb28" },
+    "pending-complaints": { label: "Pending Complaints", color: "#FF6347" },
+  };
+
+  const swapTrendsConfig = {
+    count: {
+      label: "Swap Requests",
+      color: "hsl(var(--chart-1))",
+    },
+  };
+
   const exchangeRequestData = [
-    { name: "ongoing", value: 33, label: "Ongoing", color: "#00c49f" }, // Green
-    { name: "completed", value: 40, label: "Completed", color: "#ADD8E6" }, // Light Blue
-    { name: "pending", value: 27, label: "Pending", color: "#ffbb28" }, // Yellow
+    { name: "ongoing", value: exchangeRequestsOverview.ongoingExchanges, label: "Ongoing", color: "#00c49f" }, // Green
+    { name: "completed", value: exchangeRequestsOverview.completedExchanges, label: "Completed", color: "#ADD8E6" }, // Light Blue
+    { name: "pending", value: exchangeRequestsOverview.pendingExchanges, label: "Pending", color: "#ffbb28" }, // Yellow
+    { name: "rejected", value: exchangeRequestsOverview.rejectedExchanges, label: "Rejected", color: "#FF6347" }, // Tomato
   ];
 
   const exchangeRequestConfig = {
     "ongoing": { label: "Ongoing", color: "#00c49f" }, // Green
     "completed": { label: "Completed", color: "#ADD8E6" }, // Light Blue
     "pending": { label: "Pending", color: "#ffbb28" }, // Yellow
+    "rejected": { label: "Rejected", color: "#FF6347" }, // Tomato
   };
 
   return (
@@ -118,10 +176,9 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,254</div>
-              {/* Keep placeholder data for now */}
-              <p className="text-xs text-green-500">
-                +8% since last month
+              <div className="text-2xl font-bold">{totalExchanges}</div>
+              <p className="text-xs text-gray-500">
+                Data from API
               </p>
             </CardContent>
           </Card>
@@ -209,6 +266,83 @@ export default function Dashboard() {
                   <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
                   <ChartLegend content={<ChartLegendContent nameKey="name" />} />
                 </RechartsPrimitive.PieChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          {/* Chart 3: Complaint Status Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-purple-800">Complaint Status Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer
+                config={complaintStatusConfig}
+                className="min-h-[200px] w-full"
+              >
+                <RechartsPrimitive.PieChart>
+                  <RechartsPrimitive.Pie
+                    data={complaintStatusData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    cx="50%"
+                    cy="50%"
+                  >
+                    {complaintStatusData.map((entry, index) => (
+                      <RechartsPrimitive.Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </RechartsPrimitive.Pie>
+                  <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                  <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+                </RechartsPrimitive.PieChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          {/* Chart 4: Swap Request Trends */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-purple-800">Swap Request Trends</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer
+                config={swapTrendsConfig}
+                className="min-h-[200px] w-full"
+              >
+                <RechartsPrimitive.LineChart
+                  accessibilityLayer
+                  data={swapTrends}
+                  margin={{
+                    left: 12,
+                    right: 12,
+                  }}
+                >
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                  <RechartsPrimitive.XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    minTickGap={32}
+                  />
+                  <RechartsPrimitive.YAxis
+                    dataKey="count"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    domain={[0, 'dataMax + 10']}
+                  />
+                  <RechartsPrimitive.Line
+                    dataKey="count"
+                    type="monotone"
+                    stroke="hsl(var(--chart-1))"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </RechartsPrimitive.LineChart>
               </ChartContainer>
             </CardContent>
           </Card>
