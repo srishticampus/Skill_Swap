@@ -111,7 +111,26 @@ function EditSwapRequest() {
   };
 
   if (loading) {
-    return <div className="container mx-auto py-10 text-center">Loading swap request data...</div>;
+    return (
+      <div className="container mx-auto py-10">
+        <Skeleton className="h-8 w-1/2 mx-auto mb-6" /> {/* Skeleton for title */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Array.from({ length: 7 }).map((_, i) => ( // 7 input fields + 1 for contact details
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-1/4 mb-2" /> {/* Skeleton for label */}
+              <Skeleton className="h-10 w-full" /> {/* Skeleton for input */}
+            </div>
+          ))}
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-1/4 mb-2" /> {/* Skeleton for label */}
+            <Skeleton className="h-10 w-full" /> {/* Skeleton for input */}
+          </div>
+          <div className="md:col-span-2 flex justify-center">
+            <Skeleton className="h-10 w-24" /> {/* Skeleton for submit button */}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!swapRequest) {

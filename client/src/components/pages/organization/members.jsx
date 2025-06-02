@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, MapPin, Phone, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -74,7 +75,36 @@ const Members = () => {
 
 
   if (loading) {
-    return <div className="container mx-auto p-6 text-white min-h-screen">Loading...</div>;
+    return (
+      <div className="container mx-auto p-6 text-white min-h-screen">
+        <Skeleton className="h-8 w-1/3 mb-8 mx-auto" /> {/* For "View Member" title */}
+        <div className="flex justify-center mb-8">
+          <Skeleton className="h-10 w-full max-w-md rounded-full" /> {/* For search input */}
+          <Skeleton className="h-10 w-36 ml-4 rounded-md" /> {/* For "Add New Member" button */}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Card key={index} className="bg-white border-gray-200 rounded-lg overflow-hidden">
+              <CardContent className="p-6 flex items-center">
+                <Skeleton className="w-24 h-24 rounded-full mr-6" />
+                <div className="flex-1">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2 mb-2" />
+                  <Skeleton className="h-4 w-2/3 mb-1" />
+                  <Skeleton className="h-4 w-1/3 mb-4" />
+                  <Skeleton className="h-5 w-1/4 mb-4" />
+                  <div className="flex space-x-4 mb-4">
+                    <Skeleton className="h-10 flex-1" />
+                    <Skeleton className="h-10 flex-1" />
+                  </div>
+                  <Skeleton className="h-4 w-1/4 ml-auto" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -166,4 +196,3 @@ const Members = () => {
 };
 
 export default Members;
-

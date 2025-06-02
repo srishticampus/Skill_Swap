@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import { MapPin, Briefcase, Star, ArrowRight, User, Mail, Phone, Globe, Venus } from 'lucide-react';
 import axiosInstance from '@/api/axios'; // Import axiosInstance
 import { Button } from '@/components/ui/button';
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -74,7 +75,45 @@ export default function SkillSwapperDetailsPage() {
   }, [id]); // Rerun effect if ID changes
 
   if (loading) {
-    return <div className="p-6 w-full min-h-screen bg-gray-100 text-center">Loading skill swapper details...</div>;
+    return (
+      <div className="p-6 w-full min-h-screen bg-gray-100">
+        <Skeleton className="h-8 w-64 mx-auto my-8" /> {/* Title skeleton */}
+
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
+          {/* Top section: Image, Name, Personal Details Skeletons */}
+          <div className="flex flex-col md:flex-row items-center md:items-start mb-8 pb-8 border-b border-gray-200">
+            <Skeleton className="w-32 h-32 rounded-full mr-0 md:mr-8 mb-6 md:mb-0" /> {/* Image skeleton */}
+            <div className="flex flex-col flex-grow w-full">
+              <Skeleton className="h-8 w-48 mb-4 mx-auto md:mx-0" /> {/* Name skeleton */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                {[...Array(6)].map((_, i) => ( // Skeletons for personal details
+                  <div key={i} className="flex items-center">
+                    <Skeleton className="w-5 h-5 mr-3" />
+                    <Skeleton className="h-6 w-40" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom section: Technical Info Skeletons */}
+          <div>
+            <Skeleton className="h-6 w-48 mb-6" /> {/* Technical Info title skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+              {[...Array(8)].map((_, i) => ( // Skeletons for technical details
+                <div key={i}>
+                  <Skeleton className="h-4 w-32 mb-1" />
+                  <Skeleton className="h-6 w-48" />
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 flex justify-end">
+              <Skeleton className="h-10 w-40" /> {/* Delete button skeleton */}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {

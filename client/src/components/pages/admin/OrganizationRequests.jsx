@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Phone, Key, Calendar, Search, ArrowRight } from "lucide-react";
 import { Link } from "react-router";
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 const OrganizationRequests = () => {
   const [organizationRequests, setOrganizationRequests] = useState([]);
@@ -67,8 +68,29 @@ const OrganizationRequests = () => {
     return (
       <main className="flex-1 px-6 pb-6">
         <div className="bg-white rounded-lg h-full p-6">
-          <h2 className="text-2xl font-semibold mb-4">Organization Requests</h2>
-          <div>Loading organization requests...</div>
+          <Skeleton className="h-8 w-1/2 mb-4" /> {/* Title skeleton */}
+          <div className="flex justify-end mb-6">
+            <Skeleton className="h-10 w-64" /> {/* Search input skeleton */}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => ( // Show 6 skeleton cards
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-3/4" /> {/* Card title skeleton */}
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <Skeleton className="h-4 w-full" /> {/* Phone skeleton */}
+                  <Skeleton className="h-4 w-full" /> {/* Registration number skeleton */}
+                  <Skeleton className="h-4 w-full" /> {/* Date skeleton */}
+                  <Skeleton className="h-10 w-full mt-4" /> {/* View More button skeleton */}
+                  <div className="flex gap-2 mt-4">
+                    <Skeleton className="h-10 flex-1" /> {/* Approve button skeleton */}
+                    <Skeleton className="h-10 flex-1" /> {/* Reject button skeleton */}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </main>
     );

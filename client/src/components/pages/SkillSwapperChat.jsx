@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import axiosInstance from '../../api/axios';
 import AuthContext from '../../context/AuthContext'; // Import AuthContext
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 const SkillSwapperChat = () => {
   const { user } = useContext(AuthContext); // Get authenticated user/organization from context
@@ -156,37 +157,52 @@ const SkillSwapperChat = () => {
         <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-250px)]">
           <Card className="w-full lg:w-1/4 p-4 shadow-lg rounded-lg overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4">Conversations</h2>
-            {loading && <p>Loading conversations...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {!loading && filteredChatEntities.length === 0 && <p>No conversations found matching your search.</p>}
-            {filteredChatEntities.map((entity) => (
-              <div
-                key={entity._id}
-                className={`flex items-center p-3 rounded-lg cursor-pointer mb-2 ${
-                  selectedChatEntity?._id === entity._id ? 'bg-purple-100' : 'hover:bg-gray-50'
-                } ${entity.type === 'Organization' ? 'bg-blue-100 border-blue-300 border' : ''}`}
-                onClick={() => handleChatEntityClick(entity)}
-              >
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={getAvatarSrc(entity)} alt={entity.name} />
-                  <AvatarFallback>{getFallback(entity)}</AvatarFallback>
-                </Avatar>
-                <div className="ml-3 flex-grow">
-                  <p className="font-medium">
-                    {entity.name} {entity.type === 'Organization' && <span className="text-xs text-blue-600">(Organization)</span>}
-                    {entity.email === 'admin@admin.com' && <span className="text-xs text-blue-600">(Admin)</span>}
-                  </p>
-                  {entity.type === 'User' && entity.email !== 'admin@admin.com' && (
-                    <p className="text-sm text-gray-500">{entity.skills?.join(', ') || 'No skills'}</p>
+            {loading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center p-3 rounded-lg">
+                    <Skeleton className="h-10 w-10 rounded-full mr-3" />
+                    <div className="flex-grow space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              <p className="text-red-500">{error}</p>
+            ) : filteredChatEntities.length === 0 ? (
+              <p>No conversations found matching your search.</p>
+            ) : (
+              filteredChatEntities.map((entity) => (
+                <div
+                  key={entity._id}
+                  className={`flex items-center p-3 rounded-lg cursor-pointer mb-2 ${
+                    selectedChatEntity?._id === entity._id ? 'bg-purple-100' : 'hover:bg-gray-50'
+                  } ${entity.type === 'Organization' ? 'bg-blue-100 border-blue-300 border' : ''}`}
+                  onClick={() => handleChatEntityClick(entity)}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={getAvatarSrc(entity)} alt={entity.name} />
+                    <AvatarFallback>{getFallback(entity)}</AvatarFallback>
+                  </Avatar>
+                  <div className="ml-3 flex-grow">
+                    <p className="font-medium">
+                      {entity.name} {entity.type === 'Organization' && <span className="text-xs text-blue-600">(Organization)</span>}
+                      {entity.email === 'admin@admin.com' && <span className="text-xs text-blue-600">(Admin)</span>}
+                    </p>
+                    {entity.type === 'User' && entity.email !== 'admin@admin.com' && (
+                      <p className="text-sm text-gray-500">{entity.skills?.join(', ') || 'No skills'}</p>
+                    )}
+                  </div>
+                  {entity.unreadCount > 0 && (
+                    <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      {entity.unreadCount}
+                    </span>
                   )}
                 </div>
-                {entity.unreadCount > 0 && (
-                  <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    {entity.unreadCount}
-                  </span>
-                )}
-              </div>
-            ))}
+              ))
+            )}
           </Card>
 
           <Card className="flex-grow p-6 shadow-lg rounded-lg flex flex-col">
@@ -221,37 +237,55 @@ const SkillSwapperChat = () => {
                 </div>
 
                 <div className="flex-grow overflow-y-auto p-4 space-y-4" ref={messagesEndRef}>
-                  {loading && <p>Loading messages...</p>}
-                  {error && <p className="text-red-500">{error}</p>}
-                  {!loading && messages.length === 0 && <p>No messages yet. Start a conversation!</p>}
-                  {messages.map((message) => (
-                    <div
-                      key={message._id}
-                      className={`flex ${isSender(message) ? 'justify-end' : 'justify-start'}`}
-                    >
-                      {!isSender(message) && (
-                        <Avatar className="h-8 w-8 mr-2">
-                          <AvatarImage src={getAvatarSrc(selectedChatEntity)} alt={selectedChatEntity.name} />
-                          <AvatarFallback>{getFallback(selectedChatEntity)}</AvatarFallback>
-                        </Avatar>
-                      )}
-                      <p
-                        className={`p-3 rounded-lg max-w-xs break-words ${
-                          isSender(message)
-                            ? 'bg-gray-600 text-white'
-                            : 'bg-purple-200 text-gray-800'
-                        }`}
-                      >
-                        {message.message_text}
-                      </p>
-                      {isSender(message) && (
-                        <Avatar className="h-8 w-8 ml-2">
-                          <AvatarImage src={getAvatarSrc(user)} alt={user.name} />
-                          <AvatarFallback>{getFallback(user)}</AvatarFallback>
-                        </Avatar>
-                      )}
+                  {loading ? (
+                    <div className="space-y-4">
+                      <div className="flex justify-start">
+                        <Skeleton className="h-10 w-1/2" />
+                      </div>
+                      <div className="flex justify-end">
+                        <Skeleton className="h-10 w-1/2" />
+                      </div>
+                      <div className="flex justify-start">
+                        <Skeleton className="h-10 w-2/3" />
+                      </div>
+                      <div className="flex justify-end">
+                        <Skeleton className="h-10 w-1/3" />
+                      </div>
                     </div>
-                  ))}
+                  ) : error ? (
+                    <p className="text-red-500">{error}</p>
+                  ) : messages.length === 0 ? (
+                    <p>No messages yet. Start a conversation!</p>
+                  ) : (
+                    messages.map((message) => (
+                      <div
+                        key={message._id}
+                        className={`flex ${isSender(message) ? 'justify-end' : 'justify-start'}`}
+                      >
+                        {!isSender(message) && (
+                          <Avatar className="h-8 w-8 mr-2">
+                            <AvatarImage src={getAvatarSrc(selectedChatEntity)} alt={selectedChatEntity.name} />
+                            <AvatarFallback>{getFallback(selectedChatEntity)}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <p
+                          className={`p-3 rounded-lg max-w-xs break-words ${
+                            isSender(message)
+                              ? 'bg-gray-600 text-white'
+                              : 'bg-purple-200 text-gray-800'
+                          }`}
+                        >
+                          {message.message_text}
+                        </p>
+                        {isSender(message) && (
+                          <Avatar className="h-8 w-8 ml-2">
+                            <AvatarImage src={getAvatarSrc(user)} alt={user.name} />
+                            <AvatarFallback>{getFallback(user)}</AvatarFallback>
+                          </Avatar>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 <div className="flex items-center pt-4 border-t border-gray-200">

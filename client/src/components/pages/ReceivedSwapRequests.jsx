@@ -5,6 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Star } from 'lucide-react';
 import axiosInstance from '@/api/axios';
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 const ReceivedSwapRequests = () => {
   const [requests, setRequests] = useState([]);
@@ -97,7 +98,43 @@ const ReceivedSwapRequests = () => {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <section className="mt-10 lg:mt-20 mb-10 p-5">
+        <Skeleton className="h-10 w-1/2 mx-auto mb-10" /> {/* Title skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => ( // Show 4 skeleton cards
+            <Card key={i} className="bg-white shadow-md rounded-lg overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-evenly mb-4">
+                  <Skeleton className="w-32 h-32 rounded-3xl" /> {/* Avatar skeleton */}
+                  <div>
+                    <Skeleton className="h-6 w-3/4 mb-2" /> {/* Name skeleton */}
+                    <Skeleton className="h-4 w-1/2 mb-1" /> {/* Skills skeleton */}
+                    <Skeleton className="h-4 w-1/3 mb-1" /> {/* Location skeleton */}
+                    <Skeleton className="h-4 w-1/3 mb-2" /> {/* Experience skeleton */}
+                    <div className="flex">
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <Skeleton key={j} className="w-4 h-4 rounded-full mr-1" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <Skeleton className="h-5 w-2/3 mb-2" /> {/* Service Required title */}
+                <Skeleton className="h-8 w-full mb-4" /> {/* Service Required badge */}
+                <Skeleton className="h-5 w-2/3 mb-2" /> {/* Service Offered title */}
+                <Skeleton className="h-8 w-full mb-4" /> {/* Service Offered badge */}
+                <Skeleton className="h-5 w-1/3 mb-2" /> {/* Deadline title */}
+                <Skeleton className="h-6 w-1/2 mb-4" /> {/* Deadline text */}
+                <div className="flex justify-between">
+                  <Skeleton className="h-10 w-24 rounded-full" /> {/* Approve button */}
+                  <Skeleton className="h-10 w-24 rounded-full" /> {/* Reject button */}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+    );
   }
 
   if (error) {

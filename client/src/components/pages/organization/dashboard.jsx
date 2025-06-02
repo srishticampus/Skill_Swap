@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
+import { Skeleton } from '@/components/ui/skeleton';
 import axios from '@/api/axios'; // Assuming axios is configured for API calls
 
 const COLORS = ['#6b48ff', '#00c49f', '#ffbb28', '#ff8042', '#8884d8', '#82ca9d']; // Added more colors for potential new charts
@@ -69,7 +70,63 @@ const Dashboard = () => {
   }, []);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen text-xl">Loading dashboard...</div>;
+    return (
+      <div className="flex flex-col gap-4 p-4">
+        <Skeleton className="h-8 w-1/4" /> {/* For "Dashboard" title */}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Card key={index} className="bg-primary text-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-5 w-1/2" />
+                <Skeleton className="h-6 w-6 rounded-full" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-1/3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-3/4" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[300px] w-full" />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-3/4" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[300px] w-full" />
+            </CardContent>
+          </Card>
+        </div>
+
+        <Skeleton className="h-6 w-1/4 mt-4" /> {/* For "Best Performers" title */}
+        <Skeleton className="h-1 w-full my-4" /> {/* For separator */}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Card key={index}>
+              <CardContent className="flex flex-col items-center p-6">
+                <Skeleton className="w-24 h-24 rounded-full mb-4" />
+                <Skeleton className="h-6 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-2/3 mb-2" />
+                <Skeleton className="h-4 w-1/3 mb-1" />
+                <Skeleton className="h-4 w-1/4 mb-2" />
+                <Skeleton className="h-5 w-1/3 mt-2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (error) {

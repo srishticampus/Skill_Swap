@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from "react-router";
 import { Button } from "@/components/ui/button"; // Assuming a button component exists
+import { Skeleton } from "@/components/ui/skeleton";
 import axiosInstance from '@/api/axios'; // Import axiosInstance
 
 function OrganizationDetails() {
@@ -61,7 +62,62 @@ function OrganizationDetails() {
   };
 
   if (loading) {
-    return <div className="p-6 text-center">Loading...</div>;
+    return (
+      <div className="p-6 min-h-screen bg-gray-100">
+        <div className="text-center mb-8">
+          <Skeleton className="h-8 w-64 mx-auto" />
+        </div>
+
+        <div className="bg-white rounded-lg p-8 shadow-lg max-w-2xl mx-auto" style={{ minHeight: '400px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+            {/* Left Column Skeletons */}
+            <div>
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-48 mb-4" />
+
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-48 mb-4" />
+
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-48 mb-4" />
+
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-24 mb-4" />
+
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-40" />
+            </div>
+
+            {/* Right Column Skeletons */}
+            <div>
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-48 mb-4" />
+
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-48 mb-4" />
+
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-48 mb-4" />
+
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-24 mb-4" />
+
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-40 mb-4" />
+
+              <Skeleton className="h-4 w-32 mb-1" />
+              <Skeleton className="h-6 w-40" />
+            </div>
+          </div>
+
+          {/* Buttons Skeletons */}
+          <div className="flex justify-center gap-4 mt-8">
+            <Skeleton className="h-12 w-32" />
+            <Skeleton className="h-12 w-32" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { User, Mail, Globe, Smartphone, Building, CircleUser } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import axiosInstance from '@/api/axios';
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
@@ -35,7 +36,45 @@ const SwapRequestDetails = () => {
   }, [id]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container mx-auto py-8 max-w-4xl">
+        <Skeleton className="h-10 w-24 mb-4" />
+        <Card className="mb-8 rounded-lg shadow-md">
+          <CardContent className="p-6 flex flex-col md:flex-row items-center md:items-start justify-between">
+            <div className="flex items-center mb-6 md:mb-0">
+              <Skeleton className="w-24 h-24 rounded-full mr-6" />
+              <div className="flex-1">
+                <Skeleton className="h-8 w-64 mb-4" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-5 w-48" />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-lg shadow-md">
+          <CardContent className="p-6">
+            <Skeleton className="h-8 w-48 mb-6" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-20 w-full md:col-span-2" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (error) {

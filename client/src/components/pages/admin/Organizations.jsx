@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button"; // Assuming a button component exists
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"; // Assuming dropdown exists
 import { Eye } from "lucide-react"; // Using Eye icon for View More
+import { Skeleton } from "@/components/ui/skeleton";
 
 const organizationData = [
   {
@@ -118,9 +119,33 @@ function Organizations() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center">Loading organizations...</TableCell>
-              </TableRow>
+              <>
+                {[...Array(itemsPerPage)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell className="font-medium">
+                      <Skeleton className="h-6 w-12" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-48" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-32" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-48" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-24" />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Skeleton className="h-8 w-8 mx-auto" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
             ) : error ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-red-500">Error loading organizations: {error.message}</TableCell>

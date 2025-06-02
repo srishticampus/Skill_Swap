@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
@@ -70,7 +71,77 @@ const ManageComplaints = () => {
   };
 
   if (loading) {
-    return <div>Loading complaints...</div>;
+    return (
+      <div className="p-6">
+        <div className="bg-white rounded-lg p-6">
+          <Skeleton className="h-8 w-64 mx-auto mb-6" /> {/* Title skeleton */}
+
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-gradient-to-r from-purple-600 to-purple-800 text-white">
+                <TableRow>
+                  <TableHead className="text-white">
+                    <Skeleton className="h-6 w-16" />
+                  </TableHead>
+                  <TableHead className="text-white">
+                    <Skeleton className="h-6 w-32" />
+                  </TableHead>
+                  <TableHead className="text-white">
+                    <Skeleton className="h-6 w-32" />
+                  </TableHead>
+                  <TableHead className="text-white">
+                    <Skeleton className="h-6 w-48" />
+                  </TableHead>
+                  <TableHead className="text-white">
+                    <Skeleton className="h-6 w-24" />
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...Array(itemsPerPage)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell className="font-medium">
+                      <Skeleton className="h-6 w-12" />
+                    </TableCell>
+                    <TableCell className="flex items-center gap-2">
+                      <Skeleton className="w-8 h-8 rounded-full" />
+                      <Skeleton className="h-6 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-32" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-48" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-8 w-24" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Pagination and Items per page Skeletons */}
+          <div className="flex justify-between items-center mt-6">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-6 w-12" />
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="h-6 w-20" />
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-6 w-32" />
+              <div className="flex">
+                <Skeleton className="h-8 w-8 rounded-full mr-2" />
+                <Skeleton className="h-8 w-8 rounded-full mr-2" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {

@@ -4,6 +4,7 @@ import axiosInstance from '@/api/axios';
 import Timeline from '@/components/Timeline';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '../ui/button';
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 const SwapRequestDetailsPage = () => {
   const { id } = useParams(); // Extract swap request ID from URL params
@@ -29,7 +30,50 @@ const SwapRequestDetailsPage = () => {
   }, [id]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container mx-auto py-10 bg-gray-100">
+        {/* Skeleton for Technical Info */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <Skeleton className="h-8 w-1/3 mb-4" /> {/* Title skeleton */}
+          <div className="grid grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i}>
+                <Skeleton className="h-4 w-1/2 mb-2" /> {/* Subtitle skeleton */}
+                <Skeleton className="h-6 w-full" /> {/* Content skeleton */}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Skeleton for My Profile */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <Skeleton className="h-8 w-1/3 mb-4" /> {/* Title skeleton */}
+          <div className="flex items-center mb-4">
+            <Skeleton className="w-16 h-16 rounded-full mr-4" /> {/* Avatar skeleton */}
+            <div>
+              <Skeleton className="h-6 w-48 mb-2" /> {/* Name skeleton */}
+              <Skeleton className="h-4 w-32" /> {/* Percentage skeleton */}
+            </div>
+          </div>
+          <Skeleton className="h-6 w-2/3 mt-4 mb-4" /> {/* Performance updates title skeleton */}
+          <Skeleton className="h-24 w-full" /> {/* Timeline skeleton */}
+        </div>
+
+        {/* Skeleton for Skill Swap Partner */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <Skeleton className="h-8 w-1/3 mb-4" /> {/* Title skeleton */}
+          <div className="flex items-center mb-4">
+            <Skeleton className="w-16 h-16 rounded-full mr-4" /> {/* Avatar skeleton */}
+            <div>
+              <Skeleton className="h-6 w-48 mb-2" /> {/* Name skeleton */}
+              <Skeleton className="h-4 w-32" /> {/* Percentage skeleton */}
+            </div>
+          </div>
+          <Skeleton className="h-6 w-2/3 mt-4 mb-4" /> {/* Performance updates title skeleton */}
+          <Skeleton className="h-24 w-full" /> {/* Timeline skeleton */}
+        </div>
+      </div>
+    );
   }
 
   if (error) {

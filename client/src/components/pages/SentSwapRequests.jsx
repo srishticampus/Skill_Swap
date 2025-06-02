@@ -4,6 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Star } from 'lucide-react';
 import axiosInstance from '@/api/axios';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SentSwapRequests = () => {
   const [requests, setRequests] = useState([]);
@@ -38,7 +39,41 @@ const SentSwapRequests = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <section className="mt-10 lg:mt-20 mb-10 p-5">
+        <Skeleton className="h-10 w-80 mx-auto mb-10" /> {/* Title skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => ( // Show 3 skeleton cards
+            <Card key={i} className="bg-white shadow-md rounded-lg overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-evenly">
+                  <Skeleton className="w-32 h-32 rounded-full" /> {/* Avatar skeleton */}
+                  <div>
+                    <Skeleton className="h-6 w-40 mb-2" /> {/* Name skeleton */}
+                    <Skeleton className="h-4 w-32 mb-1" /> {/* Skills skeleton */}
+                    <Skeleton className="h-4 w-24 mb-1" /> {/* Location skeleton */}
+                    <Skeleton className="h-4 w-28 mb-1" /> {/* Experience skeleton */}
+                    <Skeleton className="h-4 w-20" /> {/* Rating skeleton */}
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Skeleton className="h-5 w-36 mb-2" /> {/* Service Required title skeleton */}
+                  <Skeleton className="h-6 w-24" /> {/* Badge skeleton */}
+                </div>
+                <div className="mt-4">
+                  <Skeleton className="h-5 w-40 mb-2" /> {/* Service Description title skeleton */}
+                  <Skeleton className="h-12 w-full" /> {/* Description text skeleton */}
+                </div>
+                <div className="mt-4">
+                  <Skeleton className="h-5 w-36 mb-2" /> {/* Service Title title skeleton */}
+                  <Skeleton className="h-6 w-full" /> {/* Service title text skeleton */}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+    );
   }
 
   if (error) {

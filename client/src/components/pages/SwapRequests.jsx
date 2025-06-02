@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Pencil, Trash2 } from 'lucide-react';
 import axiosInstance from '../../api/axios';
 import { toast } from 'sonner';
@@ -147,7 +148,39 @@ function SwapRequests() {
   });
 
   if (loading) {
-    return <div className="container mx-auto py-10 text-center">Loading swap requests...</div>;
+    return (
+      <div className="container mx-auto py-10">
+        <Skeleton className="h-8 w-1/3 mb-6 mx-auto" /> {/* For the "Posted Swaps" title */}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-primary text-white">
+                {columns.map((column, index) => (
+                  <TableHead key={index} className="text-white">
+                    <Skeleton className="h-5 w-full" />
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 5 }).map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {columns.map((column, colIndex) => (
+                    <TableCell key={colIndex}>
+                      <Skeleton className="h-5 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex items-center justify-between space-x-2 py-4">
+          <Skeleton className="h-8 w-1/4" />
+          <Skeleton className="h-8 w-1/4" />
+        </div>
+      </div>
+    );
   }
 
   return (

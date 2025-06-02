@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, MapPin, Briefcase, Star, Handshake, Users, User, ChartNoAxesCombined } from "lucide-react";
 import { Link } from 'react-router';
 import heroimg from '../landing/heroimg.jpeg';
@@ -254,7 +255,38 @@ export default function Home() {
     <section className="container px-4 mx-auto py-16">
         <h2 className="text-3xl font-semibold mb-6 text-foreground">Pick an Exchange</h2>
         {loadingPickExchanges ? (
-          <p>Loading exchanges...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="bg-card rounded-xl shadow-sm border p-4 flex flex-col space-y-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-16 h-16 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+                <div className="border-t pt-3 space-y-1.5">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-4 w-1/3" />
+                </div>
+                <div className="border-t pt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div className="space-y-1">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                </div>
+                <div className="pt-2 flex gap-2">
+                  <Skeleton className="h-9 flex-1" />
+                  <Skeleton className="h-9 flex-1" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : pickExchangeData.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {pickExchangeData.map(exchange => (
@@ -262,8 +294,7 @@ export default function Home() {
               ))}
           </div>
         ) : (
-          <></>
-          // <NoDataSection />
+          <NoDataSection />
         )}
         {pickExchangeData.length > 0 && (
           <div className="text-center mt-8">
@@ -279,7 +310,38 @@ export default function Home() {
      <section className="container px-4 mx-auto py-16 bg-muted/30 rounded-lg">
         <h2 className="text-3xl font-semibold mb-6 text-foreground">Exchanges related to your skills...</h2>
         {loadingRelatedExchanges ? (
-          <p>Loading related exchanges...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="bg-card rounded-xl shadow-sm border p-4 flex flex-col space-y-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-16 h-16 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+                <div className="border-t pt-3 space-y-1.5">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-4 w-1/3" />
+                </div>
+                <div className="border-t pt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div className="space-y-1">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                </div>
+                <div className="pt-2 flex gap-2">
+                  <Skeleton className="h-9 flex-1" />
+                  <Skeleton className="h-9 flex-1" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : relatedExchangeData.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedExchangeData.map(exchange => (
@@ -287,8 +349,7 @@ export default function Home() {
               ))}
           </div>
         ) : (
-          <></>
-          // <NoDataSection />
+          <NoDataSection />
         )}
         {relatedExchangeData.length > 0 && (
           <div className="text-center mt-8">

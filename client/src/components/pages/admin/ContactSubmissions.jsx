@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ContactSubmissions = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -44,7 +45,62 @@ const ContactSubmissions = () => {
   };
 
   if (loading) {
-    return <div>Loading submissions...</div>;
+    return (
+      <main className="flex-1 px-6 pb-6">
+        <div className="bg-white rounded-lg h-full p-6">
+          <Skeleton className="h-8 w-64 mb-4" /> {/* For "Category Management" title */}
+          <div className="container mx-auto py-10">
+            <Skeleton className="h-10 w-80 mb-6" /> {/* For "Contact Form Submissions" title */}
+            <Table>
+              <TableCaption>
+                <Skeleton className="h-4 w-full" />
+              </TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">
+                    <Skeleton className="h-6 w-24" />
+                  </TableHead>
+                  <TableHead>
+                    <Skeleton className="h-6 w-32" />
+                  </TableHead>
+                  <TableHead>
+                    <Skeleton className="h-6 w-48" />
+                  </TableHead>
+                  <TableHead className="text-right">
+                    <Skeleton className="h-6 w-20" />
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...Array(5)].map((_, i) => ( // Show 5 skeleton rows
+                  <TableRow key={i}>
+                    <TableCell className="font-medium">
+                      <Skeleton className="h-6 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-32" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-48" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="h-8 w-20" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">
+                    <Skeleton className="h-6 w-48 mx-auto" />
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   if (error) {

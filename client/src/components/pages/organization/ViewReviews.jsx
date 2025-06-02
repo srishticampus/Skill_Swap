@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { useEffect, useState, useContext } from 'react';
 import AuthContext from '@/context/AuthContext';
@@ -34,7 +35,29 @@ export default function ViewReviews() {
   }, [user]);
 
   if (loading) {
-    return <p className="text-center text-gray-500">Loading reviews...</p>;
+    return (
+      <div className="p-6 bg-[#F6F7F9] min-h-screen">
+        <Skeleton className="h-8 w-1/3 mb-6 mx-auto" /> {/* For "View Swap Review" title */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center gap-4 pb-2">
+                <Skeleton className="w-12 h-12 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-2 space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-5 w-1/3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (error) {
