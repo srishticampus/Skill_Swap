@@ -5,10 +5,16 @@ import { User, Mail, Globe, Smartphone, Building, CircleUser } from 'lucide-reac
 import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
 import axiosInstance from '@/api/axios';
-import { useParams } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
+import { ArrowLeft } from 'lucide-react';
 
 const SwapRequestDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate(-1); // Go back to the previous page
+  };
   const [swapRequestData, setSwapRequestData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,6 +54,9 @@ const SwapRequestDetails = () => {
 
   return (
     <div className="container mx-auto py-8 max-w-4xl">
+      <Button onClick={handleBack} className="mb-4 flex items-center">
+        <ArrowLeft className="mr-2 h-4 w-4" /> Back
+      </Button>
       {/* Top Section: User Basic Info */}
       <Card className="mb-8 rounded-lg shadow-md">
         <CardContent className="p-6 flex flex-col md:flex-row items-center md:items-start justify-between">
