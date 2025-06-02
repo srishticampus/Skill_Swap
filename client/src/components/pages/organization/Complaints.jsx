@@ -31,12 +31,11 @@ function Complaints() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get('/api/admin/complaints'); // Changed to admin endpoint
+        const response = await axios.get('/api/organizations/complaints');
         setComplaints(response.data);
         setLoading(false);
       } catch (err) {
@@ -50,7 +49,7 @@ function Complaints() {
 
   const handleStatusChange = async (complaintId, newStatus) => {
     try {
-      await axios.put(`/api/admin/complaints/${complaintId}/status`, { status: newStatus });
+      await axios.put(`/api/organizations/complaints/${complaintId}/status`, { status: newStatus });
       setComplaints(prevComplaints =>
         prevComplaints.map(complaint =>
           complaint._id === complaintId ? { ...complaint, status: newStatus } : complaint
@@ -97,7 +96,6 @@ function Complaints() {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        isAdmin ? (
           <Select
             value={row.original.status}
             onValueChange={(newStatus) => handleStatusChange(row.original._id, newStatus)}
@@ -112,9 +110,6 @@ function Complaints() {
               <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
-        ) : (
-          <span>{row.original.status}</span>
-        )
       ),
     },
   ];

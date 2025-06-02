@@ -24,6 +24,45 @@ const getOrganizationComplaints = async (req, res) => {
   }
 };
 
+// Endpoint to update the status of a complaint
+const updateComplaintStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    const validStatuses = ['pending', 'in_progress', 'resolved', 'rejected'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status provided.' });
+    }
+
+    const complaint = await Complaint.findById(id);
+
+    if (!complaint) {
+      return res.status(404).json({ message: 'Complaint not found.' });
+    }
+
+    // Optional: Add logic to ensure the organization has permission to update this specific complaint
+    // For example, check if the complaint's userId belongs to the organization's members
+    const organizationId = req.organization.id;
+    const organizationMembers = await User.find({ organization: organizationId }).select('_id');
+    const memberIds = organizationMembers.map(member => member._id.toString());
+
+    if (!memberIds.includes(complaint.userId.toString())) {
+      return res.status(403).json({ message: 'Unauthorized to update this complaint.' });
+    }
+
+    complaint.status = status;
+    await complaint.save();
+
+    res.status(200).json({ message: 'Complaint status updated successfully.', complaint });
+  } catch (error) {
+    console.error('Error updating complaint status:', error);
+    res.status(500).json({ message: 'Failed to update complaint status.', error: error.message });
+  }
+};
+
 router.get('/', organizationAuth, getOrganizationComplaints);
+router.put('/:id/status', organizationAuth, updateComplaintStatus);
 
 export default router;
