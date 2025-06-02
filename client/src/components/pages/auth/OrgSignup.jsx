@@ -97,6 +97,8 @@ export default function OrgSignup() {
 
     if (!data.name) {
       errors.name = 'Organization Name is required';
+    } else if (!/^[A-Za-z\s]+$/.test(data.name)) {
+      errors.name = 'Organization Name can only contain letters and spaces';
     }
     if (!data.email) {
       errors.email = 'Please include a valid email';
@@ -105,18 +107,18 @@ export default function OrgSignup() {
     }
     if (!data.phone) {
       errors.phone = 'Phone number is required';
-    } else if (/^0/.test(data.phone)) {
-      errors.phone = 'Phone number cannot start with zero';
+    } else if (!/^\d{10}$/.test(data.phone)) {
+      errors.phone = 'Phone number must be exactly 10 digits and contain only numbers';
     }
     if (!data.country) {
       errors.country = 'Country is required';
-    } else if (/\d/.test(data.country)) {
-      errors.country = 'Country name cannot contain digits';
+    } else if (!/^[A-Za-z\s]+$/.test(data.country)) {
+      errors.country = 'Country name can only contain letters and spaces';
     }
     if (!data.city) {
       errors.city = 'City is required';
-    } else if (/\d/.test(data.city)) {
-      errors.city = 'City name cannot contain digits';
+    } else if (!/^[A-Za-z\s]+$/.test(data.city)) {
+      errors.city = 'City name can only contain letters and spaces';
     }
     if (!data.password) {
       errors.password = 'Please enter a password with 6 or more characters';
