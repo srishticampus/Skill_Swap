@@ -10,7 +10,7 @@ import landing2 from '../landing/landing-2.png';
 import landing3 from '../landing/landing-3.png';
 import axios from '@/api/axios';
 import { toast } from "sonner";
-import { AuthContext } from '@/context/AuthContext';
+import AuthContext from '@/context/AuthContext';
 
 
 // Reusable Star Rating Component
