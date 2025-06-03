@@ -89,6 +89,7 @@ function App() {
           <Route path="/received-swap-requests" element={<ReceivedSwapRequests />} />
           <Route path="/edit-swap-request/:id" element={<EditSwapRequest />} />
           <Route path="/exchange-skills" element={<ExchangeSkills />} />
+          <Route path="/exchange-skills/related" element={<ExchangeSkills />} /> {/* New route for related exchanges */}
           <Route path="/exchange-skills/:id" element={<SwapRequestDetails />} /> {/* Add the route for details page */}
           <Route path="/approved-swap-requests" element={<ApprovedSwapRequests />} />
           <Route path="/swap-requests/:id" element={<SwapRequestDetailsPage />} />

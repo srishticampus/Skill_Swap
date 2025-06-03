@@ -25,11 +25,11 @@ export default function Landing(){
             Join a community where learning meets collaboration
           </p>
           <div className="flex gap-4">
-            <Button size="lg" className="rounded-full">
-              Join Community
+            <Button size="lg" className="rounded-full" asChild>
+              <Link to="/signup">Join Community</Link>
             </Button>
-            <Button variant="outline" size="lg" className="rounded-full">
-              Learn More
+            <Button variant="outline" size="lg" className="rounded-full" asChild>
+              <Link to="/about">Learn More</Link>
             </Button>
           </div>
         </div>
