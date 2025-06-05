@@ -14,6 +14,8 @@ import axiosInstance from '@/api/axios';
 import { toast } from 'sonner';
 import { MultiSelect } from '@/components/multi-select';
 
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
+
 export default function EditTechnicalInfo({ className, setIsTechModalOpen, onProfileUpdate }) {
   const [formData, setFormData] = useState({
     resume: null,
@@ -29,6 +31,7 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
 
   const [errors, setErrors] = useState({});
   const [categories, setCategories] = useState([]); // State for categories
+  const [loadingCategories, setLoadingCategories] = useState(true); // Loading state for categories
 
   useEffect(() => {
     const fetchUserDataAndCategories = async () => {
@@ -39,6 +42,7 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
         setFormData(userData);
 
         // Fetch categories
+        setLoadingCategories(true);
         const categoryResponse = await axiosInstance.get('/api/categories');
         setCategories(categoryResponse.data.map(category => ({
           value: category._id,
@@ -46,6 +50,8 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
         })));
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setLoadingCategories(false);
       }
     };
 
@@ -189,7 +195,7 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
                   modalPopover={true}
                 />
               ) : (
-                <div>Loading categories...</div>
+                <Skeleton className="h-10 w-full" />
               )}
               {errors.categories && <span className="text-red-500">{errors.categories}</span>}
             </div>

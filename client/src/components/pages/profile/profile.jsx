@@ -58,6 +58,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const ProfilePage = () => {
@@ -210,7 +211,69 @@ const ProfilePage = () => {
 
 
   if (!profileData) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container mx-auto p-4">
+        {/* Profile and Details Section Skeleton */}
+        <Card className="mb-8 bg-gray-100">
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row items-center gap-8 mb-4 px-8">
+              <Skeleton className="h-40 w-40 md:h-64 md:w-64 rounded-full" /> {/* Avatar skeleton */}
+              <div className="flex flex-col justify-start w-full">
+                <Skeleton className="h-8 w-1/2 mb-4" /> {/* Name skeleton */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i}>
+                      <Skeleton className="h-4 w-1/4 mb-2" /> {/* Label skeleton */}
+                      <Skeleton className="h-6 w-3/4" /> {/* Value skeleton */}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Technical Info Section Skeleton */}
+        <Card className="bg-gray-100">
+          <CardHeader>
+            <Skeleton className="h-8 w-1/3" /> {/* Technical Info title skeleton */}
+          </CardHeader>
+          <CardContent className="space-y-4 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div key={i} className="col-span-1">
+                  <Skeleton className="h-4 w-1/3 mb-2" /> {/* Label skeleton */}
+                  <Skeleton className="h-6 w-full" /> {/* Value skeleton */}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Reviews Section Skeleton */}
+        <Card className="mt-8 bg-gray-100">
+          <CardHeader>
+            <Skeleton className="h-8 w-1/4" /> {/* Reviews title skeleton */}
+          </CardHeader>
+          <CardContent className="space-y-4 p-4">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="border-b pb-4 last:border-b-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <Skeleton className="h-8 w-8 rounded-full" /> {/* Avatar skeleton */}
+                  <Skeleton className="h-6 w-1/4" /> {/* Rater name skeleton */}
+                  <div className="flex items-center">
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <Skeleton key={j} className="h-4 w-4 rounded-full mr-1" />
+                    ))}
+                  </div>
+                </div>
+                <Skeleton className="h-10 w-full" /> {/* Review text skeleton */}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

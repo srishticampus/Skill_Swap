@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import axiosInstance from '@/api/axios';
 import { toast } from 'sonner';
 import { MultiSelect } from '@/components/multi-select'; // Import MultiSelect
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 export default function EditProfile({ setIsEditModalOpen, onProfileUpdate }) {
   const [formData, setFormData] = useState({
@@ -23,6 +24,7 @@ export default function EditProfile({ setIsEditModalOpen, onProfileUpdate }) {
   const [errors, setErrors] = useState({});
   const [profilePicPreview, setProfilePicPreview] = useState(profilepic);
   const [categories, setCategories] = useState([]); // State for categories
+  const [loadingCategories, setLoadingCategories] = useState(true); // Loading state for categories
 
   useEffect(() => {
     const fetchUserDataAndCategories = async () => {
@@ -34,6 +36,7 @@ export default function EditProfile({ setIsEditModalOpen, onProfileUpdate }) {
         setProfilePicPreview(userData.profilePicture || profilepic);
 
         // Fetch categories
+        setLoadingCategories(true);
         const categoryResponse = await axiosInstance.get('/api/categories');
         setCategories(categoryResponse.data.map(category => ({
           value: category._id,
@@ -45,6 +48,8 @@ export default function EditProfile({ setIsEditModalOpen, onProfileUpdate }) {
         })));
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setLoadingCategories(false);
       }
     };
 
@@ -216,7 +221,7 @@ export default function EditProfile({ setIsEditModalOpen, onProfileUpdate }) {
               modalPopover={true} // Set modalPopover to true
             />
           ) : (
-            <div>Loading categories...</div>
+            <Skeleton className="h-10 w-full" />
           )}
           {errors.categories && <span className="text-red-500">{errors.categories}</span>}
         </div>

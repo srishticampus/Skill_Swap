@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import axios from '@/api/axios'; // Assuming axios is configured for API calls
+import { Skeleton } from '@/components/ui/skeleton';
 
 const OrganizationProfile = () => {
   const [organizationData, setOrganizationData] = useState(null);
@@ -60,8 +61,26 @@ const OrganizationProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex items-center justify-center">
-        Loading organization profile...
+      <div className="min-h-screen p-4 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <main className="container mx-auto py-8">
+          <Skeleton className="h-8 w-1/3 mx-auto mb-8" /> {/* Title skeleton */}
+          <Card className="max-w-3xl mx-auto bg-gray-200 dark:bg-gray-700 rounded-lg shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Skeleton className="h-6 w-1/4" /> {/* Card title skeleton */}
+              <Skeleton className="h-8 w-24" /> {/* Edit button skeleton */}
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i}>
+                    <Skeleton className="h-4 w-1/3 mb-2" /> {/* Label skeleton */}
+                    <Skeleton className="h-8 w-full" /> {/* Input/Value skeleton */}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </main>
       </div>
     );
   }

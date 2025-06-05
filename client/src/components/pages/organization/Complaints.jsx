@@ -25,6 +25,7 @@ import {
 } from "@tanstack/react-table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from '@/context/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 function Complaints() {
   const [complaints, setComplaints] = useState([]);
@@ -127,7 +128,39 @@ function Complaints() {
   });
 
   if (loading) {
-    return <div>Loading complaints...</div>;
+    return (
+      <div className="p-6">
+        <Skeleton className="h-8 w-1/3 mb-6" /> {/* Skeleton for title */}
+        <div className="bg-white rounded-lg shadow p-4">
+          <Table>
+            <TableHeader className="bg-primary text-white">
+              <TableRow className="border-b border-primary">
+                {Array.from({ length: 5 }).map((_, i) => ( // 5 columns
+                  <TableHead key={i} className="text-white">
+                    <Skeleton className="h-4 w-full" />
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 5 }).map((_, i) => ( // 5 rows
+                <TableRow key={i}>
+                  {Array.from({ length: 5 }).map((_, j) => ( // 5 columns
+                    <TableCell key={j}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {

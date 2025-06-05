@@ -19,28 +19,34 @@ import { Button } from "@/components/ui/button";
 import UpdateSwapRequestDialog from "@/components/UpdateSwapRequestDialog";
 import axiosInstance from "@/api/axios";
 import { useNavigate } from 'react-router';
+import { Skeleton } from '@/components/ui/skeleton';
+
 const ApprovedSwapRequests = () => {
   const [swapRequests, setSwapRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { user } = useContext(AuthContext); // Get current user from AuthContext
 
   useEffect(() => {
     const fetchApprovedSwapRequests = async () => {
       if (!user) {
-        // If user is not logged in, do not fetch swap requests
         setSwapRequests([]);
+        setLoading(false);
         return;
       }
       try {
+        setLoading(true);
         const response = await axiosInstance.get('/api/swap-requests/approved');
         setSwapRequests(response.data);
       } catch (error) {
         console.error('Error fetching approved swap requests:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchApprovedSwapRequests();
-  }, [user]); // Depend on user to re-fetch when user logs in/out
+  }, [user]);
 
   const handleTrackClick = (swapRequestId) => {
     // Implement navigation to the swap request details page
@@ -163,6 +169,46 @@ const ApprovedSwapRequests = () => {
       pagination,
     },
   });
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-10">
+        <Skeleton className="h-8 w-1/3 mb-6 mx-auto" /> {/* Title skeleton */}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-primary text-white">
+                {Array.from({ length: 10 }).map((_, i) => ( // Assuming 10 columns
+                  <TableHead key={i} className="text-white">
+                    <Skeleton className="h-4 w-full" />
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 4 }).map((_, i) => ( // Show 4 skeleton rows
+                <TableRow key={i}>
+                  {Array.from({ length: 10 }).map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex items-center justify-between space-x-2 py-4">
+          <Skeleton className="h-8 w-1/4" />
+          <Skeleton className="h-8 w-1/4" />
+          <div className="space-x-2">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-24" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

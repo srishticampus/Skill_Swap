@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Pencil, User, Mail, Phone, MapPin, Globe, FileText, GraduationCap, Code, Briefcase, Award } from 'lucide-react';
 import axios from '@/api/axios'; // Import axios
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 const MemberDetails = () => {
   const { id } = useParams(); // Get member ID from URL
@@ -32,7 +33,46 @@ const MemberDetails = () => {
   }, [id]); // Refetch when ID changes
 
   if (loading) {
-    return <div className="container mx-auto p-6 text-white min-h-screen">Loading...</div>;
+    return (
+      <div className="container mx-auto p-6 min-h-screen">
+        {/* Title Skeleton */}
+        <Skeleton className="h-8 w-1/3 mx-auto mb-8" />
+
+        {/* Personal Info Card Skeleton */}
+        <Card className="bg-white border-gray-200 rounded-lg overflow-hidden mb-8">
+          <CardContent className="p-6">
+            <Skeleton className="h-6 w-1/4 mb-4" /> {/* Title skeleton */}
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <Skeleton className="w-32 h-32 rounded-full" /> {/* Avatar skeleton */}
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                <Skeleton className="col-span-full h-8 w-1/2 mb-2" /> {/* Name skeleton */}
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 rounded-full" /> {/* Icon skeleton */}
+                    <Skeleton className="h-5 w-3/4" /> {/* Text skeleton */}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Technical Info Card Skeleton */}
+        <Card className="bg-white border-gray-200 rounded-lg overflow-hidden">
+          <CardContent className="p-6">
+            <Skeleton className="h-6 w-1/4 mb-4" /> {/* Title skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="mb-4">
+                  <Skeleton className="h-4 w-1/3 mb-1" /> {/* Label skeleton */}
+                  <Skeleton className="h-6 w-full" /> {/* Value skeleton */}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (error) {
