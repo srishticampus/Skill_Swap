@@ -28,7 +28,8 @@ import {
   List,
   MessageSquare,
   Edit,
-  Trash2
+  Trash2,
+  Star
 } from "lucide-react"
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -63,6 +64,7 @@ const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTechModalOpen, setIsTechModalOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [reviews, setReviews] = useState([]); // New state for reviews
   const [isMentorRequestModalOpen, setIsMentorRequestModalOpen] = useState(false); // Re-added mentor request modal state
   const [mentorRequestText, setMentorRequestText] = useState("");
   const [isAddCertificationModalOpen, setIsAddCertificationModalOpen] = useState(false);
@@ -86,9 +88,24 @@ const ProfilePage = () => {
     }
   }, []);
 
+  const fetchReviews = useCallback(async (userId) => {
+    try {
+      const response = await axiosInstance.get(`/api/user-reviews/${userId}`);
+      setReviews(response.data);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchProfileData();
   }, [fetchProfileData]);
+
+  useEffect(() => {
+    if (profileData?._id) {
+      fetchReviews(profileData._id);
+    }
+  }, [profileData, fetchReviews]);
 
   // Fetch all categories
   useEffect(() => {
@@ -529,6 +546,45 @@ const ProfilePage = () => {
             </div>
             <p>{profileData.serviceDescription}</p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Reviews Section */}
+      <Card className="mt-8 bg-gray-100">
+        <CardHeader>
+          <CardTitle className="text-primary text-xl">Reviews</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 p-4">
+          {reviews.length > 0 ? (
+            reviews.map((review) => (
+              <div key={review._id} className="border-b pb-4 last:border-b-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={review.rater.profilePictureUrl ? `${import.meta.env.VITE_API_URL}/${review.rater.profilePictureUrl}` : undefined} alt={review.rater.name} />
+                    <AvatarFallback>
+                      {review.rater.profilePictureUrl ? (
+                        review.rater?.name?.charAt(0) || 'N'
+                      ) : (
+                        <User className="h-1/2 w-1/2" />
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="font-semibold">{review.rater.name}</p>
+                  <div className="flex items-center">
+                    {[...Array(review.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                    ))}
+                    {[...Array(5 - review.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-gray-300" />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">{review.reviewText}</p>
+              </div>
+            ))
+          ) : (
+            <p>No reviews yet.</p>
+          )}
         </CardContent>
       </Card>
     </div>

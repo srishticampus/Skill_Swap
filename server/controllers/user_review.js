@@ -25,7 +25,7 @@ export const createReview = async (req, res) => {
 export const getReviewsForUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const reviews = await UserRating.find({ ratedUser: userId }).populate('rater', 'username'); // Populate rater details
+    const reviews = await UserRating.find({ ratedUser: userId }).populate('rater', 'username name profilePictureUrl'); // Populate rater details
 
     res.status(200).json(reviews);
   } catch (error) {

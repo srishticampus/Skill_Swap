@@ -187,7 +187,7 @@ router.post(
               { expiresIn: 604800 }, // Set expiration to 7 days (in seconds)
               (err, token) => {
                 if (err) throw err;
-                res.json({ token, user: { id: user.id, isAdmin: true, type: 'User' } });
+                res.json({ token, user: { id: user.id, name: user.name, profilePicture: user.profilePicture, isAdmin: true, type: 'User' } });
               }
             );
             return;
@@ -242,7 +242,7 @@ router.post(
             }
           }
 
-          res.json({ token, user: { id: user.id, isAdmin: user.isAdmin || false, type: 'User' } });
+          res.json({ token, user: { id: user.id, name: user.name, profilePicture: user.profilePicture, isAdmin: user.isAdmin || false, type: 'User' } });
         }
       );
     } catch (err) {

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import AuthContext from "@/context/AuthContext";
 import {
   createColumnHelper,
   flexRender,
@@ -21,9 +22,15 @@ import { useNavigate } from 'react-router';
 const ApprovedSwapRequests = () => {
   const [swapRequests, setSwapRequests] = useState([]);
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext); // Get current user from AuthContext
 
   useEffect(() => {
     const fetchApprovedSwapRequests = async () => {
+      if (!user) {
+        // If user is not logged in, do not fetch swap requests
+        setSwapRequests([]);
+        return;
+      }
       try {
         const response = await axiosInstance.get('/api/swap-requests/approved');
         setSwapRequests(response.data);
@@ -33,7 +40,27 @@ const ApprovedSwapRequests = () => {
     };
 
     fetchApprovedSwapRequests();
-  }, []);
+  }, [user]); // Depend on user to re-fetch when user logs in/out
+
+  const handleTrackClick = (swapRequestId) => {
+    // Implement navigation to the swap request details page
+    navigate(`/swap-requests/${swapRequestId}`);
+  };
+
+  const [selectedSwapRequestId, setSelectedSwapRequestId] = useState(null);
+
+  const handleUpdateClick = (swapRequestId) => {
+    setSelectedSwapRequestId(swapRequestId);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedSwapRequestId(null);
+  };
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 4,
+  });
 
   const columnHelper = createColumnHelper();
 
@@ -41,12 +68,31 @@ const ApprovedSwapRequests = () => {
     columnHelper.accessor('_id', {
       header: 'SI No',
     }),
-    columnHelper.accessor('createdBy.profilePicture', {
-      header: 'Profile Pic',
-      cell: info => <img src={`${import.meta.env.VITE_API_URL}/${info.getValue()}`} alt="Profile" className="w-10 h-10 rounded-full" />,
+    columnHelper.accessor('yourProfilePic', {
+      header: 'Your Profile Pic',
+      cell: () => user?.profilePicture ? <img src={`${import.meta.env.VITE_API_URL}/${user.profilePicture}`} alt="Your Profile" className="w-10 h-10 rounded-full" /> : 'N/A',
     }),
-    columnHelper.accessor('createdBy.name', {
-      header: 'Name',
+    columnHelper.accessor('yourName', {
+      header: 'Your Name',
+      cell: () => user?.name || 'N/A',
+    }),
+    columnHelper.accessor('partnerProfilePic', {
+      header: 'Partner Profile Pic',
+      cell: ({ row }) => {
+        const partner = String(row.original.createdBy._id) === String(user._id) ? row.original.interactionUser : row.original.createdBy;
+        return partner?.profilePicture ? (
+          <img src={`${import.meta.env.VITE_API_URL}/${partner.profilePicture}`} alt="Partner Profile" className="w-10 h-10 rounded-full" />
+        ) : (
+          'N/A'
+        );
+      },
+    }),
+    columnHelper.accessor('partnerName', {
+      header: 'Partner Name',
+      cell: ({ row }) => {
+        const partner = String(row.original.createdBy._id) === String(user._id) ? row.original.interactionUser : row.original.createdBy;
+        return partner?.name || 'N/A';
+      },
     }),
     columnHelper.accessor('serviceCategory', {
       header: 'Category',
@@ -77,26 +123,6 @@ const ApprovedSwapRequests = () => {
 
   ];
 
-  const handleTrackClick = (swapRequestId) => {
-    // Implement navigation to the swap request details page
-    navigate(`/swap-requests/${swapRequestId}`);
-  };
-
-  const [selectedSwapRequestId, setSelectedSwapRequestId] = useState(null);
-
-  const handleUpdateClick = (swapRequestId) => {
-    setSelectedSwapRequestId(swapRequestId);
-  };
-
-  const handleCloseDialog = () => {
-    setSelectedSwapRequestId(null);
-  };
-
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 4,
-  });
-
   const table = useReactTable({
     data: swapRequests,
     columns,
@@ -107,6 +133,15 @@ const ApprovedSwapRequests = () => {
       pagination,
     },
   });
+
+  if (!user) {
+    return (
+      <div className="container mx-auto py-10 text-center">
+        <h1 className="text-2xl font-bold mb-6 text-center text-primary">Approved Swap Requests</h1>
+        <p className="text-muted-foreground">Please log in to view approved swap requests.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-10">

@@ -89,7 +89,7 @@ const SentSwapRequests = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-evenly">
              <Avatar className="w-1/2 aspect-square h-auto rounded-3xl flex items-center justify-center">
-                <AvatarImage className="rounded-3xl" src={`${import.meta.env.VITE_API_URL}/${request.createdBy.profilePicture}`} alt={request.createdBy?.name || 'N/A'} />
+                <AvatarImage className="rounded-3xl" src={`${import.meta.env.VITE_API_URL}/${request.createdBy?.profilePicture}`} alt={request.createdBy?.name || 'N/A'} />
                 <AvatarFallback className="w-32 h-32 rounded-full">{request.createdBy?.name ? request.createdBy.name[0] : 'U'}</AvatarFallback>
               </Avatar>
               <div>
