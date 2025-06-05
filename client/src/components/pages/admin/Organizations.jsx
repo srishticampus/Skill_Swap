@@ -13,49 +13,28 @@ import {
 } from "@/components/ui/table"; // Assuming a table component exists based on other ui components
 import { Button } from "@/components/ui/button"; // Assuming a button component exists
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"; // Assuming dropdown exists
-import { Eye } from "lucide-react"; // Using Eye icon for View More
+import { Eye, Trash2 } from "lucide-react"; // Using Eye icon for View More, Trash2 for Delete
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
-const organizationData = [
-  {
-    slNo: 1,
-    name: "Skill Gain Org Pvt Ltd.",
-    registerNumber: "reg122356",
-    email: "skillgainorg@gmail.com",
-    approvedDate: "12 April 2001",
-    link: "View Organization Swaps",
-  },
-  {
-    slNo: 2,
-    name: "Skill Gain Org Pvt Ltd.",
-    registerNumber: "reg122356",
-    email: "skillgainorg@gmail.com",
-    approvedDate: "12 April 2001",
-    link: "View Organization Swaps",
-  },
-  {
-    slNo: 3,
-    name: "Skill Gain Org Pvt Ltd.",
-    registerNumber: "reg122356",
-    email: "skillgainorg@gmail.com",
-    approvedDate: "12 April 2001",
-    link: "View Organization Swaps",
-  },
-  {
-    slNo: 4,
-    name: "Skill Gain Org Pvt Ltd.",
-    registerNumber: "reg122356",
-    email: "skillgainorg@gmail.com",
-    approvedDate: "12 April 2001",
-    link: "View Organization Swaps",
-  },
-];
 
 function Organizations() {
   const navigate = useNavigate();
-  const [organizations, setOrganizations] = useState([]); // State to hold fetched organizations
-  const [loading, setLoading] = useState(true); // State for loading status
-  const [error, setError] = useState(null); // State for error handling
+  const [organizations, setOrganizations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [deletingOrgId, setDeletingOrgId] = useState(null); // State to track organization being deleted
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -170,14 +149,43 @@ function Organizations() {
                   {/* <TableCell className="text-blue-600 hover:underline cursor-pointer">{org.link || 'N/A'}</TableCell> */}
                    <TableCell>N/A</TableCell> {/* Placeholder as there's no 'link' in API */}
                   <TableCell className="text-center">
-                      <Button
-                          variant="ghost"
-                          size="sm"
-                          // Use organization._id for the navigation link
-                          onClick={() => navigate(`/admin/organizations/details/${org._id}`)}
-                      >
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
                           <Eye className="h-5 w-5 text-primary" />
-                      </Button>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => navigate(`/admin/organizations/details/${org._id}`)}>
+                          View Details
+                        </DropdownMenuItem>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}> {/* Prevent dropdown close */}
+                              <Button variant="ghost" className="w-full justify-start text-red-500" disabled={deletingOrgId === org._id}>
+                                {deletingOrgId === org._id ? "Deleting..." : "Delete"}
+                                {deletingOrgId === org._id ? null : <Trash2 className="ml-2 h-4 w-4" />}
+                              </Button>
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the organization
+                                and all its associated members and data.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteOrganization(org._id)} disabled={deletingOrgId === org._id}>
+                                {deletingOrgId === org._id ? "Deleting..." : "Continue"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))

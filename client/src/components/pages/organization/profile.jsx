@@ -4,13 +4,28 @@ import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import axios from '@/api/axios'; // Assuming axios is configured for API calls
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useNavigate } from 'react-router';
+import { toast } from "sonner";
 
 const OrganizationProfile = () => {
+  const navigate = useNavigate();
   const [organizationData, setOrganizationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchOrganizationProfile = async () => {
@@ -87,11 +102,43 @@ const OrganizationProfile = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex items-center justify-center text-red-500">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-gray-100 flex items-center justify-center text-red-500">
         Error loading organization profile: {error.message}
       </div>
     );
   }
+
+  const handleDeleteOrganization = async () => {
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast("Error", {
+          variant: "destructive",
+          description: "No token provided. Please log in.",
+        });
+        return;
+      }
+
+      await axios.delete('/api/organizations/profile', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast("Success", {
+        description: "Organization deleted successfully!",
+      });
+      navigate('/'); // Redirect to home or a suitable page after deletion
+    } catch (error) {
+      console.error('Error deleting organization:', error);
+      toast("Error", {
+        variant: "destructive",
+        description: String(error.response?.data?.message || "Failed to delete organization."),
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (!organizationData) {
     return (
@@ -118,7 +165,31 @@ const OrganizationProfile = () => {
                 <Button variant="outline" onClick={handleCancelClick}>Cancel</Button>
               </div>
             ) : (
-              <Pencil className="h-5 w-5 text-gray-600 dark:text-gray-300 cursor-pointer" onClick={handleEditClick} />
+              <div className="flex items-center gap-2">
+                <Pencil className="h-5 w-5 text-gray-600 dark:text-gray-300 cursor-pointer" onClick={handleEditClick} />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" disabled={deleting}>
+                      {deleting ? "Deleting..." : "Delete Organization"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your organization
+                        account and remove your data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteOrganization} disabled={deleting}>
+                        {deleting ? "Deleting..." : "Continue"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             )}
           </CardHeader>
           <CardContent>

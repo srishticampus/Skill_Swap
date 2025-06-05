@@ -293,9 +293,7 @@ export default function Home() {
                   <ExchangeCard key={exchange._id} exchange={exchange} actionType="request" handlePlaceRequest={handlePlaceRequest} placingRequest={placingRequest} />
               ))}
           </div>
-        ) : (
-          <NoDataSection />
-        )}
+        ) : null}
         {pickExchangeData.length > 0 && (
           <div className="text-center mt-8">
               <Button variant="link" className="text-primary" asChild>
@@ -348,9 +346,7 @@ export default function Home() {
                   <ExchangeCard key={exchange._id} exchange={exchange} actionType="swap" handlePlaceRequest={handlePlaceRequest} placingRequest={placingRequest} />
               ))}
           </div>
-        ) : (
-          <NoDataSection />
-        )}
+        ) : null}
         {relatedExchangeData.length > 0 && (
           <div className="text-center mt-8">
               <Button variant="link" className="text-primary" asChild>
@@ -359,6 +355,9 @@ export default function Home() {
           </div>
         )}
     </section>
+    {(pickExchangeData.length === 0 && !loadingPickExchanges && relatedExchangeData.length === 0 && !loadingRelatedExchanges) && (
+      <NoDataSection />
+    )}
     </>
   )
 }

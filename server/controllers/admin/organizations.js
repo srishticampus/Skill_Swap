@@ -7,6 +7,32 @@ import user from "../../models/user.js";
 
 export const router = express.Router();
 
+// @route   DELETE api/admin/organizations/:id
+// @desc    Delete an organization and its associated members
+// @access  Private (Admin only)
+router.delete("/:id", auth, adminCheck, async (req, res) => {
+  try {
+    const organizationId = req.params.id;
+
+    // Delete all users associated with this organization
+    await user.deleteMany({ organization: organizationId });
+
+    const organization = await Organization.findByIdAndDelete(organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ msg: "Organization not found" });
+    }
+
+    res.json({ msg: "Organization and its members deleted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Organization not found' });
+    }
+    res.status(500).send("Server Error");
+  }
+});
+
 // @route   GET api/admin/organizations
 // @desc    Get all organizations
 // @access  Private (Admin only)
