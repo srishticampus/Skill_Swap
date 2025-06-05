@@ -186,10 +186,24 @@ const ReceivedSwapRequests = () => {
                   <h3 className="text-md font-semibold text-primary">Deadline</h3>
                   <p className="text-sm text-gray-700">Before 21 April 2025</p>
                 </div>
-                <div className="flex justify-between mt-4">
-                  <button className="bg-purple-200 text-purple-700 rounded-full px-4 py-2 hover:bg-purple-300" onClick={() => handleApprove(request._id)}>Approve</button>
-                  <button className="bg-purple-200 text-purple-700 rounded-full px-4 py-2 hover:bg-purple-300" onClick={() => handleReject(request._id)}>Reject</button>
-                </div>
+                {request.status === 'pending' ? (
+                  <div className="flex justify-between mt-4">
+                    <button className="bg-purple-200 text-purple-700 rounded-full px-4 py-2 hover:bg-purple-300" onClick={() => handleApprove(request._id)}>Approve</button>
+                    <button className="bg-purple-200 text-purple-700 rounded-full px-4 py-2 hover:bg-purple-300" onClick={() => handleReject(request._id)}>Reject</button>
+                  </div>
+                ) : (
+                  <div className="mt-4 text-center">
+                    <h3 className="text-md font-semibold text-primary mb-2">Status</h3>
+                    <Badge className={`text-white px-3 py-1 rounded-full text-sm ${
+                      request.status === 'accepted' ? 'bg-green-500' :
+                      request.status === 'rejected' ? 'bg-red-500' :
+                      request.status === 'completed' ? 'bg-blue-500' :
+                      'bg-gray-500'
+                    }`}>
+                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                    </Badge>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))

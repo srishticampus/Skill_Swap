@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import AuthContext from "@/context/AuthContext";
 import {
   createColumnHelper,
@@ -64,64 +64,94 @@ const ApprovedSwapRequests = () => {
 
   const columnHelper = createColumnHelper();
 
-  const columns = [
-    columnHelper.accessor('_id', {
-      header: 'SI No',
-    }),
-    columnHelper.accessor('yourProfilePic', {
-      header: 'Your Profile Pic',
-      cell: () => user?.profilePicture ? <img src={`${import.meta.env.VITE_API_URL}/${user.profilePicture}`} alt="Your Profile" className="w-10 h-10 rounded-full" /> : 'N/A',
-    }),
-    columnHelper.accessor('yourName', {
-      header: 'Your Name',
-      cell: () => user?.name || 'N/A',
-    }),
-    columnHelper.accessor('partnerProfilePic', {
-      header: 'Partner Profile Pic',
-      cell: ({ row }) => {
-        const partner = String(row.original.createdBy._id) === String(user._id) ? row.original.interactionUser : row.original.createdBy;
-        return partner?.profilePicture ? (
-          <img src={`${import.meta.env.VITE_API_URL}/${partner.profilePicture}`} alt="Partner Profile" className="w-10 h-10 rounded-full" />
-        ) : (
-          'N/A'
-        );
-      },
-    }),
-    columnHelper.accessor('partnerName', {
-      header: 'Partner Name',
-      cell: ({ row }) => {
-        const partner = String(row.original.createdBy._id) === String(user._id) ? row.original.interactionUser : row.original.createdBy;
-        return partner?.name || 'N/A';
-      },
-    }),
-    columnHelper.accessor('serviceCategory', {
-      header: 'Category',
-      cell: info => info.getValue().map(cat => cat.name).join(', '),
-    }),
-    columnHelper.accessor('createdBy.skills', {
-      header: 'Skills',
-      cell: info => info.getValue() ? info.getValue().join(', ') : '',
-    }),
-    columnHelper.accessor('deadline', {
-      header: 'Deadline',
-    }),
-    columnHelper.accessor('requestStatus', {
-      header: 'Status',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <span>{row.original.requestStatus}</span>
-          <Button onClick={() => handleUpdateClick(row.original._id)}>Update</Button>
-        </div>
-      ),
-    }),
-    columnHelper.accessor('_id', {
-      header: 'Track Request',
-      cell: ({ row }) => (
-        <Button onClick={() => handleTrackClick(row.original._id)}>Track</Button>
-      ),
-    }),
+  const getUsersForSwapRequest = (currentUser, swapRequest) => {
+    let yourUser = null;
+    let partnerUser = null;
 
-  ];
+    console.log('Current User ID (inside getUsersForSwapRequest):', currentUser?.id);
+    console.log('Created By ID (inside getUsersForSwapRequest):', swapRequest.createdBy?._id);
+    console.log('Interaction User ID (inside getUsersForSwapRequest):', swapRequest.interactionUser?._id);
+
+    if (currentUser?.id === swapRequest.createdBy?._id) {
+      yourUser = swapRequest.createdBy;
+      partnerUser = swapRequest.interactionUser;
+      console.log('Match: Current user is createdBy');
+    } else if (currentUser?.id === swapRequest.interactionUser?._id) {
+      yourUser = swapRequest.interactionUser;
+      partnerUser = swapRequest.createdBy;
+      console.log('Match: Current user is interactionUser');
+    } else {
+      console.log('No match found for current user in swap request');
+    }
+    return { yourUser, partnerUser };
+  };
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('_id', {
+        header: 'SI No',
+      }),
+      columnHelper.accessor('yourProfilePic', {
+        header: 'Your Profile Pic',
+        cell: ({ row }) => {
+          const { yourUser } = getUsersForSwapRequest(user, row.original);
+          return yourUser?.profilePicture ? <img src={`${import.meta.env.VITE_API_URL}/${yourUser.profilePicture}`} alt="Your Profile" className="w-10 h-10 rounded-full" /> : 'N/A';
+        },
+      }),
+      columnHelper.accessor('yourName', {
+        header: 'Your Name',
+        cell: ({ row }) => {
+          const { yourUser } = getUsersForSwapRequest(user, row.original);
+          return yourUser?.name || 'N/A';
+        },
+      }),
+      columnHelper.accessor('partnerProfilePic', {
+        header: 'Partner Profile Pic',
+        cell: ({ row }) => {
+          const { partnerUser } = getUsersForSwapRequest(user, row.original);
+          return partnerUser?.profilePicture ? (
+            <img src={`${import.meta.env.VITE_API_URL}/${partnerUser.profilePicture}`} alt="Partner Profile" className="w-10 h-10 rounded-full" />
+          ) : (
+            'N/A'
+          );
+        },
+      }),
+      columnHelper.accessor('partnerName', {
+        header: 'Partner Name',
+        cell: ({ row }) => {
+          const { partnerUser } = getUsersForSwapRequest(user, row.original);
+          return partnerUser?.name || 'N/A';
+        },
+      }),
+      columnHelper.accessor('serviceCategory', {
+        header: 'Category',
+        cell: info => info.getValue().map(cat => cat.name).join(', '),
+      }),
+      columnHelper.accessor('createdBy.skills', {
+        header: 'Skills',
+        cell: info => info.getValue() ? info.getValue().join(', ') : '',
+      }),
+      columnHelper.accessor('deadline', {
+        header: 'Deadline',
+      }),
+      columnHelper.accessor('requestStatus', {
+        header: 'Status',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <span>{row.original.requestStatus}</span>
+            <Button onClick={() => handleUpdateClick(row.original._id)}>Update</Button>
+          </div>
+        ),
+      }),
+      columnHelper.accessor('_id', {
+        header: 'Track Request',
+        cell: ({ row }) => (
+          <Button onClick={() => handleTrackClick(row.original._id)}>Track</Button>
+        ),
+      }),
+    ],
+    [user]
+  );
 
   const table = useReactTable({
     data: swapRequests,

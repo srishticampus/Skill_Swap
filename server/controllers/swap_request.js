@@ -475,8 +475,7 @@ export const getReceivedSwapRequests = async (req, res) => {
 
      // Find swap request interactions for the swap requests created by the current user
      const swapRequestInteractions = await SwapRequestInteraction.find({
-       swapRequest: { $in: swapRequestIds },
-       status: "pending" // Only get pending interactions
+       swapRequest: { $in: swapRequestIds }
      })
        .populate({
          path: 'swapRequest',
