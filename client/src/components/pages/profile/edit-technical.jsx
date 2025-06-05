@@ -103,15 +103,23 @@ export default function EditTechnicalInfo({ className, setIsTechModalOpen, onPro
     const errors = {};
     const textRegex = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s,.'-]*$/; // Requires at least one letter, allows alphanumeric, spaces, commas, periods, hyphens
 
-    if (!data.qualifications.trim()) {
+    const qualificationsString = Array.isArray(data.qualifications)
+      ? data.qualifications.join(', ')
+      : String(data.qualifications || '');
+
+    if (!qualificationsString.trim()) {
       errors.qualifications = 'Qualifications are required.';
-    } else if (!textRegex.test(data.qualifications)) {
+    } else if (!textRegex.test(qualificationsString)) {
       errors.qualifications = 'Qualifications should contain descriptive text, not just numbers or special characters.';
     }
 
-    if (!data.skills.trim()) {
+    const skillsString = Array.isArray(data.skills)
+      ? data.skills.join(', ')
+      : String(data.skills || '');
+
+    if (!skillsString.trim()) {
       errors.skills = 'Skills are required.';
-    } else if (!textRegex.test(data.skills)) {
+    } else if (!textRegex.test(skillsString)) {
       errors.skills = 'Skills should contain descriptive text, not just numbers or special characters.';
     }
 
