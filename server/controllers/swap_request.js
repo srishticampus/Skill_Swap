@@ -2,10 +2,96 @@ import SwapRequest from '../models/swap_request.js';
 import SwapRequestInteraction from '../models/swap_request_interaction.js'; // Import the SwapRequestInteraction model
 import Category from '../models/category.js'; // Import Category model
 import UserRating from '../models/user_rating.js'; // Import UserRating model
+import User from '../models/user.js'; // Import User model
+import Notification from '../models/notification.js'; // Import Notification model
 import jwt from 'jsonwebtoken';
 import { validationResult, body } from 'express-validator';
 import { match } from 'assert';
 import mongoose from 'mongoose';
+
+// Helper function to calculate skill match score
+const calculateSkillMatch = (userSkills, targetSkills) => {
+  if (!userSkills || !targetSkills) return 0;
+  const userSkillSet = new Set(userSkills.map(s => s.toLowerCase()));
+  let score = 0;
+  targetSkills.forEach(skill => {
+    if (userSkillSet.has(skill.toLowerCase())) {
+      score += 1;
+    }
+  });
+  return score;
+};
+
+// Get recommended swap requests
+export const getRecommendedSwapRequests = async (req, res) => {
+  try {
+    const userId = req.user.id; // Authenticated user's ID
+
+    // Fetch the current user's profile
+    const currentUser = await User.findById(userId).select('skills yearsOfExperience qualifications categories');
+    if (!currentUser) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Fetch all swap requests, excluding those created by the current user
+    // Populate createdBy to access the creator's skills and experience
+    const allSwapRequests = await SwapRequest.find({ createdBy: { $ne: userId } })
+      .populate('createdBy', 'name profilePicture skills yearsOfExperience qualifications') // Populate relevant user fields including name and profilePicture
+      .populate('serviceCategory', 'name'); // Populate category name if needed for display
+
+    const recommendedRequests = allSwapRequests.map(request => {
+      let score = 0;
+
+      // 1. Skill Matching
+      // Match user's skills with serviceRequired of the request
+      if (currentUser.skills && request.serviceRequired) {
+        const serviceRequiredSkills = request.serviceRequired.split(',').map(s => s.trim());
+        score += calculateSkillMatch(currentUser.skills, serviceRequiredSkills) * 2; // Higher weight for direct skill match
+      }
+
+      // Match user's skills with skills of the request creator (for reciprocal swaps)
+      if (currentUser.skills && request.createdBy?.skills) {
+        score += calculateSkillMatch(currentUser.skills, request.createdBy.skills);
+      }
+
+      // 2. Experience Matching
+      if (currentUser.yearsOfExperience !== undefined && request.yearsOfExperience !== undefined) {
+        if (currentUser.yearsOfExperience >= request.yearsOfExperience) {
+          score += 3; // Award points if user meets or exceeds experience requirement
+        }
+      }
+
+      // 3. Qualifications Matching (as keywords in service title/description)
+      if (currentUser.qualifications && (request.serviceTitle || request.serviceDescription)) {
+        const requestText = `${request.serviceTitle || ''} ${request.serviceDescription || ''}`.toLowerCase();
+        currentUser.qualifications.forEach(qualification => {
+          if (requestText.includes(qualification.toLowerCase())) {
+            score += 1;
+          }
+        });
+      }
+
+      // 4. Category Matching
+      if (currentUser.categories && request.serviceCategory) {
+        const currentUserCategoryIds = new Set(currentUser.categories.map(cat => cat.toString()));
+        request.serviceCategory.forEach(reqCat => {
+          if (currentUserCategoryIds.has(reqCat._id.toString())) {
+            score += 2; // Award points for matching categories
+          }
+        });
+      }
+
+      return { ...request.toObject(), recommendationScore: score };
+    }).sort((a, b) => b.recommendationScore - a.recommendationScore); // Sort by score descending
+
+    res.status(200).json(recommendedRequests);
+
+  } catch (error) {
+    console.error('Error fetching recommended swap requests:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
  
 // Create a new swap request
 export const createSwapRequest = [

@@ -9,7 +9,7 @@ import { router as authRoutes } from "./controllers/auth/index.js";
 import { router as organizationAuthRoutes } from "./controllers/auth/organization.js"; // Import organization auth routes
 import { router as adminRoutes } from "./controllers/admin/index.js";
 import { router as marketplaceRoutes } from "./controllers/marketplace/index.js";
-import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById, placeRequest,getSentSwapRequests,getReceivedSwapRequests, getApprovedSwapRequests, addStatusUpdate, markAsCompleted } from "./controllers/swap_request.js";
+import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById, placeRequest,getSentSwapRequests,getReceivedSwapRequests, getApprovedSwapRequests, addStatusUpdate, markAsCompleted, getRecommendedSwapRequests } from "./controllers/swap_request.js";
 import { createReview, getReviewsForUser } from "./controllers/user_review.js"; // Import user review controller functions
 import { verifyToken } from "./controllers/auth/index.js";
 import notificationRoutes from "./controllers/notifications.js";
@@ -65,6 +65,7 @@ app.use("/api/categories", categoryRoutes); // Route category routes
 app.use("/api/complaints", complaintRoutes); // Use complaint routes
 
 // New Swap Request routes
+app.get('/api/swap-requests/recommended', verifyToken, getRecommendedSwapRequests); // New route for recommended swaps
 app.get('/api/swap-requests/approved', verifyToken, getApprovedSwapRequests);
 app.post('/api/swap-requests/:id/update', verifyToken, addStatusUpdate);
 app.put('/api/swap-requests/:id/complete', verifyToken, markAsCompleted);
