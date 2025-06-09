@@ -73,17 +73,20 @@ export default function Landing(){
             id: 1,
             title: "AI-Powered Skill Matching",
             description: "Upload your resume, and our AI automatically extracts and categorizes your skills. This ensures you get precise matches, saving time and effort in finding the right skill exchange partner.",
-            image: landing1
+            image: landing1,
+            link: "/learn-more/ai-skill-matching"
           }, {
             id: 2,
             title: "Real-time Chat",
             description: "Connect with experienced mChat with users in real-time to finalize exchange details and agreements. Keep track of completed and pending swaps with a structured system for smooth transactions. This helps you connect with the most relevant individuals for an efficient exchange.entors",
-            image: landing2
+            image: landing2,
+            link: "/learn-more/realtime-chat"
           }, {
             id: 3,
             title: "Progress Tracking",
             description: "Chat with users in real-time to finalize exchange details and agreements. Keep track of completed and pending swaps with a structured system for smooth transactions.",
-            image: landing3
+            image: landing3,
+            link: "/learn-more/progress-tracking"
           }].map((item) => (
             <div key={item.id} className={`flex flex-col md:flex-row gap-8 items-center ${item.id % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
               <img
@@ -99,7 +102,7 @@ export default function Landing(){
                   {item.description}
                 </p>
                 <div className="font-medium">
-                  <Button asChild variant="link" className="text-primary p-0! m-0"><Link to="/login">Learn More <ArrowRight/></Link></Button>
+                  <Button asChild variant="link" className="text-primary p-0! m-0"><Link to={item.link}>Learn More <ArrowRight/></Link></Button>
                 </div>
               </div>
             </div>

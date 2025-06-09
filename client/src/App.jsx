@@ -56,6 +56,9 @@ import SwapRequestDetailsPage from "./components/pages/SwapRequestDetailsPage";
 import OrganizationSwaps from "./components/pages/admin/OrganizationSwaps";
 import SkillSwapperChat from "./components/pages/SkillSwapperChat"; // Added import
 import ViewUserProfile from "./components/pages/profile/ViewUserProfile";
+import AISkillMatching from "./components/pages/learn-more/AISkillMatching";
+import RealtimeChat from "./components/pages/learn-more/RealtimeChat";
+import ProgressTracking from "./components/pages/learn-more/ProgressTracking";
 
 // Helper component to determine root page based on auth state
 const RootRouteHandler = () => {
@@ -97,6 +100,9 @@ function App() {
           <Route path="/add-review/:userId" element={<AddReview />} /> {/* Add the route for add swap review page */}
           <Route path="/add-complaint" element={<AddComplaint />} /> {/* Add the route for add complaint page */}
           <Route path="/chat" element={<ProtectedRoute><SkillSwapperChat /></ProtectedRoute>} /> {/* Added route */}
+          <Route path="/learn-more/ai-skill-matching" element={<AISkillMatching />} />
+          <Route path="/learn-more/realtime-chat" element={<RealtimeChat />} />
+          <Route path="/learn-more/progress-tracking" element={<ProgressTracking />} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
