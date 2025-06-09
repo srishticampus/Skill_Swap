@@ -71,7 +71,7 @@ function ViewAllSwaps() {
       header: 'Sl No',
       cell: info => info.row.index + 1 + '.',
     }),
-    columnHelper.accessor('createdBy', {
+    columnHelper.accessor('requestedTo', {
       header: 'Requested By',
       cell: info => (
         <div className="flex items-center gap-2">
@@ -105,7 +105,7 @@ function ViewAllSwaps() {
       header: 'Deadline',
       cell: info => info.getValue() ? new Date(info.getValue()).toLocaleDateString() : 'N/A',
     }),
-    columnHelper.accessor('requestedTo', {
+    columnHelper.accessor('createdBy', {
       header: 'Requested To',
       cell: info => (
         <div className="flex items-center gap-2">
