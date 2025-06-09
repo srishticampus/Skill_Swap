@@ -74,7 +74,7 @@ export default function ViewReviews() {
             <Card key={review.id}>
               <CardHeader className="flex flex-row items-center gap-4 pb-2">
                 <Avatar>
-                  <AvatarImage src={review.reviewerAvatarUrl} alt={review.reviewerName} />
+                  <AvatarImage src={`${import.meta.env.VITE_API_URL}/${review.reviewerAvatarUrl}`} alt={review.reviewerName} />
                   <AvatarFallback>{review.reviewerName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -83,7 +83,7 @@ export default function ViewReviews() {
                 </div>
               </CardHeader>
               <CardContent className="pt-2">
-                <p className="text-sm text-gray-700 mb-2">Reviewed for <span className="font-semibold">{review.swapTitle}</span></p>
+                {/* Removed swapTitle as per user's request */}
                 <p className="text-gray-800 italic mb-2">"{review.comment}"</p>
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (

@@ -21,11 +21,22 @@ router.get('/:organizationId/reviews', async (req, res) => {
     const memberIds = members.map(member => member._id);
 
     // Find reviews for the members
-    const reviews = await UserRating.find({ reviewedUser: { $in: memberIds } })
-      .populate('reviewer', 'firstName lastName') // Populate reviewer details
-      .populate('reviewedUser', 'firstName lastName'); // Populate reviewed user details
+    const reviews = await UserRating.find({ ratedUser: { $in: memberIds } })
+      .populate('rater', 'name profilePicture skills') // Populate rater details
+      .populate('ratedUser', 'name'); // Populate rated user details
 
-    res.status(200).json(reviews);
+    // Transform reviews to match client expectations
+    const transformedReviews = reviews.map(review => ({
+      id: review._id,
+      reviewerName: review.rater.name,
+      reviewerAvatarUrl: review.rater.profilePicture, // Keep as relative path
+      reviewerSkills: review.rater.skills ? review.rater.skills.join(', ') : '', // Join skills array into a string, handle null/undefined skills
+      comment: review.reviewText,
+      rating: review.rating,
+      // swapTitle is explicitly not needed as per user's clarification
+    }));
+
+    res.status(200).json(transformedReviews);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Failed to fetch organization member reviews' });

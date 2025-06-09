@@ -9,6 +9,11 @@ import { validationResult, body } from 'express-validator';
 import { match } from 'assert';
 import mongoose from 'mongoose';
 
+// Helper function to get IDs of swap requests that have accepted interactions
+const getSwapRequestsWithAcceptedInteractions = async () => {
+  return await SwapRequestInteraction.find({ status: 'accepted' }).distinct('swapRequest');
+};
+
 // Helper function to calculate skill match score
 const calculateSkillMatch = (userSkills, targetSkills) => {
   if (!userSkills || !targetSkills) return 0;
@@ -33,13 +38,17 @@ export const getRecommendedSwapRequests = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Fetch all swap requests, excluding those created by the current user
-    // Populate createdBy to access the creator's skills and experience
-    const allSwapRequests = await SwapRequest.find({ createdBy: { $ne: userId } })
-      .populate('createdBy', 'name profilePicture skills yearsOfExperience qualifications') // Populate relevant user fields including name and profilePicture
-      .populate('serviceCategory', 'name'); // Populate category name if needed for display
+    const acceptedSwapRequestIds = await getSwapRequestsWithAcceptedInteractions(); // NEW
 
-    const recommendedRequests = allSwapRequests.map(request => {
+    // Fetch all swap requests, excluding those created by the current user AND those with accepted interactions
+    const allSwapRequests = await SwapRequest.find({
+        createdBy: { $ne: userId },
+        _id: { $nin: acceptedSwapRequestIds } // Exclude accepted swaps
+      })
+      .populate('createdBy', 'name profilePicture skills yearsOfExperience qualifications')
+      .populate('serviceCategory', 'name');
+
+    const recommendedRequests = await Promise.all(allSwapRequests.map(async (request) => { // Use Promise.all for async map
       let score = 0;
 
       // 1. Skill Matching
@@ -81,8 +90,18 @@ export const getRecommendedSwapRequests = async (req, res) => {
         });
       }
 
-      return { ...request.toObject(), recommendationScore: score };
-    }).sort((a, b) => b.recommendationScore - a.recommendationScore); // Sort by score descending
+      // Add hasPlacedRequest flag for consistency with getAllSwapRequests
+      const existingInteraction = await SwapRequestInteraction.findOne({
+        swapRequest: request._id,
+        user: userId
+      });
+
+      return {
+        ...request.toObject(),
+        recommendationScore: score,
+        hasPlacedRequest: !!existingInteraction // NEW: Add hasPlacedRequest
+      };
+    })).sort((a, b) => b.recommendationScore - a.recommendationScore);
 
     res.status(200).json(recommendedRequests);
 
@@ -186,76 +205,58 @@ export const createSwapRequest = [
  */
 export const getAllSwapRequests = async (req, res) => {
   try {
-    const { createdBy, searchTerm, serviceRequired, serviceCategory } = req.query;
-    let query = {};
+    const acceptedSwapRequestIds = await getSwapRequestsWithAcceptedInteractions(); // NEW
 
-    // Filter by createdBy (either specific user or exclude logged-in user)
+    const { createdBy, searchTerm, serviceRequired, serviceCategory } = req.query;
+    let query = { _id: { $nin: acceptedSwapRequestIds } }; // Initialize query with exclusion
+
+    // Existing createdBy filter logic (needs to be combined with initial query)
+    let createdByFilter = {};
     if (createdBy) {
-      query.createdBy = createdBy;
+      createdByFilter.createdBy = createdBy;
     } else {
       const token = req.headers.authorization?.split(' ')[1];
       if (token) {
         try {
           const decoded = jwt.verify(token, import.meta.env.VITE_JWT_SECRET);
           const userId = decoded.user.id;
-          query.createdBy = { $ne: userId };
+          createdByFilter.createdBy = { $ne: userId };
         } catch (err) {
           console.error('Error verifying token:', err);
-          // If token is invalid, proceed without filtering by logged-in user
-          // No createdBy filter added to query
         }
       }
+    }
+    if (Object.keys(createdByFilter).length > 0) {
+        query = { $and: [query, createdByFilter] };
     }
 
     // Add searchTerm filter using $or for multiple fields
     if (searchTerm) {
-      const searchRegex = new RegExp(searchTerm, 'i'); // Case-insensitive regex
+      const searchRegex = new RegExp(searchTerm, 'i');
       const searchConditions = {
         $or: [
           { serviceTitle: searchRegex },
-          { serviceDetails: searchRegex },
-          // You could potentially add searching on populated user fields here
-          // but it would require Mongoose aggregation which is more complex.
-          // For simplicity, sticking to SwapRequest fields for now.
+          { serviceDescription: searchRegex }, // Changed from serviceDetails to serviceDescription based on schema
         ]
       };
-
-      // Combine search conditions with existing query conditions
-      if (Object.keys(query).length > 0) {
-        query = { $and: [query, searchConditions] };
-      } else {
-        query = searchConditions;
-      }
+      query = { $and: [query, searchConditions] };
     }
 
     // Add serviceRequired filter
     if (serviceRequired && serviceRequired !== 'any') {
-       const serviceRequiredCondition = { serviceRequired: serviceRequired };
-       if (Object.keys(query).length > 0) {
-           query = { $and: [query, serviceRequiredCondition] };
-       } else {
-           query = serviceRequiredCondition;
-       }
+       query = { $and: [query, { serviceRequired: serviceRequired }] };
     }
 
     // Add serviceCategory filter
-    // serviceCategory in the query is expected to be a single category ID string
     if (serviceCategory && serviceCategory !== 'any') {
-       const serviceCategoryCondition = { serviceCategory: serviceCategory };
-       if (Object.keys(query).length > 0) {
-           query = { $and: [query, serviceCategoryCondition] };
-       } else {
-           query = serviceCategoryCondition;
-       }
+       query = { $and: [query, { serviceCategory: serviceCategory }] };
     }
 
-    // Find swap requests based on the constructed query
-    const swapRequests = await SwapRequest.find(query)
+    const swapRequests = await SwapRequest.find(query) // Use the combined query
       .populate('serviceCategory')
       .populate('createdBy')
       .exec();
-    
-    // Extract user ID from token
+
     let userId = null;
     const token = req.headers.authorization?.split(' ')[1];
     if (token) {
@@ -264,8 +265,6 @@ export const getAllSwapRequests = async (req, res) => {
         userId = decoded.user.id;
       } catch (err) {
         console.error('Error verifying token:', err);
-        // If token is invalid, proceed without filtering by logged-in user
-        // No createdBy filter added to query
       }
     }
 
@@ -284,7 +283,7 @@ export const getAllSwapRequests = async (req, res) => {
     res.status(200).json(swapRequestsWithInteraction);
 
   } catch (err) {
-    console.error('Error fetching swap requests:', err); // Log the error details on the server
+    console.error('Error fetching swap requests:', err);
     res.status(500).json({ message: 'Failed to fetch swap requests', error: err.message });
   }
 };
