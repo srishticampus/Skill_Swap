@@ -55,6 +55,7 @@ import AddComplaint from "./components/pages/AddComplaint"; // Import the new co
 import SwapRequestDetailsPage from "./components/pages/SwapRequestDetailsPage";
 import OrganizationSwaps from "./components/pages/admin/OrganizationSwaps";
 import SkillSwapperChat from "./components/pages/SkillSwapperChat"; // Added import
+import ViewUserProfile from "./components/pages/profile/ViewUserProfile";
 
 // Helper component to determine root page based on auth state
 const RootRouteHandler = () => {
@@ -115,6 +116,7 @@ function App() {
         </Route>
         <Route path="/organization" element={<Organization />}>
           <Route index element={<OrganizationDashboard />} />
+          <Route path="/organization/users/:id" element={<ProtectedRoute><ViewUserProfile /></ProtectedRoute>} /> {/* New route for general user profile details */}
           <Route path="/organization/profile" element={<OrganizationProfile />} />
           <Route path="/organization/members" element={<OrganizationMembers />} />
           <Route path="/organization/members/details/:id" element={<MemberDetails />} />

@@ -79,6 +79,9 @@ export default function ViewReviews() {
                 </Avatar>
                 <div>
                   <CardTitle className="text-lg text-[#6B46C1]">{review.reviewerName}</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-semibold">Rated:</span> {review.ratedUserName}
+                  </p>
                   <p className="text-sm text-gray-600">{review.reviewerSkills}</p>
                 </div>
               </CardHeader>

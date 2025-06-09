@@ -33,6 +33,7 @@ router.get('/:organizationId/reviews', async (req, res) => {
       reviewerSkills: review.rater.skills ? review.rater.skills.join(', ') : '', // Join skills array into a string, handle null/undefined skills
       comment: review.reviewText,
       rating: review.rating,
+      ratedUserName: review.ratedUser.name, // Add the name of the user being rated
       // swapTitle is explicitly not needed as per user's clarification
     }));
 

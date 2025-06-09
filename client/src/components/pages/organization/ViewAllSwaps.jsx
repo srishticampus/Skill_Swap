@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import {
   createColumnHelper,
   flexRender,
@@ -70,8 +71,20 @@ function ViewAllSwaps() {
       header: 'Sl No',
       cell: info => info.row.index + 1 + '.',
     }),
-    columnHelper.accessor('createdBy.name', { // Assuming createdBy has a name field
+    columnHelper.accessor('createdBy', {
       header: 'Requested By',
+      cell: info => (
+        <div className="flex items-center gap-2">
+          <span>{info.getValue()?.name || 'N/A'}</span>
+          {info.getValue()?._id && (
+            <Link to={`/organization/users/${info.getValue()._id}`}>
+              <Button variant="link" size="sm" className="p-0 h-auto text-primary">
+                View Profile
+              </Button>
+            </Link>
+          )}
+        </div>
+      ),
     }),
     columnHelper.accessor('serviceCategory', {
       header: 'Category',
@@ -92,9 +105,20 @@ function ViewAllSwaps() {
       header: 'Deadline',
       cell: info => info.getValue() ? new Date(info.getValue()).toLocaleDateString() : 'N/A',
     }),
-    columnHelper.accessor('requestedTo.name', { // Assuming requestedTo has a name field
+    columnHelper.accessor('requestedTo', {
       header: 'Requested To',
-      cell: info => info.getValue() || 'N/A', // Handle cases where requestedTo might be null
+      cell: info => (
+        <div className="flex items-center gap-2">
+          <span>{info.getValue()?.name || 'N/A'}</span>
+          {info.getValue()?._id && (
+            <Link to={`/organization/users/${info.getValue()._id}`}>
+              <Button variant="link" size="sm" className="p-0 h-auto text-primary">
+                View Profile
+              </Button>
+            </Link>
+          )}
+        </div>
+      ),
     }),
     columnHelper.accessor('status', { // Assuming a status field exists
       header: 'Status',

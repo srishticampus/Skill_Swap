@@ -1,6 +1,7 @@
 import { Router } from "express";
 import SwapRequest from "../../models/swap_request.js";
 import User from "../../models/user.js";
+import SwapRequestInteraction from "../../models/swap_request_interaction.js"; // Import SwapRequestInteraction
 import organizationAuth from "../../middleware/organizationAuth.js";
 
 const router = Router();
@@ -20,9 +21,23 @@ router.get("/swaps", organizationAuth, async (req, res) => {
     const organizationSwaps = await SwapRequest.find({ createdBy: { $in: memberIds } })
       .populate('serviceCategory')
       .populate('createdBy')
+      .lean() // Use .lean() for better performance when populating manually
       .exec();
 
-    res.status(200).json(organizationSwaps);
+    // For each swap request, find the associated accepted/in-progress interaction to get the requestedTo user
+    const populatedSwaps = await Promise.all(organizationSwaps.map(async (swap) => {
+      const interaction = await SwapRequestInteraction.findOne({
+        swapRequest: swap._id,
+        status: { $in: ['accepted', 'in progress'] } // Assuming 'accepted' or 'in progress' means a partner is assigned
+      }).populate('user').lean().exec();
+
+      return {
+        ...swap,
+        requestedTo: interaction ? interaction.user : null // Attach the requestedTo user
+      };
+    }));
+
+    res.status(200).json(populatedSwaps);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
