@@ -256,7 +256,9 @@ export default function Home() {
 
     {/* Pick an Exchange Section */}
     <section className="container px-4 mx-auto py-16">
-        <h2 className="text-3xl font-semibold mb-6 text-foreground">Pick an Exchange</h2>
+        {!loadingPickExchanges && pickExchangeData.length > 0 && (
+          <h2 className="text-3xl font-semibold mb-6 text-foreground">Pick an Exchange</h2>
+        )}
         {loadingPickExchanges ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 3 }).map((_, index) => (
@@ -309,7 +311,9 @@ export default function Home() {
 
      {/* Exchanges related to your skills Section */}
      <section className="container px-4 mx-auto py-16 bg-muted/30 rounded-lg">
-        <h2 className="text-3xl font-semibold mb-6 text-foreground">Exchanges related to your skills...</h2>
+        {!loadingRelatedExchanges && relatedExchangeData.length > 0 && (
+          <h2 className="text-3xl font-semibold mb-6 text-foreground">Exchanges related to your skills...</h2>
+        )}
         {loadingRelatedExchanges ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 3 }).map((_, index) => (
