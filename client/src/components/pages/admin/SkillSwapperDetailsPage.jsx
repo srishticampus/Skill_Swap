@@ -127,6 +127,7 @@ export default function SkillSwapperDetailsPage() {
 
   return (
     <div className="p-6 w-full min-h-screen bg-gray-100">
+      <Button onClick={() => navigate(-1)} className="mb-4">Back</Button>
       <h1 className="text-2xl font-semibold text-[#4E20B3] text-center my-8">
         Skill Swapper Details
       </h1>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router'; // Import useParams
+import { useParams, useNavigate } from 'react-router'; // Import useParams and useNavigate
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 const MemberDetails = () => {
   const { id } = useParams(); // Get member ID from URL
+  const navigate = useNavigate();
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -85,6 +86,7 @@ const MemberDetails = () => {
 
   return (
     <div className="container mx-auto p-6 text-white min-h-screen">
+      <Button onClick={() => navigate(-1)} className="mb-4">Back</Button>
       {/* Title */}
       <h1 className="text-3xl font-bold text-center mb-8 text-primary">View More</h1>
 
