@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import { MapPin, Briefcase, Star, User, Mail, Phone, Globe, Venus } from 'lucide-react';
 import axiosInstance from '@/api/axios';
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +24,7 @@ const renderStars = (rating) => {
 
 export default function ViewUserProfile() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -88,6 +89,7 @@ export default function ViewUserProfile() {
 
   return (
     <div className="p-6 w-full min-h-screen bg-gray-100">
+      <Button onClick={() => navigate(-1)} className="mb-4">Back</Button>
       <h1 className="text-2xl font-semibold text-[#4E20B3] text-center my-8">
         User Profile
       </h1>
