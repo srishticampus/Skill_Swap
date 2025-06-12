@@ -57,7 +57,8 @@ const CategoryManagement = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('/api/categories'); // Modified endpoint
+      const response = await axios.get('/api/organizations/categories'); // Modified endpoint
+      console.log('Fetched categories:', response.data); // Add console log
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -66,7 +67,7 @@ const CategoryManagement = () => {
 
   const handleCreateCategory = async () => {
     try {
-      await axios.post('/api/categories/organization', newCategory); // Modified endpoint
+      await axios.post('/api/organizations/categories', newCategory); // Modified endpoint
       fetchCategories();
       setNewCategory({ name: '', description: '' });
       setOpenCreate(false);
@@ -75,33 +76,14 @@ const CategoryManagement = () => {
     }
   };
 
-  // Remove update and delete functionality for organization view
-  // const handleUpdateCategory = async () => {
-  //   try {
-  //     await axios.put(`/api/admin/categories/${selectedCategory}`, editCategory);
-  //     fetchCategories();
-  //     setSelectedCategory(null);
-  //     setEditCategory({ name: '', description: '' });
-  //     setOpenUpdateAlert(false);
-  //   } catch (error) {
-  //     console.error('Error updating category:', error);
-  //   }
-  // };
-
-  // const handleSelectCategory = (category) => {
-  //   setSelectedCategory(category._id);
-  //   setEditCategory({ name: category.name, description: category.description });
-  //   setOpenUpdateAlert(true);
-  // };
-
-  // const handleDeleteCategory = async (categoryId) => {
-  //   try {
-  //     await axios.delete(`/api/admin/categories/${categoryId}`);
-  //     fetchCategories();
-  //   } catch (error) {
-  //     console.error('Error deleting category:', error);
-  //   }
-  // };
+  const handleDeleteCategory = async (categoryId) => {
+    try {
+      await axios.delete(`/api/organizations/categories/${categoryId}`);
+      fetchCategories();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+    }
+  };
 
   return (
     <main className="flex-1 px-6 pb-6">
@@ -150,8 +132,7 @@ const CategoryManagement = () => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
-              {/* Remove Actions column for organization view */}
-              {/* <TableHead>Actions</TableHead> */}
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -159,8 +140,7 @@ const CategoryManagement = () => {
               <TableRow key={category._id}>
                 <TableCell>{category.name}</TableCell>
                 <TableCell>{category.description}</TableCell>
-                {/* Remove Actions column for organization view */}
-                {/* <TableCell>
+                <TableCell>
                   <DropdownMenu >
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
@@ -170,42 +150,14 @@ const CategoryManagement = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => setTimeout(()=>handleSelectCategory(category),100)}>
-                        Update
-                      </DropdownMenuItem>
-                      <DropdownMenuItem variant='destructive' onClick={() => setTimeout(()=>setOpenDelete(true),100)}>
+                      <DropdownMenuItem variant='destructive' onClick={() => {
+                        setSelectedCategory(category._id); // Set the category to be deleted
+                        setOpenDelete(true);
+                      }}>
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <AlertDialog open={openUpdateAlert} onOpenChange={setOpenUpdateAlert}>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Update Category</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to update this category?
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="name" className="text-right">
-                            Name
-                          </Label>
-                          <Input id="name" value={editCategory.name} onChange={(e) => setEditCategory({ ...editCategory, name: e.target.value })} className="col-span-3" />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="description" className="text-right">
-                            Description
-                          </Label>
-                          <Textarea id="description" value={editCategory.description} onChange={(e) => setEditCategory({ ...editCategory, description: e.target.value })} className="col-span-3" />
-                        </div>
-                      </div>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setOpenUpdateAlert(false)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleUpdateCategory}>Update</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
                   <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
                     <AlertDialogContent>
                       <AlertDialogHeader>
@@ -217,17 +169,20 @@ const CategoryManagement = () => {
                       <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setOpenDelete(false)}>Cancel</AlertDialogCancel>
                         <AlertDialogAction variant="destructive" onClick={() => {
-                          handleDeleteCategory(category._id);
+                          handleDeleteCategory(selectedCategory); // Use selectedCategory for deletion
                           setOpenDelete(false);
                         }}>Delete</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                </TableCell> */}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        {categories.length === 0 && (
+          <p className="text-center text-gray-500 mt-4">No organization specific categories added yet.</p>
+        )}
       </div>
     </main>
   );
