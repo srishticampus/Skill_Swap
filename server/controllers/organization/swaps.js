@@ -21,6 +21,7 @@ router.get("/swaps", organizationAuth, async (req, res) => {
     const organizationSwaps = await SwapRequest.find({ createdBy: { $in: memberIds } })
       .populate('serviceCategory')
       .populate('createdBy')
+      .select('requestStatus serviceTitle serviceDescription deadline') // Explicitly select requestStatus and other necessary fields
       .lean() // Use .lean() for better performance when populating manually
       .exec();
 
@@ -33,7 +34,8 @@ router.get("/swaps", organizationAuth, async (req, res) => {
 
       return {
         ...swap,
-        requestedTo: interaction ? interaction.user : null // Attach the requestedTo user
+        requestedTo: interaction ? interaction.user : null, // Attach the requestedTo user
+        status: swap.requestStatus // Map requestStatus to status for client-side compatibility
       };
     }));
 

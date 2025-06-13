@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import { MapPin, Briefcase, Star, User, Mail, Phone, Globe, Venus } from 'lucide-react';
 import axiosInstance from '@/api/axios';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 const renderStars = (rating) => {
   const fullStars = Math.floor(rating);
