@@ -193,7 +193,7 @@ router.get('/conversations', verifyToken, async (req, res) => {
                   $match: {
                     $expr: {
                       $and: [
-                        { $eq: ['$status', 'accepted'] },
+                        { $in: ['$status', ['accepted', 'pending', 'completed']] },
                         {
                           $or: [
                             { $eq: ['$user', '$$userId'] },
