@@ -133,11 +133,18 @@ const MemberDetails = () => {
                 <Globe size={18} className="mr-2 text-primary" />
                 <span>{member.country}</span> {/* Use country from API */}
               </div>
-               {/* Assuming 'location' in dummy data was city, and 'Trivandrum' was a specific example. Using city from API */}
-               {/* <div className="flex items-center text-gray-700">
-                <Briefcase size={18} className="mr-2 text-primary" />
-                <span>{member.city}</span>
-              </div> */}
+              {member.completedSwapsCount !== undefined && (
+                <div className="flex items-center text-gray-700">
+                  <Award size={18} className="mr-2 text-primary" />
+                  <span>Completed Swaps: {member.completedSwapsCount}</span>
+                </div>
+              )}
+              {member.positiveReviewsCount !== undefined && (
+                <div className="flex items-center text-gray-700">
+                  <Star size={18} className="mr-2 text-primary" />
+                  <span>Positive Reviews: {member.positiveReviewsCount}</span>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

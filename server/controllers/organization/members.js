@@ -224,4 +224,22 @@ router.put("/members/:id/deactivate", organizationAuth, async (req, res) => {
   }
 });
 
+// @route   GET /api/organization/members/ranked
+// @desc    Get all members for an organization, ranked by completed swaps and positive reviews
+// @access  Private (Organization)
+router.get("/members/ranked", organizationAuth, async (req, res) => {
+  try {
+    const organizationId = req.organization.id;
+
+    const rankedMembers = await User.find({ organization: organizationId })
+      .select('-password') // Exclude password
+      .sort({ completedSwapsCount: -1, positiveReviewsCount: -1 }); // Sort by completed swaps (desc) then positive reviews (desc)
+
+    res.json(rankedMembers);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 export default router;

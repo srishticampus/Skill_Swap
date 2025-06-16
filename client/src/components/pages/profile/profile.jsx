@@ -396,6 +396,24 @@ const ProfilePage = () => {
                     <p>{profileData.organization.name}</p>
                   </div>
                 )}
+                {profileData.completedSwapsCount !== undefined && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <BadgeCheck className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Completed Swaps</p>
+                    </div>
+                    <p>{profileData.completedSwapsCount}</p>
+                  </div>
+                )}
+                {profileData.positiveReviewsCount !== undefined && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Positive Reviews</p>
+                    </div>
+                    <p>{profileData.positiveReviewsCount}</p>
+                  </div>
+                )}
               </div>
               {profileData.organization && ( // Add Complaint button for organization members
                 <div className="flex justify-end mt-4">

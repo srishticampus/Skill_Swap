@@ -26,16 +26,16 @@ const Dashboard = () => {
           membersRes,
           complaintsTotalRes, // Renamed to avoid conflict with new overview
           swapsRes,
-          performersRes,
+          rankedMembersRes, // Renamed for clarity
           complaintsOverviewRes // New API call
         ] = await Promise.all([
           axios.get('/api/organizations/stats/members/total'),
           axios.get('/api/organizations/stats/complaints/total'),
           axios.get('/api/organizations/stats/swaps/overview'),
-          axios.get('/api/organizations/stats/performers'),
+          axios.get('/api/organizations/members/ranked'), // Use the new ranked members endpoint
           axios.get('/api/organizations/stats/complaints/overview') // New API call
         ]);
-        console.log('Dashboard data:', membersRes, complaintsTotalRes, swapsRes, performersRes, complaintsOverviewRes);
+        console.log('Dashboard data:', membersRes, complaintsTotalRes, swapsRes, rankedMembersRes, complaintsOverviewRes);
         setTotalMembers(membersRes.data.totalMembers);
         setTotalComplaints(complaintsTotalRes.data.totalComplaints);
         setPendingSwaps(swapsRes.data.openSwaps + swapsRes.data.inProgressSwaps);
@@ -48,7 +48,7 @@ const Dashboard = () => {
           { name: 'Pending', value: swapsRes.data.openSwaps, color: '#ff8042' },
         ];
         setSwapDistribution(swapDistData);
-        setBestPerformers(performersRes.data.performers);
+        setBestPerformers(rankedMembersRes.data); // Set ranked members
 
         const complaintDistData = [
           { name: 'Pending', value: complaintsOverviewRes.data.pendingComplaints, color: COLORS[0] },
@@ -257,35 +257,32 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <h2 className="text-xl font-bold text-primary mt-4">Best Performers</h2>
+      <h2 className="text-xl font-bold text-primary mt-4">Ranked Members</h2>
       <Separator className="my-4" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {bestPerformers.map((performer, index) => (
+        {bestPerformers.map((member, index) => (
           <Card key={index}>
             <CardContent className="flex flex-col items-center p-6">
-              <img src={performer.profilePicture || "/client/src/assets/pfp.jpeg"} alt={performer.name} className="w-24 h-24 rounded-full mb-4" />
-              <h3 className="text-lg font-semibold">{performer.name}</h3>
-              <p className="text-sm text-gray-500">{performer.skills.join(', ')}</p>
+              <img src={member.profilePicture || "/client/src/assets/pfp.jpeg"} alt={member.name} className="w-24 h-24 rounded-full mb-4" />
+              <h3 className="text-lg font-semibold">{member.name}</h3>
+              <p className="text-sm text-gray-500">{member.skills.join(', ')}</p>
               <div className="flex items-center text-gray-500 text-sm mt-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                 </svg>
-                {performer.city}
+                {member.city}
               </div>
               <div className="flex items-center text-gray-500 text-sm mt-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.259c0 1.094-.787 2.036-1.872 2.036l-1.08-.18a9.776 9.776 0 01-7.071 0l-1.08.18c-1.085 0-1.872-.942-1.872-2.036V14.15M2.25 10.5h19.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H2.25A2.25 2.25 0 000 6.75v1.5a2.25 2.25 0 002.25 2.25zm0 0h19.5" />
                 </svg>
-                {performer.yearsOfExperience}+ years Experience
+                {member.yearsOfExperience}+ years Experience
               </div>
-              {/* Star rating can be dynamic based on a rating field if available in performer data */}
-              <div className="flex mt-2">
-                {/* Placeholder for dynamic stars */}
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className={`w-5 h-5 ${i < (performer.rating || 3) ? 'text-yellow-400' : 'text-gray-300'} fill-current`} viewBox="0 0 24 24"> </svg>
-                ))}
+              <div className="flex flex-col items-center mt-2 text-sm text-gray-700">
+                <p>Completed Swaps: <span className="font-semibold">{member.completedSwapsCount}</span></p>
+                <p>Positive Reviews: <span className="font-semibold">{member.positiveReviewsCount}</span></p>
               </div>
             </CardContent>
           </Card>

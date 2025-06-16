@@ -51,9 +51,9 @@ export const AuthProvider = ({ children }) => {
  * Custom hook to access the authentication context.
  *
  * @returns {{
- *   user: { id: string, isAdmin: boolean },
+ *   user: { id: string, isAdmin: boolean, organization?: string },
  *   token: string,
- *   login: (userData: { id: string, isAdmin: boolean }, token: string) => void,
+ *   login: (userData: { id: string, isAdmin: boolean, organization?: string }, token: string) => void,
  *   logout: () => void,
  *   loading: boolean
  * }}

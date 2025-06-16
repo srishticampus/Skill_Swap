@@ -15,6 +15,12 @@ export const createReview = async (req, res) => {
     });
 
     await newReview.save();
+
+    // If the review is positive (rating 4 or 5), increment positiveReviewsCount for the rated user
+    if (rating >= 4) {
+      await User.findByIdAndUpdate(ratedUser, { $inc: { positiveReviewsCount: 1 } });
+    }
+
     res.status(201).json(newReview);
   } catch (error) {
     res.status(400).json({ message: error.message });

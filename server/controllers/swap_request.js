@@ -812,6 +812,13 @@ export const markAsCompleted = async (req, res) => {
       swapRequestInteraction.status = 'completed';
       await swapRequestInteraction.save();
 
+      // Increment completedSwapsCount for both users involved
+      const swapRequest = await SwapRequest.findById(swapRequestId);
+      if (swapRequest) {
+        await User.findByIdAndUpdate(swapRequest.createdBy, { $inc: { completedSwapsCount: 1 } });
+        await User.findByIdAndUpdate(swapRequestInteraction.user, { $inc: { completedSwapsCount: 1 } });
+      }
+
       res.status(200).json({ message: 'Swap request marked as completed' });
     });
   } catch (err) {

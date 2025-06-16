@@ -82,6 +82,14 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  completedSwapsCount: {
+    type: Number,
+    default: 0,
+  },
+  positiveReviewsCount: {
+    type: Number,
+    default: 0,
+  },
   organization: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
