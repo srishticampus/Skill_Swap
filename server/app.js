@@ -19,6 +19,8 @@ import organizationRoutes from './controllers/organization/index.js'; // Import 
 import complaintRoutes from './controllers/complaint.js'; // Import complaint routes
 import path from "path";
 import { router as chatRoutes } from "./controllers/chat.js";
+import { getAllWorkshopsForMembers, rsvpToWorkshop, cancelRsvp } from "./controllers/organization/workshop.js";
+import organizationAuth from "./middleware/organizationAuth.js"; // Import organizationAuth middleware
 
 export const app = express();
 
@@ -48,8 +50,8 @@ app.use("/api/auth", authRoutes);
 
 // Use organization authentication routes
 app.use("/api/organizations", organizationAuthRoutes);
-// Use organization routes
-app.use("/api/organizations",organizationRoutes)
+// Use organization routes with organizationAuth middleware
+app.use("/api/organizations", organizationAuth, organizationRoutes);
 
 // Use admin routes
 app.use("/api/admin", adminRoutes);
@@ -88,6 +90,11 @@ app.get('/api/user-reviews/:userId', getReviewsForUser);
 
 // Use chat routes
 app.use("/api/chat", chatRoutes);
+
+// Workshop routes (Members)
+app.get('/api/organization/workshops/members', verifyToken, getAllWorkshopsForMembers);
+app.post('/api/organization/workshops/:id/rsvp', verifyToken, rsvpToWorkshop);
+app.delete('/api/organization/workshops/:id/rsvp', verifyToken, cancelRsvp);
 
 // Add profile update routes (already added above)
 // app.post("/api/auth/update-profile", authRoutes);

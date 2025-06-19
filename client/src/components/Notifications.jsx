@@ -53,7 +53,17 @@ const Notifications = ({ onNotificationRead }) => {
                 <div className="flex flex-col justify-between items-start">
                   <div>
                     <p className="text-sm">{notification.message}</p>
-                    <Badge variant={notification.status === 'approved' ? 'success' : notification.status === 'rejected' ? 'destructive' : 'secondary'}>{notification.status}</Badge>
+                    <Badge variant={
+                      notification.type === 'New Workshop' ? 'default' :
+                      notification.type === 'Workshop RSVP' ? 'secondary' : // Using secondary as 'info' might not exist
+                      notification.status === 'approved' ? 'success' :
+                      notification.status === 'rejected' ? 'destructive' :
+                      'secondary'
+                    }>
+                      {notification.type === 'New Workshop' ? 'New' :
+                       notification.type === 'Workshop RSVP' ? 'RSVP' :
+                       notification.status}
+                    </Badge>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => handleMarkAsRead(notification._id)} disabled={notification.read}>
                     {notification.read ? 'Read' : 'Mark as Read'}

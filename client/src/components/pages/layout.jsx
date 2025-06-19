@@ -143,6 +143,15 @@ function Navbar() {
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
+                {user.organization && ( // Only show if user is part of an organization
+                  <NavigationMenuItem>
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      <Link to="/member-workshops" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/member-workshops" ? "text-primary" : ""}`}>
+                        View Workshops
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                )}
               </>
             )}
             {user && (

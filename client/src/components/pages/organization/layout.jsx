@@ -7,6 +7,7 @@ import {
   MessageSquare,
   List,
   Star,
+  Calendar,
 } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -54,6 +55,11 @@ const items = [
     title: "View Reviews",
     url: "/organization/reviews",
     icon: Star
+  },
+  {
+    title: "Manage Workshops",
+    url: "/organization/workshops",
+    icon: Calendar
   },
   {
     title: "Profile",

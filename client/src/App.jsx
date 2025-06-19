@@ -59,6 +59,8 @@ import ViewUserProfile from "./components/pages/profile/ViewUserProfile";
 import AISkillMatching from "./components/pages/learn-more/AISkillMatching";
 import RealtimeChat from "./components/pages/learn-more/RealtimeChat";
 import ProgressTracking from "./components/pages/learn-more/ProgressTracking";
+import Workshops from "./components/pages/organization/Workshops"; // Import the new component
+import MemberWorkshops from "./components/pages/MemberWorkshops"; // Import the new component
 
 // Helper component to determine root page based on auth state
 const RootRouteHandler = () => {
@@ -103,6 +105,7 @@ function App() {
           <Route path="/learn-more/ai-skill-matching" element={<AISkillMatching />} />
           <Route path="/learn-more/realtime-chat" element={<RealtimeChat />} />
           <Route path="/learn-more/progress-tracking" element={<ProgressTracking />} />
+          <Route path="/member-workshops" element={<ProtectedRoute><MemberWorkshops /></ProtectedRoute>} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
@@ -132,6 +135,7 @@ function App() {
           <Route path="/organization/complaints" element={<Complaints />} />
           <Route path="/organization/categories" element={<OrganizationCategoryManagement />} /> {/* Add the new route */}
           <Route path="/organization/chat" element={<SkillSwapperChat />} /> {/* New Organization Chat Route */}
+          <Route path="/organization/workshops" element={<Workshops />} />
         </Route>
       </Routes>
     </AuthProvider>

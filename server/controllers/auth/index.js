@@ -242,7 +242,7 @@ router.post(
             }
           }
 
-          res.json({ token, user: { id: user.id, name: user.name, profilePicture: user.profilePicture, isAdmin: user.isAdmin || false, type: 'User' } });
+          res.json({ token, user: { id: user.id, name: user.name, profilePicture: user.profilePicture, isAdmin: user.isAdmin || false, type: 'User', organization: user.organization || null } });
         }
       );
     } catch (err) {
