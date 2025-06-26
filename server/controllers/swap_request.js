@@ -17,12 +17,17 @@ const getSwapRequestsWithAcceptedInteractions = async () => {
 // Helper function to calculate skill match score
 const calculateSkillMatch = (userSkills, targetSkills) => {
   if (!userSkills || !targetSkills) return 0;
-  const userSkillSet = new Set(userSkills.map(s => s.toLowerCase()));
+
+  const userSkillWords = new Set(userSkills.flatMap(s => s.toLowerCase().split(/\s+/)));
   let score = 0;
+
   targetSkills.forEach(skill => {
-    if (userSkillSet.has(skill.toLowerCase())) {
-      score += 1;
-    }
+    const targetSkillWords = skill.toLowerCase().split(/\s+/);
+    targetSkillWords.forEach(word => {
+      if (userSkillWords.has(word)) {
+        score += 1;
+      }
+    });
   });
   return score;
 };
@@ -48,25 +53,30 @@ export const getRecommendedSwapRequests = async (req, res) => {
       .populate('createdBy', 'name profilePicture skills yearsOfExperience qualifications')
       .populate('serviceCategory', 'name');
 
-    const recommendedRequests = await Promise.all(allSwapRequests.map(async (request) => { // Use Promise.all for async map
+    let recommendedRequests = await Promise.all(allSwapRequests.map(async (request) => {
       let score = 0;
+      let isRequestingSkillMatch = false;
 
       // 1. Skill Matching
-      // Match user's skills with serviceRequired of the request
+      // Match user's skills with serviceRequired of the request (requesting skill match - highest priority)
       if (currentUser.skills && request.serviceRequired) {
         const serviceRequiredSkills = request.serviceRequired.split(',').map(s => s.trim());
-        score += calculateSkillMatch(currentUser.skills, serviceRequiredSkills) * 2; // Higher weight for direct skill match
+        const directSkillMatchScore = calculateSkillMatch(currentUser.skills, serviceRequiredSkills);
+        if (directSkillMatchScore > 0) {
+          score += directSkillMatchScore * 100; // Very high weight for direct requesting skill match
+          isRequestingSkillMatch = true;
+        }
       }
 
       // Match user's skills with skills of the request creator (for reciprocal swaps)
       if (currentUser.skills && request.createdBy?.skills) {
-        score += calculateSkillMatch(currentUser.skills, request.createdBy.skills);
+        score += calculateSkillMatch(currentUser.skills, request.createdBy.skills) * 5; // Increased weight
       }
 
       // 2. Experience Matching
       if (currentUser.yearsOfExperience !== undefined && request.yearsOfExperience !== undefined) {
         if (currentUser.yearsOfExperience >= request.yearsOfExperience) {
-          score += 3; // Award points if user meets or exceeds experience requirement
+          score += 3;
         }
       }
 
@@ -83,9 +93,11 @@ export const getRecommendedSwapRequests = async (req, res) => {
       // 4. Category Matching
       if (currentUser.categories && request.serviceCategory) {
         const currentUserCategoryIds = new Set(currentUser.categories.map(cat => cat.toString()));
-        request.serviceCategory.forEach(reqCat => {
-          if (currentUserCategoryIds.has(reqCat._id.toString())) {
-            score += 2; // Award points for matching categories
+        // Ensure request.serviceCategory is an array of objects with _id
+        const requestCategoryIds = request.serviceCategory.map(cat => cat._id.toString());
+        requestCategoryIds.forEach(reqCatId => {
+          if (currentUserCategoryIds.has(reqCatId)) {
+            score += 2;
           }
         });
       }
@@ -99,9 +111,37 @@ export const getRecommendedSwapRequests = async (req, res) => {
       return {
         ...request.toObject(),
         recommendationScore: score,
-        hasPlacedRequest: !!existingInteraction // NEW: Add hasPlacedRequest
+        isRequestingSkillMatch: isRequestingSkillMatch, // Add flag for sorting
+        hasPlacedRequest: !!existingInteraction
       };
-    })).sort((a, b) => b.recommendationScore - a.recommendationScore);
+    }));
+
+    // Sort: requesting skill matches first, then by recommendation score
+    recommendedRequests.sort((a, b) => {
+      if (a.isRequestingSkillMatch && !b.isRequestingSkillMatch) return -1;
+      if (!a.isRequestingSkillMatch && b.isRequestingSkillMatch) return 1;
+      return b.recommendationScore - a.recommendationScore;
+    });
+
+    // Ensure at least one recommendation is shown (fallback)
+    if (recommendedRequests.length === 0) {
+      const fallbackRequests = await SwapRequest.find({
+          createdBy: { $ne: userId },
+          _id: { $nin: acceptedSwapRequestIds }
+        })
+        .sort({ createdAt: -1 }) // Get most recent
+        .limit(5) // Limit to a few fallback recommendations
+        .populate('createdBy', 'name profilePicture skills yearsOfExperience qualifications')
+        .populate('serviceCategory', 'name');
+
+      // Assign a minimal score to fallback requests
+      recommendedRequests = fallbackRequests.map(request => ({
+        ...request.toObject(),
+        recommendationScore: 0.1, // Minimal score to ensure they appear
+        isRequestingSkillMatch: false,
+        hasPlacedRequest: false // Assuming no interaction for fallback
+      }));
+    }
 
     res.status(200).json(recommendedRequests);
 
@@ -661,10 +701,7 @@ export const getApprovedSwapRequests = async (req, res) => {
         { $unwind: '$swapRequest' },
         {
           $match: {
-            $or: [
-              { user: new mongoose.Types.ObjectId(userId) },
-              { 'swapRequest.createdBy': new mongoose.Types.ObjectId(userId) }
-            ]
+            'swapRequest.createdBy': new mongoose.Types.ObjectId(userId) // Temporarily changed for debugging
           }
         },
         {
@@ -699,6 +736,8 @@ export const getApprovedSwapRequests = async (req, res) => {
           }
         }
       ]);
+
+    console.log("Approved Interactions from aggregation:", approvedInteractions); // Added log
 
     // Extract the swap requests from the interactions
     const swapRequests = approvedInteractions.map(interaction => {
