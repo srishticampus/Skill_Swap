@@ -677,14 +677,11 @@ export const getApprovedSwapRequests = async (req, res) => {
     if (!token) {
       return res.status(401).json({ message: 'No token provided' });
     }
-    console.log("getApprovedSwapRequests: token:", token);
     jwt.verify(token, import.meta.env.VITE_JWT_SECRET, async (err, decoded) => {
       if (err) {
         return res.status(403).json({ message: 'Failed to authenticate token' });
       }
-      console.log("getApprovedSwapRequests: decoded:", decoded);
       const userId = decoded.user.id;
-      console.log("getApprovedSwapRequests: userId:", userId);
 
       const approvedInteractions = await SwapRequestInteraction.aggregate([
         {
@@ -701,7 +698,10 @@ export const getApprovedSwapRequests = async (req, res) => {
         { $unwind: '$swapRequest' },
         {
           $match: {
-            'swapRequest.createdBy': new mongoose.Types.ObjectId(userId) // Temporarily changed for debugging
+            $or: [
+              { user: new mongoose.Types.ObjectId(userId) },
+              { 'swapRequest.createdBy': new mongoose.Types.ObjectId(userId) }
+            ]
           }
         },
         {
@@ -737,8 +737,6 @@ export const getApprovedSwapRequests = async (req, res) => {
         }
       ]);
 
-    console.log("Approved Interactions from aggregation:", approvedInteractions); // Added log
-
     // Extract the swap requests from the interactions
     const swapRequests = approvedInteractions.map(interaction => {
       if (!interaction.swapRequest) {
@@ -753,7 +751,7 @@ export const getApprovedSwapRequests = async (req, res) => {
       res.status(200).json(swapRequests);
     });
   } catch (err) {
-    console.log("Error in getApprovedSwapRequests:", err);
+    console.error("Error in getApprovedSwapRequests:", err); // Changed to console.error for consistency
     res.status(500).json({ message: err.message });
   }
 };

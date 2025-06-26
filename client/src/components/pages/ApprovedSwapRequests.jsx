@@ -37,7 +37,6 @@ const ApprovedSwapRequests = () => {
       try {
         setLoading(true);
         const response = await axiosInstance.get('/api/swap-requests/approved');
-        console.log('Fetched approved swap requests:', response.data); // Added log
         setSwapRequests(response.data);
       } catch (error) {
         console.error('Error fetching approved swap requests:', error);
@@ -75,9 +74,6 @@ const ApprovedSwapRequests = () => {
     let yourUser = null;
     let partnerUser = null;
 
-    console.log('Current User (inside getUsersForSwapRequest):', currentUser); // Added log
-    console.log('Swap Request Created By (inside getUsersForSwapRequest):', swapRequest.createdBy); // Added log
-    console.log('Swap Request Interaction User (inside getUsersForSwapRequest):', swapRequest.interactionUser); // Added log
     console.log('Current User ID (inside getUsersForSwapRequest):', currentUser?.id);
     console.log('Created By ID (inside getUsersForSwapRequest):', swapRequest.createdBy?._id);
     console.log('Interaction User ID (inside getUsersForSwapRequest):', swapRequest.interactionUser?._id);
