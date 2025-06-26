@@ -5,6 +5,7 @@ import Timeline from '@/components/Timeline';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '../ui/button';
 import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
+import { toast } from 'sonner'; // Import toast for notifications
 
 const SwapRequestDetailsPage = () => {
   const { id } = useParams(); // Extract swap request ID from URL params
@@ -12,6 +13,8 @@ const SwapRequestDetailsPage = () => {
   const [swapRequest, setSwapRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [llmSummary, setLlmSummary] = useState('');
+  const [summarizing, setSummarizing] = useState(false);
 
   useEffect(() => {
     const fetchSwapRequestDetails = async () => {
@@ -28,6 +31,27 @@ const SwapRequestDetailsPage = () => {
 
     fetchSwapRequestDetails();
   }, [id]);
+
+  const handleSummarizeClick = async () => {
+    if (!swapRequest) {
+      toast.error("No swap request data available to summarize.");
+      return;
+    }
+
+    setSummarizing(true);
+    setLlmSummary(''); // Clear previous summary
+
+    try {
+      const response = await axiosInstance.post('/api/llm/summarize-swap-request', { swapRequestData: swapRequest });
+      setLlmSummary(response.data.summary);
+      toast.success("Swap request summarized successfully!");
+    } catch (err) {
+      console.error("Error summarizing swap request:", err);
+      toast.error("Failed to summarize swap request. Please ensure your GEMINI_API_KEY is configured and the backend server is running.");
+    } finally {
+      setSummarizing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -89,7 +113,20 @@ const SwapRequestDetailsPage = () => {
       {/* Technical Info */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-2xl font-bold mb-4 text-primary">Technical Info</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <Button
+          onClick={handleSummarizeClick}
+          disabled={summarizing}
+          className="mb-4"
+        >
+          {summarizing ? 'Summarizing...' : 'Summarize with AI'}
+        </Button>
+        {llmSummary && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200">
+            <h3 className="text-lg font-semibold mb-2">AI Summary:</h3>
+            <p className="text-gray-700 whitespace-pre-wrap">{llmSummary}</p>
+          </div>
+        )}
+        <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
             <h3 className="font-semibold">Category:</h3>
             <p>

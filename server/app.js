@@ -19,6 +19,7 @@ import organizationRoutes from './controllers/organization/index.js'; // Import 
 import complaintRoutes from './controllers/complaint.js'; // Import complaint routes
 import path from "path";
 import { router as chatRoutes } from "./controllers/chat.js";
+import { summarizeSwapRequest } from "./controllers/llm.js"; // Import LLM controller
 import { getAllWorkshopsForMembers, rsvpToWorkshop, cancelRsvp } from "./controllers/organization/workshop.js";
 import organizationAuth from "./middleware/organizationAuth.js"; // Import organizationAuth middleware
 
@@ -108,5 +109,8 @@ app.post(
 app.get('/api/contact', verifyToken, getAllContactForms);
 app.get('/api/contact/:id', verifyToken, getContactFormById);
 app.delete('/api/contact/:id', verifyToken, deleteContactForm);
+
+// LLM routes
+app.post('/api/llm/summarize-swap-request', verifyToken, summarizeSwapRequest);
 
 if (import.meta.env.PROD) app.listen(import.meta.env.VITE_PORT || 4054);
