@@ -13,17 +13,61 @@ export const summarizeSwapRequest = async (req, res) => {
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = `Summarize the following skill swap request. Focus on the skills offered and requested, the service description, and the overall progress based on the updates. Keep the summary concise and informative.
+    let prompt = `Summarize the following skill swap request. Focus on the skills offered and requested, the service description, and the overall progress based on the updates. Do not mention fields that are not provided or are "N/A". Keep the summary concise and informative.
 
 Swap Request Details:
-- Created By: ${swapRequestData.createdBy?.name || 'N/A'}
-- Interaction User: ${swapRequestData.interactionUser?.name || 'N/A'}
-- Category 1: ${swapRequestData.serviceCategory && swapRequestData.serviceCategory.length > 0 ? swapRequestData.serviceCategory[0].name : 'N/A'}
-- Category 2: ${swapRequestData.serviceCategory && swapRequestData.serviceCategory.length > 1 ? swapRequestData.serviceCategory[1].name : 'N/A'}
-- Service Description: ${swapRequestData.serviceDescription || 'N/A'}
-- Updates: ${swapRequestData.updates.map(update => `(${new Date(update.createdAt).toLocaleDateString()}) ${update.title} (${update.percentage}%): ${update.message}`).join('\n- ')}
+`;
 
-Provide a summary in a paragraph or two.`;
+    if (swapRequestData.serviceTitle) {
+      prompt += `- Service Title: ${swapRequestData.serviceTitle}\n`;
+    }
+    if (swapRequestData.createdBy?.name) {
+      prompt += `- Created By: ${swapRequestData.createdBy.name}\n`;
+    }
+    if (swapRequestData.interactionUser?.name) {
+      prompt += `- Interaction User: ${swapRequestData.interactionUser.name}\n`;
+    }
+    if (swapRequestData.serviceCategory && swapRequestData.serviceCategory.length > 0) {
+      prompt += `- Category Offered: ${swapRequestData.serviceCategory[0].name}\n`;
+    }
+    if (swapRequestData.serviceCategory && swapRequestData.serviceCategory.length > 1) {
+      prompt += `- Category Requested: ${swapRequestData.serviceCategory[1].name}\n`;
+    }
+    if (swapRequestData.serviceRequired) {
+      prompt += `- Skill Requested: ${swapRequestData.serviceRequired}\n`;
+    }
+    if (swapRequestData.serviceDescription) {
+      prompt += `- Service Description: "${swapRequestData.serviceDescription}"\n`;
+    }
+    if (swapRequestData.yearsOfExperience !== undefined && swapRequestData.yearsOfExperience !== null) {
+      prompt += `- Years of Experience: ${swapRequestData.yearsOfExperience}\n`;
+    }
+    if (swapRequestData.preferredLocation) {
+      prompt += `- Preferred Location: ${swapRequestData.preferredLocation}\n`;
+    }
+    if (swapRequestData.deadline) {
+      prompt += `- Deadline: ${new Date(swapRequestData.deadline).toLocaleDateString()}\n`;
+    }
+    if (swapRequestData.requestStatus) {
+      prompt += `- Request Status: ${swapRequestData.requestStatus}\n`;
+    }
+    if (swapRequestData.interactionStatus) {
+      prompt += `- Interaction Status: ${swapRequestData.interactionStatus}\n`;
+    }
+
+    if (swapRequestData.updates && swapRequestData.updates.length > 0) {
+      prompt += `\nPerformance Updates:\n`;
+      swapRequestData.updates.forEach(update => {
+        const userName = update.user?.name || 'Unknown User';
+        const updateDate = new Date(update.createdAt).toLocaleDateString();
+        const updateTitle = update.title || 'No Title';
+        const updatePercentage = update.percentage !== undefined && update.percentage !== null ? `${update.percentage}%` : 'N/A';
+        const updateMessage = update.message || 'No message provided.';
+        prompt += `- On ${updateDate}, ${userName} updated: "${updateTitle}" (${updatePercentage} completed). Details: "${updateMessage}"\n`;
+      });
+    }
+
+    prompt += `\nProvide a summary in a paragraph or two. It should be informative and concise, but not too long.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
