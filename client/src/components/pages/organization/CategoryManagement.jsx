@@ -41,6 +41,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal } from "lucide-react"
+import { set } from 'date-fns';
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -50,6 +51,7 @@ const CategoryManagement = () => {
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [openUpdateAlert, setOpenUpdateAlert] = React.useState(false);
+  const [categoryError, setCategoryError] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -72,6 +74,7 @@ const CategoryManagement = () => {
       setNewCategory({ name: '', description: '' });
       setOpenCreate(false);
     } catch (error) {
+      setCategoryError(error?.response?.data?.message);
       console.error('Error creating category:', error);
     }
   };
@@ -115,6 +118,7 @@ const CategoryManagement = () => {
                 </Label>
                 <Textarea id="description" value={newCategory.description} onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })} className="col-span-3" />
               </div>
+              {categoryError && <p className="text-red-500">{categoryError}</p>}
             </div>
             <DialogFooter>
               <DialogClose asChild>

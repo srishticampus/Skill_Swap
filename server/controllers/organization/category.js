@@ -18,6 +18,12 @@ router.get('/', organizationAuth, async (req, res) => {
 // Create a new category for the organization
 router.post('/', organizationAuth, async (req, res) => {
   try {
+    if(!req.body.name || !req.body.description) {
+      return res.status(400).json({ message: 'Name or description are required' });
+    }
+    if(!req.organization.id) {
+      return res.status(400).json({ message: 'Organization ID is required' });
+    }
     const category = new Category({
       ...req.body,
       organization: req.organization.id, // Assign category to the organization
@@ -25,6 +31,10 @@ router.post('/', organizationAuth, async (req, res) => {
     const savedCategory = await category.save();
     res.status(201).json(savedCategory);
   } catch (error) {
+    // send error if the dbfinds a duplicate
+    if (error.code === 11000) {
+      return res.status(409).json({ message: 'Category already exists' });
+    }
     res.status(400).json({ message: error.message });
   }
 });
