@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', organizationAuth, async (req, res) => {
   try {
     // Assuming organization ID is available in req.organization.id from organizationAuth middleware
-    const categories = await Category.find({ organization: req.organization.id });
+    const categories = await Category.find({ organizationId: req.organization.id });
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -26,7 +26,7 @@ router.post('/', organizationAuth, async (req, res) => {
     }
     const category = new Category({
       ...req.body,
-      organization: req.organization.id, // Assign category to the organization
+      organizationId: req.organization.id, // Assign category to the organization
     });
     const savedCategory = await category.save();
     res.status(201).json(savedCategory);
@@ -44,7 +44,7 @@ router.delete('/:id', organizationAuth, async (req, res) => {
   try {
     const category = await Category.findOneAndDelete({
       _id: req.params.id,
-      organization: req.organization.id, // Ensure category belongs to the organization
+      organizationId: req.organization.id, // Ensure category belongs to the organization
     });
     if (!category) {
       return res.status(404).json({ message: 'Category not found or not authorized to delete' });
