@@ -265,10 +265,12 @@ export const createSwapRequest = [
  */
 export const getAllSwapRequests = async (req, res) => {
   try {
-    const acceptedSwapRequestIds = await getSwapRequestsWithAcceptedInteractions(); // NEW
+    // const acceptedSwapRequestIds = await getSwapRequestsWithAcceptedInteractions(); // NEW
 
     const { createdBy, searchTerm, serviceRequired, serviceCategory } = req.query;
-    let query = { _id: { $nin: acceptedSwapRequestIds } }; // Initialize query with exclusion
+    let query = { 
+      // _id: { $nin: acceptedSwapRequestIds }
+     }; // Initialize query with exclusion
 
     // Existing createdBy filter logic (needs to be combined with initial query)
     let createdByFilter = {};
