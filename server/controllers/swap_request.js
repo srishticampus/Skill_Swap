@@ -43,13 +43,54 @@ export const getRecommendedSwapRequests = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    const acceptedSwapRequestIds = await getSwapRequestsWithAcceptedInteractions(); // NEW
+    const acceptedSwapRequestIds = await getSwapRequestsWithAcceptedInteractions();
 
-    // Fetch all swap requests, excluding those created by the current user AND those with accepted interactions
-    const allSwapRequests = await SwapRequest.find({
-        createdBy: { $ne: userId },
-        _id: { $nin: acceptedSwapRequestIds } // Exclude accepted swaps
-      })
+    const baseConditions = [{
+      createdBy: { $ne: userId }
+    }, {
+      _id: { $nin: acceptedSwapRequestIds }
+    }, ];
+
+    const matchConditions = [];
+
+    if (currentUser.skills && currentUser.skills.length > 0) {
+      const skillRegexes = currentUser.skills.map(skill => new RegExp(skill, 'i'));
+      matchConditions.push({
+        $or: [{
+          serviceRequired: {
+            $in: skillRegexes
+          }
+        }, {
+          serviceTitle: {
+            $in: skillRegexes
+          }
+        }, ],
+      });
+    }
+
+    if (currentUser.categories && currentUser.categories.length > 0) {
+      matchConditions.push({
+        serviceCategory: {
+          $in: currentUser.categories
+        }
+      });
+    }
+
+    // If no skills or categories are defined for the user, return an empty array
+    if (matchConditions.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // Combine base conditions with an OR of match conditions
+    const finalQuery = {
+      $and: [
+        ...baseConditions, {
+          $or: matchConditions
+        }
+      ]
+    };
+
+    const allSwapRequests = await SwapRequest.find(finalQuery)
       .populate('createdBy', 'name profilePicture skills yearsOfExperience qualifications')
       .populate('serviceCategory', 'name');
 
@@ -73,14 +114,14 @@ export const getRecommendedSwapRequests = async (req, res) => {
         score += calculateSkillMatch(currentUser.skills, request.createdBy.skills) * 5; // Increased weight
       }
 
-      // 2. Experience Matching
+      // 2. Experience Matching (still relevant for quality of match)
       if (currentUser.yearsOfExperience !== undefined && request.yearsOfExperience !== undefined) {
         if (currentUser.yearsOfExperience >= request.yearsOfExperience) {
           score += 3;
         }
       }
 
-      // 3. Qualifications Matching (as keywords in service title/description)
+      // 3. Qualifications Matching (as keywords in service title/description - still relevant)
       if (currentUser.qualifications && (request.serviceTitle || request.serviceDescription)) {
         const requestText = `${request.serviceTitle || ''} ${request.serviceDescription || ''}`.toLowerCase();
         currentUser.qualifications.forEach(qualification => {
@@ -90,10 +131,9 @@ export const getRecommendedSwapRequests = async (req, res) => {
         });
       }
 
-      // 4. Category Matching
+      // 4. Category Matching (already part of initial query, but can add to score for finer sorting)
       if (currentUser.categories && request.serviceCategory) {
         const currentUserCategoryIds = new Set(currentUser.categories.map(cat => cat.toString()));
-        // Ensure request.serviceCategory is an array of objects with _id
         const requestCategoryIds = request.serviceCategory.map(cat => cat._id.toString());
         requestCategoryIds.forEach(reqCatId => {
           if (currentUserCategoryIds.has(reqCatId)) {
@@ -111,7 +151,7 @@ export const getRecommendedSwapRequests = async (req, res) => {
       return {
         ...request.toObject(),
         recommendationScore: score,
-        isRequestingSkillMatch: isRequestingSkillMatch, // Add flag for sorting
+        isRequestingSkillMatch: isRequestingSkillMatch,
         hasPlacedRequest: !!existingInteraction
       };
     }));
@@ -122,26 +162,6 @@ export const getRecommendedSwapRequests = async (req, res) => {
       if (!a.isRequestingSkillMatch && b.isRequestingSkillMatch) return 1;
       return b.recommendationScore - a.recommendationScore;
     });
-
-    // Ensure at least one recommendation is shown (fallback)
-    if (recommendedRequests.length === 0) {
-      const fallbackRequests = await SwapRequest.find({
-          createdBy: { $ne: userId },
-          _id: { $nin: acceptedSwapRequestIds }
-        })
-        .sort({ createdAt: -1 }) // Get most recent
-        .limit(5) // Limit to a few fallback recommendations
-        .populate('createdBy', 'name profilePicture skills yearsOfExperience qualifications')
-        .populate('serviceCategory', 'name');
-
-      // Assign a minimal score to fallback requests
-      recommendedRequests = fallbackRequests.map(request => ({
-        ...request.toObject(),
-        recommendationScore: 0.1, // Minimal score to ensure they appear
-        isRequestingSkillMatch: false,
-        hasPlacedRequest: false // Assuming no interaction for fallback
-      }));
-    }
 
     res.status(200).json(recommendedRequests);
 

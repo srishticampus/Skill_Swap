@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Plus } from 'lucide-react';
+import { Plus, Eye, EyeOff } from 'lucide-react'; // Import Eye and EyeOff icons
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import countries from '@/constants/countries';
 import axios from '@/api/axios'; // Import axios
@@ -27,6 +27,7 @@ const AddMember = () => {
     categories: [], // Add categories field
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
   const [categories, setCategories] = useState([]); // State for categories
   const [errors, setErrors] = useState({}); // State for validation errors
 
@@ -214,9 +215,23 @@ const AddMember = () => {
               </Select>
               {errors.country && <span className="text-red-500">{errors.country}</span>}
             </div>
-            <div className="grid gap-2 md:col-span-2">
+            <div className="grid gap-2 md:col-span-2 relative"> {/* Added relative positioning */}
               <Label htmlFor="password">Create Password</Label>
-              <Input id="password" type="password" placeholder="Create password" value={formData.password} onChange={handleInputChange} />
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'} // Toggle type based on state
+                placeholder="Create password"
+                value={formData.password}
+                onChange={handleInputChange}
+                className="pr-10" // Add padding for the icon
+              />
+              <button
+                type="button" // Important: prevent form submission
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center pt-6 text-gray-400" // Position the icon
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />} {/* Toggle icon */}
+              </button>
               {errors.password && <span className="text-red-500">{errors.password}</span>}
             </div>
             <div className="grid gap-2 md:col-span-2">
