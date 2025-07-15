@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Pencil, User, Mail, Phone, MapPin, Globe, FileText, GraduationCap, Code, Briefcase, Award } from 'lucide-react';
+import { Pencil, User, Mail, Phone, MapPin, Globe, FileText, GraduationCap, Code, Briefcase, Award, Star } from 'lucide-react';
 import axios from '@/api/axios'; // Import axios
 import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
@@ -97,7 +97,7 @@ const MemberDetails = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Avatar */}
             <Avatar className="w-32 h-32">
-              <AvatarImage src={member.profilePicture || '/src/assets/profile-pic.png'} alt={member.name} /> {/* Use profilePicture from API */}
+              <AvatarImage src={member.profilePicture ? `${import.meta.env.VITE_API_URL}/${member.profilePicture}` : '/src/assets/profile-pic.png'} alt={member.name} /> {/* Use profilePicture from API */}
               <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
             </Avatar>
 
@@ -129,7 +129,7 @@ const MemberDetails = () => {
                 <MapPin size={18} className="mr-2 text-primary" />
                 <span>{member.city}</span> {/* Use city from API */}
               </div>
-               <div className="flex items-center text-gray-700">
+              <div className="flex items-center text-gray-700">
                 <Globe size={18} className="mr-2 text-primary" />
                 <span>{member.country}</span> {/* Use country from API */}
               </div>
