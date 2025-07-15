@@ -83,7 +83,25 @@ const ProfilePage = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      setProfileData(response.data);
+      const rawProfileData = response.data;
+
+      // Process skills: split, trim, limit to 12
+      const processedSkills = rawProfileData.skills
+        ? rawProfileData.skills[0]
+            .split(',')
+            .map(skill => skill.trim())
+            .filter(skill => skill !== '')
+            .slice(0, 12) // Limit to a maximum of 12 skills for display
+        : [];
+
+      // Process qualifications: split, trim
+      const processedQualifications = rawProfileData.qualifications
+
+      setProfileData({
+        ...rawProfileData,
+        skills: processedSkills,
+        qualifications: processedQualifications,
+      });
     } catch (error) {
       console.error('Error fetching profile data:', error);
     }

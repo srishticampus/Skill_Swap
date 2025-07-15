@@ -5,13 +5,12 @@ import morgan from "morgan";
 import logger from "pino-http";
 import { createStream } from "rotating-file-stream";
 import db from "./db_driver";
-import { router as authRoutes } from "./controllers/auth/index.js";
+import { router as authRoutes, verifyToken, upload, parseResume } from "./controllers/auth/index.js"; // Import upload and parseResume
 import { router as organizationAuthRoutes } from "./controllers/auth/organization.js"; // Import organization auth routes
 import { router as adminRoutes } from "./controllers/admin/index.js";
 import { router as marketplaceRoutes } from "./controllers/marketplace/index.js";
 import { createSwapRequest, getAllSwapRequests, getSwapRequestById, updateSwapRequestById, deleteSwapRequestById, placeRequest,getSentSwapRequests,getReceivedSwapRequests, getApprovedSwapRequests, addStatusUpdate, markAsCompleted, getRecommendedSwapRequests } from "./controllers/swap_request.js";
 import { createReview, getReviewsForUser } from "./controllers/user_review.js"; // Import user review controller functions
-import { verifyToken } from "./controllers/auth/index.js";
 import notificationRoutes from "./controllers/notifications.js";
 import { submitContactForm, getAllContactForms, getContactFormById, deleteContactForm } from './controllers/contact.js';
 import categoryRoutes from './controllers/category.js'; // Import category routes
@@ -112,5 +111,8 @@ app.delete('/api/contact/:id', verifyToken, deleteContactForm);
 
 // LLM routes
 app.post('/api/llm/summarize-swap-request', verifyToken, summarizeSwapRequest);
+
+// Resume parsing route
+app.post('/api/auth/parse-resume', verifyToken, upload.single('resume'), parseResume);
 
 if (import.meta.env.PROD) app.listen(import.meta.env.VITE_PORT || 4054);

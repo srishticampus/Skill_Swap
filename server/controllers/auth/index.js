@@ -9,9 +9,14 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import Organization from "../../models/organization.js";
+import pdfParse from 'pdf-parse-debugging-disabled';
+import mammoth from 'mammoth';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 // Multer configuration
 const storage = multer.memoryStorage(); // Store the file in memory
-const upload = multer({ storage: storage });
+export const upload = multer({ storage: storage }); // Export upload for use in routes
 
 // Middleware function to verify JWT token
 export const verifyToken = (req, res, next) => {
@@ -559,6 +564,74 @@ router.post(
     }
   }
 );
+
+// @route   POST api/auth/parse-resume
+// @desc    Parse resume and extract data using LLM
+// @access  Private
+export const parseResume = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ msg: "No resume file uploaded." });
+    }
+
+    const fileBuffer = req.file.buffer;
+    const fileMimeType = req.file.mimetype;
+    let resumeText = '';
+
+    if (fileMimeType === 'application/pdf') {
+      const data = await pdfParse(fileBuffer);
+      resumeText = data.text;
+    } else if (fileMimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const result = await mammoth.extractRawText({ buffer: fileBuffer });
+      resumeText = result.value;
+    } else {
+      return res.status(400).json({ msg: "Unsupported file type. Please upload a PDF or DOCX." });
+    }
+
+    if (!resumeText) {
+      return res.status(400).json({ msg: "Could not extract text from resume." });
+    }
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const prompt = `Extract the following information from the resume text provided below and return it as a JSON object. If a field is not found or cannot be determined, return null for that field. Ensure the output is a valid JSON object.
+
+Fields to extract:
+- qualifications (string, comma-separated list of key qualifications or educational background)
+- skills (string, comma-separated list of technical and soft skills)
+- experienceLevel (string, e.g., 'Entry-level', 'Junior', 'Mid-level', 'Senior', 'Lead', 'Manager', 'Executive')
+- yearsOfExperience (number, total years of professional experience)
+
+Resume Text:
+${resumeText}
+
+JSON Output:`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    let parsedData = {};
+    try {
+      parsedData = JSON.parse(text);
+    } catch (jsonError) {
+      console.error('Error parsing LLM response as JSON:', jsonError);
+      console.error('LLM raw response:', text);
+      return res.status(500).json({ msg: "Failed to parse resume data from LLM. Invalid JSON response.", llmResponse: text });
+    }
+
+    res.status(200).json(parsedData);
+
+  } catch (err) {
+    console.error('Error in parseResume:', err.message);
+    res.status(500).send("Server error during resume parsing.");
+  }
+};
 
 // @route   POST api/auth/add-certification
 // @desc    Add a new certification to the user
