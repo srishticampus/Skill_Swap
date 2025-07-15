@@ -83,7 +83,7 @@ function Navbar() {
 
     const fetchUnreadChats = async () => {
       try {
-        const response = await axiosInstance.get('/api/chat/users');
+        const response = await axiosInstance.get('/api/chat/conversations');
         const totalUnread = response.data.reduce((sum, user) => sum + user.unreadCount, 0);
         setUnreadChats(totalUnread);
       } catch (error) {
