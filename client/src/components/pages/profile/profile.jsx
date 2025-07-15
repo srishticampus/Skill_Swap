@@ -86,8 +86,8 @@ const ProfilePage = () => {
       const rawProfileData = response.data;
 
       // Process skills: split, trim, limit to 12
-      const processedSkills = rawProfileData.skills
-        ? rawProfileData.skills[0]
+      const processedSkills = (rawProfileData.skills
+        && rawProfileData.skills[0]) ? rawProfileData.skills[0]
             .split(',')
             .map(skill => skill.trim())
             .filter(skill => skill !== '')
