@@ -139,7 +139,7 @@ const Members = () => {
           <Card key={member._id} className="bg-white border-gray-200 rounded-lg overflow-hidden">
             <CardContent className="p-6 flex items-center">
               <Avatar className="w-24 h-24 mr-6">
-                <AvatarImage src={`${import.meta.env.VITE_API_URL}/${profileData.profilePictureUrl}`} />
+                <AvatarImage src={member?.profilePictureUrl ? `${import.meta.env.VITE_API_URL}/${member.profilePictureUrl}` : member?.profilePicture ? `${import.meta.env.VITE_API_URL}/${member.profilePicture}` : '/src/assets/profile-pic.png'} alt={member.name} />
                 <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
