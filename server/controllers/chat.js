@@ -248,10 +248,31 @@ router.get('/conversations', verifyToken, async (req, res) => {
             }
           },
           {
+            $lookup: {
+              from: 'swaprequests',
+              let: { userId: '$_id' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $or: [
+                        { $and: [{ $eq: ['$requester', new mongoose.Types.ObjectId(currentEntityId)] }, { $eq: ['$recipient', '$$userId'] }] },
+                        { $and: [{ $eq: ['$requester', '$$userId'] }, { $eq: ['$recipient', new mongoose.Types.ObjectId(currentEntityId)] }] }
+                      ]
+                    }
+                  }
+                },
+                { $limit: 1 }
+              ],
+              as: 'directSwapRequests'
+            }
+          },
+          {
             $match: {
               $or: [
                 { 'acceptedSwapInteractions': { $ne: [] } },
                 { 'chatHistory': { $ne: [] } },
+                { 'directSwapRequests': { $ne: [] } },
                 { 'email': 'admin@admin.com' }
               ]
             }
