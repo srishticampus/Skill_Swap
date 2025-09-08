@@ -2,16 +2,10 @@ import { Route, Routes } from "react-router";
 
 import Landing from "./components/pages/landing";
 import HomePage from "./components/pages/home"; // Import the new HomePage component
-import AdminLayout from "./components/pages/admin/layout";
 import Organization from "./components/pages/organization/layout";
 import About from "./components/pages/about";
 import Layout from "./components/pages/layout";
 import Contact from "./components/pages/contact";
-import AdminDashboard from "./components/pages/admin/dashboard";
-import OrganizationDashboard from "./components/pages/organization/dashboard";
-import OrganizationProfile from "./components/pages/organization/profile";
-import OrganizationMembers from "./components/pages/organization/members";
-import MemberDetails from "./components/pages/organization/member-details";
 import Signup from "./components/pages/auth/signup";
 import Login from "./components/pages/auth/login";
 import OrgLogin from "./components/pages/auth/OrgLogin";
@@ -23,44 +17,12 @@ import ResetPassword from "./components/pages/reset-password";
 import UpdatePersonalInfo from "./components/pages/update-personal-info";
 import AuthLanding from "./components/pages/landing/authLanding";
 import ProfilePage from "./components/pages/profile/profile";
-import UserManagement from "./components/pages/admin/UserManagement";
-import Marketplace from "./components/pages/Marketplace";
 import { AuthProvider, useAuth } from "./context/AuthContext"; // Import useAuth
 import ProtectedRoute from "./components/ProtectedRoute";
-import MentorRequests from "./components/pages/admin/MentorRequests";
-import CategoryManagement from "./components/pages/admin/CategoryManagement";
-import ContactSubmissions from "./components/pages/admin/ContactSubmissions";
-import SkillSwappersPage from "./components/pages/admin/SkillSwappersPage";
-import SkillSwapperDetailsPage from "./components/pages/admin/SkillSwapperDetailsPage"; // Import the new component
-import SwapRequestForm from "./components/pages/SwapRequestForm";
-import SwapRequests from "./components/pages/SwapRequests";
-import EditSwapRequest from "./components/pages/EditSwapRequest";
-import ExchangeSkills from "./components/pages/ExchangeSkills";
-import SwapRequestDetails from "./components/pages/SwapRequestDetails"; // Import the new component
-import AddMember from "./components/pages/organization/add-member";
-import ViewAllSwaps from "./components/pages/organization/ViewAllSwaps";
-import ViewReviews from "./components/pages/organization/ViewReviews";
-import Complaints from "./components/pages/organization/Complaints";
-import OrganizationCategoryManagement from "./components/pages/organization/CategoryManagement"; // Import the new component
-import OrganizationRequests from "./components/pages/admin/OrganizationRequests";
-import Organizations from "./components/pages/admin/Organizations";
-import OrganizationDetails from "./components/pages/admin/OrganizationDetails";
-import OrganizationReviews from "./components/pages/admin/OrganizationReviews";
-import AdminComplaints from "./components/pages/admin/complaints";
-import SentSwapRequests from "./components/pages/SentSwapRequests";
-import ReceivedSwapRequests from "./components/pages/ReceivedSwapRequests";
-import ApprovedSwapRequests from "./components/pages/ApprovedSwapRequests";
-import AddReview from "./components/pages/AddReview"; // Import the new component
-import AddComplaint from "./components/pages/AddComplaint"; // Import the new component
-import SwapRequestDetailsPage from "./components/pages/SwapRequestDetailsPage";
-import OrganizationSwaps from "./components/pages/admin/OrganizationSwaps";
-import SkillSwapperChat from "./components/pages/SkillSwapperChat"; // Added import
 import ViewUserProfile from "./components/pages/profile/ViewUserProfile";
 import AISkillMatching from "./components/pages/learn-more/AISkillMatching";
 import RealtimeChat from "./components/pages/learn-more/RealtimeChat";
 import ProgressTracking from "./components/pages/learn-more/ProgressTracking";
-import Workshops from "./components/pages/organization/Workshops"; // Import the new component
-import MemberWorkshops from "./components/pages/MemberWorkshops"; // Import the new component
 
 // Helper component to determine root page based on auth state
 const RootRouteHandler = () => {
@@ -88,54 +50,12 @@ function App() {
           <Route path="/update-personal-info" element={<UpdatePersonalInfo />} />
           <Route path="/authlanding" element={<AuthLanding />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/swap-request-form" element={<SwapRequestForm />} />
-          <Route path="/swap-requests" element={<SwapRequests />} />
-          <Route path="/sent-swap-requests" element={<SentSwapRequests />} />
-          <Route path="/received-swap-requests" element={<ReceivedSwapRequests />} />
-          <Route path="/edit-swap-request/:id" element={<EditSwapRequest />} />
-          <Route path="/exchange-skills" element={<ExchangeSkills />} />
-          <Route path="/exchange-skills/related" element={<ExchangeSkills />} /> {/* New route for related exchanges */}
-          <Route path="/exchange-skills/:id" element={<SwapRequestDetails />} /> {/* Add the route for details page */}
-          <Route path="/approved-swap-requests" element={<ApprovedSwapRequests />} />
-          <Route path="/swap-requests/:id" element={<SwapRequestDetailsPage />} />
-          <Route path="/add-review/:userId" element={<AddReview />} /> {/* Add the route for add swap review page */}
-          <Route path="/add-complaint" element={<AddComplaint />} /> {/* Add the route for add complaint page */}
-          <Route path="/chat" element={<ProtectedRoute><SkillSwapperChat /></ProtectedRoute>} /> {/* Added route */}
           <Route path="/learn-more/ai-skill-matching" element={<AISkillMatching />} />
           <Route path="/learn-more/realtime-chat" element={<RealtimeChat />} />
           <Route path="/learn-more/progress-tracking" element={<ProgressTracking />} />
-          <Route path="/member-workshops" element={<ProtectedRoute><MemberWorkshops /></ProtectedRoute>} />
-        </Route>
-        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="/admin/user-management" element={<UserManagement />} />
-          <Route path="/admin/mentor-requests" element={<MentorRequests />} />
-          <Route path="/admin/categories" element={<CategoryManagement />} />
-          <Route path="/admin/contact-submissions" element={<ContactSubmissions />} />
-          <Route path="/admin/organization-requests" element={<OrganizationRequests />} />
-          <Route path="/admin/organizations" element={<Organizations />} />
-          <Route path="/admin/organizations/details/:id" element={<OrganizationDetails />} />
-          <Route path="/admin/organizations/details/:organizationId/reviews" element={<OrganizationReviews />} />
-          <Route path="/admin/skill-swappers" element={<SkillSwappersPage />} />
-          <Route path="/admin/skill-swappers/:id" element={<SkillSwapperDetailsPage />} /> {/* Add the new route for details */}
-          <Route path="/admin/complaints" element={<AdminComplaints />} />
-          <Route path="/admin/organization-swaps/:organizationId" element={<OrganizationSwaps />} />
-          <Route path="/admin/chat" element={<SkillSwapperChat />} /> {/* New Admin Chat Route */}
         </Route>
         <Route path="/organization" element={<Organization />}>
-          <Route index element={<OrganizationDashboard />} />
           <Route path="/organization/users/:id" element={<ProtectedRoute><ViewUserProfile /></ProtectedRoute>} /> {/* New route for general user profile details */}
-          <Route path="/organization/profile" element={<OrganizationProfile />} />
-          <Route path="/organization/members" element={<OrganizationMembers />} />
-          <Route path="/organization/members/details/:id" element={<MemberDetails />} />
-          <Route path="/organization/members/add" element={<AddMember />} />
-          <Route path="/organization/swaps" element={<ViewAllSwaps />} />
-          <Route path="/organization/reviews" element={<ViewReviews />} />
-          <Route path="/organization/complaints" element={<Complaints />} />
-          <Route path="/organization/categories" element={<OrganizationCategoryManagement />} /> {/* Add the new route */}
-          <Route path="/organization/chat" element={<SkillSwapperChat />} /> {/* New Organization Chat Route */}
-          <Route path="/organization/workshops" element={<Workshops />} />
         </Route>
       </Routes>
     </AuthProvider>

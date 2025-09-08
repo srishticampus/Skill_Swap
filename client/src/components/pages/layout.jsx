@@ -1,18 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Star, MessageSquare } from "lucide-react";
 import { useLocation, Link, Outlet } from 'react-router';
 import { useAuth } from "@/context/AuthContext";
 import skillswap from "@/assets/skillswap.svg";
 import skillswapwhite from "@/assets/skillswap-white.svg";
-import Notifications from "@/components/Notifications";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -22,7 +12,6 @@ import {
   NavigationMenuTrigger,
   NavigationMenuContent,
 } from "@/components/ui/navigation-menu"
-import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react";
 import axiosInstance from "@/api/axios";
 
@@ -67,43 +56,6 @@ const Footer = () => {
 function Navbar() {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const [unreadChats, setUnreadChats] = useState(0);
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await axiosInstance.get('/api/notifications');
-        const unread = response.data.filter(notification => !notification.read).length;
-        setUnreadNotifications(unread);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      }
-    };
-
-    const fetchUnreadChats = async () => {
-      try {
-        const response = await axiosInstance.get('/api/chat/conversations');
-        const totalUnread = response.data.reduce((sum, user) => sum + user.unreadCount, 0);
-        setUnreadChats(totalUnread);
-      } catch (error) {
-        console.error('Error fetching unread chats:', error);
-      }
-    };
-
-    if (user) {
-      fetchNotifications();
-      fetchUnreadChats();
-    }
-  }, [user]);
-
-  const handleNotificationRead = () => {
-    setUnreadNotifications(prevCount => Math.max(0, prevCount - 1));
-  };
-
-  const handleChatClick = () => {
-    setUnreadChats(0); // Mark all chats as read when navigating to chat
-  };
 
   return (
     <div className="container w-full flex items-baseline justify-between px-4 py-3 mx-auto">
@@ -136,63 +88,8 @@ function Navbar() {
             </NavigationMenuItem>
             {user && (
               <>
-                <NavigationMenuItem>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    <Link to="/exchange-skills" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/exchange-skills" ? "text-primary" : ""}`}>
-                      Exchange Skills
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-                {user.organization && ( // Only show if user is part of an organization
-                  <NavigationMenuItem>
-                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                      <Link to="/member-workshops" className={`text-sm font-medium text-muted-foreground hover:text-foreground transition-colors ${location.pathname === "/member-workshops" ? "text-primary" : ""}`}>
-                        View Workshops
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                )}
               </>
             )}
-            {user && (
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>
-                  Swap Requests
-                </NavigationMenuTrigger>
-                <NavigationMenuContent className="z-10">
-                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                    <Link to="/swap-request-form">Request Swap</Link>
-                  </NavigationMenuLink>
-
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
-                    <Link to="/swap-requests">My Swap Requests</Link>
-                  </NavigationMenuLink>
-
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
-                    <Link to="/sent-swap-requests">Sent Swap Requests</Link>
-                  </NavigationMenuLink>
-
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
-                    <Link to="/received-swap-requests">Received Swap Requests</Link>
-                  </NavigationMenuLink>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
-                    <Link to="/approved-swap-requests">Approved Swap Requests</Link>
-                  </NavigationMenuLink>
-
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            )}
-            {
-              user && (
-                <NavigationMenuItem>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    <Link to={`/add-complaint/`}>
-                      Add Complaint
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              )
-            }
             {user?.isAdmin && (
               <NavigationMenuItem>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -207,31 +104,6 @@ function Navbar() {
         <div className="flex items-center gap-2">
           {user ? (
             <>
-              <Button asChild variant="outline" className="rounded-full">
-                <Link to="/chat" onClick={handleChatClick}>
-                  <MessageSquare />
-                  {unreadChats > 0 && (
-                    <Badge className="ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
-                      {unreadChats}
-                    </Badge>
-                  )}
-                </Link>
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="rounded-full">
-                    <Bell />
-                    {unreadNotifications > 0 && (
-                      <Badge className="ml-2">{unreadNotifications}</Badge>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>My Notifications</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <Notifications onNotificationRead={handleNotificationRead} />
-                </DropdownMenuContent>
-              </DropdownMenu>
               <Button asChild variant="outline" className="rounded-full">
                 <Link to="/profile">Profile</Link>
               </Button>
